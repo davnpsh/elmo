@@ -1,1 +1,5 @@
+# bin
 elmo
+
+# object files
+src/*.o

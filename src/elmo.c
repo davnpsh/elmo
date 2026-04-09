@@ -6,16 +6,10 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 #include <string.h>
+#include "editor.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 #define ABUF_INIT {NULL, 0}
-
-typedef struct EDITOR_CONFIG
-{
-	int screenrows;
-	int screencols;
-	struct termios orig_termios;
-} EDITOR_CONFIG;
 
 EDITOR_CONFIG Editor;
 
