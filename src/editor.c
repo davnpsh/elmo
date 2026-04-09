@@ -1,6 +1,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "editor.h"
 #include "helper.h"
