@@ -1,6 +1,14 @@
-typedef struct EDITOR_CONFIG
+#include <termios.h>
+
+typedef struct EDITOR
 {
-	int screenrows;
-	int screencols;
-	struct termios orig_termios;
-} EDITOR_CONFIG;
+	int screen_rows;
+	int screen_cols;
+	struct termios og_terminal_conf;
+} EDITOR;
+
+int editor_get_window_size(int *rows, int *cols);
+void editor_refresh_screen();
+char editor_read_key();
+void editor_process_keypress();
+void init_editor();
