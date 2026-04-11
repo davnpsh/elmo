@@ -6,6 +6,7 @@
 
 #include "editor.h"
 #include "helper.h"
+#include "abuf.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -26,12 +27,22 @@ int editor_get_window_size(int *rows, int *cols)
 
 void editor_refresh_screen()
 {
-	write(STDOUT_FILENO, "\x1b[2J", 4);
-	write(STDOUT_FILENO, "\x1b[H", 3);
+	ABUF ab = {NULL, 0};
 	
-	// In case of drawing things like welcome text...
+	abAppend(&ab, "\x1b[?25l", 6);
+	abAppend(&ab, "\x1b[2J", 4);
+	abAppend(&ab, "\x1b[H", 3);
 	
-	write(STDOUT_FILENO, "\x1b[H", 3);
+	// ---
+	// In case of drawing things like welcome text
+	// it goes here
+	// ---
+	
+	abAppend(&ab, "\x1b[H", 3);
+	abAppend(&ab, "\x1b[?25h", 6);
+	
+	write(STDOUT_FILENO, ab.b, ab.len);
+	abFree(&ab);
 }
 
 char editor_read_key()
