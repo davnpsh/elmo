@@ -3,12 +3,21 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "editor.h"
 #include "helper.h"
 #include "abuf.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
+
+enum MOV_KEY
+{
+	UP = 1000,
+	DOWN,
+	LEFT,
+	RIGHT
+};
 
 EDITOR editor;
 
@@ -38,14 +47,16 @@ void editor_refresh_screen()
 	// it goes here
 	// ---
 	
-	abAppend(&ab, "\x1b[H", 3);
+	char buf[32];
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", editor.cursor_y + 1, editor.cursor_x + 1);
+	abAppend(&ab, buf, strlen(buf));
 	abAppend(&ab, "\x1b[?25h", 6);
 	
 	write(STDOUT_FILENO, ab.b, ab.len);
 	abFree(&ab);
 }
 
-char editor_read_key()
+int editor_read_key()
 {
 	int nread;
 	char c;
@@ -56,12 +67,56 @@ char editor_read_key()
 			die("read");
 	}
 	
+	if (c == '\x1b')
+	{
+	 	char seq[3];
+			
+	    if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
+	    if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
+		
+	    if (seq[0] == '[') 
+		{
+	     	switch (seq[1]) 
+			{
+		        case 'A': return UP;
+		        case 'B': return DOWN;
+		        case 'C': return RIGHT;
+		        case 'D': return LEFT;
+	      	}
+	    }
+					
+		return '\x1b';
+	}
+	
 	return c;
+}
+
+void editor_move_cursor(int c)
+{
+	switch (c)
+	{
+		case UP:
+			if (editor.cursor_y != 0)
+				editor.cursor_y--;
+			break;
+		case DOWN:
+			if (editor.cursor_y != editor.screen_rows - 1)
+				editor.cursor_y++;
+			break;
+		case LEFT:
+			if (editor.cursor_x != 0)
+				editor.cursor_x--;
+			break;	
+		case RIGHT:
+			if (editor.cursor_x != editor.screen_cols - 1)
+				editor.cursor_x++;
+			break;
+	}
 }
 
 void editor_process_keypress()
 {
-	char c = editor_read_key();
+	int c = editor_read_key();
 	
 	switch (c)
 	{
@@ -69,6 +124,13 @@ void editor_process_keypress()
 			write(STDOUT_FILENO, "\x1b[2J", 4);
 			write(STDOUT_FILENO, "\x1b[H", 3);
 			exit(0);
+			break;
+			
+		case UP:
+		case DOWN:
+		case LEFT:
+		case RIGHT:
+			editor_move_cursor(c);
 			break;
 	}
 }
@@ -95,6 +157,8 @@ int editor_get_cursor_position(int *rows, int *cols)
 
 void init_editor() 
 {
+	editor.cursor_x = editor.cursor_y = 0;
+	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
 		die("editor_get_window_size");
 }
