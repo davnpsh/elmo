@@ -16,7 +16,12 @@ enum MOV_KEY
 	UP = 1000,
 	DOWN,
 	LEFT,
-	RIGHT
+	RIGHT,
+	PAGE_UP,
+	PAGE_DOWN,
+	HOME_KEY,
+	END_KEY,
+	DEL_KEY
 };
 
 EDITOR editor;
@@ -76,14 +81,45 @@ int editor_read_key()
 		
 	    if (seq[0] == '[') 
 		{
-	     	switch (seq[1]) 
+			if (seq[1] >= '0' && seq[1] <= '9')
 			{
-		        case 'A': return UP;
-		        case 'B': return DOWN;
-		        case 'C': return RIGHT;
-		        case 'D': return LEFT;
-	      	}
+				if (read(STDIN_FILENO, &seq[2], 1) != 1) return '\x1b';
+				
+				if (seq[2] == '~')
+			 	{
+          			switch (seq[1]) 
+             		{
+			            case '1': return HOME_KEY;
+						case '3': return DEL_KEY;
+						case '4': return END_KEY;
+               			case '5': return PAGE_UP;
+                  		case '6': return PAGE_DOWN;
+                   		case '7': return HOME_KEY;
+                        case '8': return END_KEY;
+               		}
+        		}
+			}
+			else
+			{
+				switch (seq[1]) 
+				{
+			      	case 'A': return UP;
+			       	case 'B': return DOWN;
+				    case 'C': return RIGHT;
+				    case 'D': return LEFT;
+			        case 'H': return HOME_KEY;
+			        case 'F': return END_KEY;
+			    }
+			}
 	    }
+		else if (seq[0] == 'O')
+		{
+			switch (seq[1])
+			{
+				case 'H': return HOME_KEY;
+				case 'F': return END_KEY;
+			}
+		}
 					
 		return '\x1b';
 	}
@@ -131,6 +167,17 @@ void editor_process_keypress()
 		case LEFT:
 		case RIGHT:
 			editor_move_cursor(c);
+			break;
+			
+		case PAGE_UP:
+		case PAGE_DOWN:
+			// Do nothing for now
+			break;
+			
+		case HOME_KEY:
+		case END_KEY:
+		case DEL_KEY:
+			// Do nothing for now
 			break;
 	}
 }
