@@ -8,6 +8,7 @@
 #include "editor.h"
 #include "helper.h"
 #include "abuf.h"
+#include "ptable.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
