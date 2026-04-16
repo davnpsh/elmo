@@ -44,3 +44,20 @@ BUFFER_NODE *add_new_line(char *s, int len)
 	
 	return buf_node;
 }
+
+BUFFER_NODE *get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
+{
+	BUFFER_NODE *ptr = buf_chain->head;
+	
+	for (int i = 1; i < line_num; i++)
+	{
+		if (ptr == NULL)
+		{
+			return NULL;
+		}
+		
+		ptr = ptr->next;
+	}
+	
+	return ptr;
+}
