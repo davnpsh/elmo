@@ -1,7 +1,23 @@
+#define _DEFAULT_SOURCE
+#define _BSD_SOURCE
+#define _GNU_SOURCE
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "bufchn.h"
 #include "helper.h"
 
-BUFFER_CHAIN *parse_file(const char *file_path)
+BUFFER_NODE *buf_add_new_line(char *s, int len)
+{
+	BUFFER_NODE *buf_node = malloc(sizeof(BUFFER_NODE));
+	
+	buf_node->s = s;
+	buf_node->len = len;
+	
+	return buf_node;
+}
+
+BUFFER_CHAIN *buf_parse_file(const char *file_path)
 {
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
 	buf_chain->lines_num = 0;
@@ -12,10 +28,11 @@ BUFFER_CHAIN *parse_file(const char *file_path)
 	BUFFER_NODE *prev, *current;
 	char *s = NULL;
 	int len;
+	size_t linecap = 0;
 	
-	while ((len = getline(&s, 0, fp)) != -1)
+	while ((len = getline(&s, &linecap, fp)) != -1)
 	{
-		current = add_new_line(s, len);
+		current = buf_add_new_line(s, len);
 		
 		if (prev != NULL)
 		{
@@ -35,17 +52,7 @@ BUFFER_CHAIN *parse_file(const char *file_path)
 	return buf_chain;
 }
 
-BUFFER_NODE *add_new_line(char *s, int len)
-{
-	BUFFER_NODE *buf_node = malloc(sizeof(BUFFER_NODE));
-	
-	buf_node->s = s;
-	buf_node->len = len;
-	
-	return buf_node;
-}
-
-BUFFER_NODE *get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
+BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
 {
 	BUFFER_NODE *ptr = buf_chain->head;
 	int current_line_num = 1;
@@ -57,8 +64,32 @@ BUFFER_NODE *get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
 			return NULL;
 		}
 		
-		ptr = ptr->next;
+		ptr = (BUFFER_NODE *)ptr->next;
 	}
 	
 	return ptr;
 }
+
+void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char *new)
+{
+	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num);
+	
+	if (buf_node == NULL) return;
+	
+	if (offset > buf_node->len) return;
+	
+	BUFFER_NODE *last = buf_node;
+	
+	for (int i = 0; *new != '\0'; i++, new++)
+	{
+		// if ()
+		// {
+			
+		// }
+	}
+}
+
+// void buf_remove(BUFFER_CHAIN *buf_chain, int line_num, int offset, int len)
+// {
+// 	return;
+// }
