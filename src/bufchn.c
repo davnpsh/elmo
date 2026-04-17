@@ -48,8 +48,9 @@ BUFFER_NODE *add_new_line(char *s, int len)
 BUFFER_NODE *get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
 {
 	BUFFER_NODE *ptr = buf_chain->head;
+	int current_line_num = 1;
 	
-	for (int i = 1; i < line_num; i++)
+	while (current_line_num != line_num)
 	{
 		if (ptr == NULL)
 		{
