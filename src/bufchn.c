@@ -34,12 +34,13 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path)
 	{
 		current = buf_add_new_line(s, len);
 		
+		// Double-linked list relations:
 		if (prev != NULL)
 		{
 			prev->next = (int *)current;
 			current->prev = (int *)prev;
 		}
-		// First node
+		// Store the first line (pointer node):
 		else
 		{
 			buf_chain->head = current;
@@ -87,7 +88,8 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char *new)
 	}
 }
 
-// void buf_remove(BUFFER_CHAIN *buf_chain, int line_num, int offset, int len)
-// {
-// 	return;
-// }
+void buf_remove(BUFFER_CHAIN *buf_chain, int line_num, int offset, int len)
+{
+	// TODO: Implement this!
+	return;
+}
