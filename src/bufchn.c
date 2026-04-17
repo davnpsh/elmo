@@ -78,14 +78,12 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char *new)
 	
 	if (offset > buf_node->len) return;
 	
-	BUFFER_NODE *last = buf_node;
+	BUFFER_NODE *prev = buf_node;
+	BUFFER_NODE *last = buf_node->next;
 	
 	for (int i = 0; *new != '\0'; i++, new++)
 	{
-		// if ()
-		// {
-			
-		// }
+		// TODO: Implement this!
 	}
 }
 
