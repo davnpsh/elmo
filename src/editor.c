@@ -7,7 +7,6 @@
 
 #include "editor.h"
 #include "helper.h"
-#include "bufchn.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -39,9 +38,30 @@ int editor_get_window_size(int *rows, int *cols)
 	}
 }
 
+void editor_open(const char *file_path)
+{
+	editor.buf_chain = buf_parse_file(file_path);
+}
+
 void editor_draw(APPEND_BUFFER *ab)
 {
+	if ((editor.buf_chain == NULL) 
+		|| (editor.buf_chain->head == NULL)) return;
 	
+	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1);
+	
+	for (int y = 0; y < editor.screen_rows; y++)
+	{
+		if (y < editor.buf_chain->lines_num)
+		{
+			int len = current_line->len;
+			if (len > editor.screen_cols) len = editor.screen_cols;
+			ab_append(ab, current_line->s, len);
+			ab_append(ab, "\r", 1);
+			
+			current_line = current_line->next;
+		}
+	}
 }
 
 void editor_refresh_screen()
@@ -207,6 +227,7 @@ int editor_get_cursor_position(int *rows, int *cols)
 void init_editor() 
 {
 	editor.cursor_x = editor.cursor_y = 0;
+	editor.buf_chain = NULL;
 	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
 		die("editor_get_window_size");
