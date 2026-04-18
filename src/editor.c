@@ -7,7 +7,7 @@
 
 #include "editor.h"
 #include "helper.h"
-#include "abuf.h"
+#include "bufchn.h"
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -39,26 +39,28 @@ int editor_get_window_size(int *rows, int *cols)
 	}
 }
 
+void editor_draw(APPEND_BUFFER *ab)
+{
+	
+}
+
 void editor_refresh_screen()
 {
-	ABUF ab = {NULL, 0};
+	APPEND_BUFFER ab = {NULL, 0};
 	
-	abAppend(&ab, "\x1b[?25l", 6);
-	abAppend(&ab, "\x1b[2J", 4);
-	abAppend(&ab, "\x1b[H", 3);
+	ab_append(&ab, "\x1b[?25l", 6);
+	ab_append(&ab, "\x1b[2J", 4);
+	ab_append(&ab, "\x1b[H", 3);
 	
-	// ---
-	// In case of drawing things like welcome text
-	// it goes here
-	// ---
+	editor_draw(&ab);
 	
 	char buf[32];
 	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", editor.cursor_y + 1, editor.cursor_x + 1);
-	abAppend(&ab, buf, strlen(buf));
-	abAppend(&ab, "\x1b[?25h", 6);
+	ab_append(&ab, buf, strlen(buf));
+	ab_append(&ab, "\x1b[?25h", 6);
 	
 	write(STDOUT_FILENO, ab.b, ab.len);
-	abFree(&ab);
+	ab_free(&ab);
 }
 
 int editor_read_key()

@@ -1,5 +1,7 @@
 #include <termios.h>
 
+#include "abuf.h"
+
 typedef struct EDITOR
 {
 	int cursor_x, cursor_y;
@@ -8,6 +10,7 @@ typedef struct EDITOR
 } EDITOR;
 
 int editor_get_window_size(int *rows, int *cols);
+void editor_draw(APPEND_BUFFER *ab);
 void editor_refresh_screen();
 int editor_read_key();
 void editor_move_cursor(int c);

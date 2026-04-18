@@ -1,9 +1,9 @@
-typedef struct ABUF
+typedef struct APPEND_BUFFER
 {
 	char *b;
 	int len;
-} ABUF;
+} APPEND_BUFFER;
 
-void abAppend(ABUF *ab, const char *s, int len);
-void abFree(ABUF *ab);
+void ab_append(APPEND_BUFFER *ab, const char *s, int len);
+void ab_free(APPEND_BUFFER *ab);
 

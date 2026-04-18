@@ -3,7 +3,7 @@
 
 #include "abuf.h"
 
-void abAppend(ABUF *ab, const char *s, int len)
+void ab_append(APPEND_BUFFER *ab, const char *s, int len)
 {
 	char *new = realloc(ab->b, ab->len + len);
 	
@@ -14,7 +14,7 @@ void abAppend(ABUF *ab, const char *s, int len)
 	ab->len += len;
 }
 
-void abFree(ABUF *ab)
+void ab_free(APPEND_BUFFER *ab)
 {
 	free(ab->b);
 }
