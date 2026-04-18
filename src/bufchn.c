@@ -94,37 +94,19 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
 				current_line_num--;
 			}
 		}
-		// Forward search
-		else
-		{
-			while (current_line_num != line_num)
-			{
-				if (ptr == NULL)
-				{
-					return NULL;
-				}
-				
-				ptr = ptr->next;
-				current_line_num++;
-			}
-		}
 	}
 	// Fetch from Buffer Chain head instead
 	else
 	{
 		ptr = buf_chain->head;
 		current_line_num = 1;
-		
-		while (current_line_num != line_num)
-		{
-			if (ptr == NULL)
-			{
-				return NULL;
-			}
-			
-			ptr = ptr->next;
-			current_line_num++;
-		}
+	}
+	
+	// Forward search
+	while (current_line_num != line_num)
+	{
+		ptr = ptr->next;
+		current_line_num++;
 	}
 	
 	buf_chain->cache_node = ptr;
