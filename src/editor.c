@@ -216,14 +216,28 @@ void editor_move_cursor(int c)
 				editor.cursor_x--;
 				editor.cache_cursor_x_snap = editor.cursor_x;
 			}
+			else if (editor.cursor_y > 0)
+			{
+				editor.cursor_y--;
+				
+				current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+				editor.cursor_x = current_line->len;
+				editor.cache_cursor_x_snap = editor.cursor_x;
+			}
 			break;	
 			
 		case RIGHT:
 			if (current_line && editor.cursor_x < current_line->len)
 			{
 				editor.cursor_x++;
-				editor.cache_cursor_x_snap = editor.cursor_x;
 			}
+			else if (current_line && editor.cursor_x == current_line->len)
+			{
+				editor.cursor_y++;
+				editor.cursor_x = 0;
+			}
+			
+			editor.cache_cursor_x_snap = editor.cursor_x;
 			break;
 	}
 	
