@@ -3,6 +3,19 @@
 #include "abuf.h"
 #include "bufchn.h"
 
+enum MOV_KEY
+{
+	UP = 1000,
+	DOWN,
+	LEFT,
+	RIGHT,
+	PAGE_UP,
+	PAGE_DOWN,
+	HOME_KEY,
+	END_KEY,
+	DEL_KEY
+};
+
 typedef struct EDITOR
 {
 	int cursor_x;

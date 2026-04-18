@@ -10,19 +10,6 @@
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
-enum MOV_KEY
-{
-	UP = 1000,
-	DOWN,
-	LEFT,
-	RIGHT,
-	PAGE_UP,
-	PAGE_DOWN,
-	HOME_KEY,
-	END_KEY,
-	DEL_KEY
-};
-
 EDITOR editor;
 
 int editor_get_window_size(int *rows, int *cols)
