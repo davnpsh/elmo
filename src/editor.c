@@ -212,13 +212,17 @@ void editor_move_cursor(int c)
 			
 		case LEFT:
 			if (editor.cursor_x != 0)
+			{
 				editor.cursor_x--;
+				editor.cache_cursor_x_snap = editor.cursor_x;
+			}
 			break;	
 			
 		case RIGHT:
 			if (current_line && editor.cursor_x < current_line->len)
 			{
 				editor.cursor_x++;
+				editor.cache_cursor_x_snap = editor.cursor_x;
 			}
 			break;
 	}
@@ -230,6 +234,10 @@ void editor_move_cursor(int c)
 	if (editor.cursor_x > row_len)
 	{
 		editor.cursor_x = row_len;
+	}
+	else
+	{
+		editor.cursor_x = editor.cache_cursor_x_snap;
 	}
 }
 

@@ -24,7 +24,7 @@ typedef struct EDITOR
 	int screen_cols;
 	int row_offset;
 	int col_offset;
-	int cache_cursor_y_snap;
+	int cache_cursor_x_snap;
 	BUFFER_CHAIN *buf_chain;
 	struct termios og_terminal_conf;
 } EDITOR;
