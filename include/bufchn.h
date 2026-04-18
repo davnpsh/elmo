@@ -1,3 +1,5 @@
+#define Bool int
+
 typedef struct BUFFER_NODE
 {
 	char *s;
@@ -33,9 +35,10 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path);
  * Retrieves a node of the Buffer Chain corresponding to a line in buffer.
  * @param BUFFER_CHAIN *buf_chain.
  * @param int line_num The number of the line.
+ * @param Bool cache Whether cache or not.
  * @return The node representing the line.
  */
-BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num);
+BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache);
 
 /**
  * Inserts new text into the Buffer Chain.

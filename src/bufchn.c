@@ -8,6 +8,10 @@
 #include "bufchn.h"
 #include "helper.h"
 
+#define Bool int
+#define TRUE 1
+#define FALSE 0
+
 BUFFER_NODE *buf_add_new_line(char *s, int len)
 {
 	BUFFER_NODE *buf_node = malloc(sizeof(BUFFER_NODE));
@@ -71,7 +75,7 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path)
 	return buf_chain;
 }
 
-BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
+BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache)
 {
 	BUFFER_NODE *ptr;
 	int current_line_num;
@@ -109,15 +113,18 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
 		current_line_num++;
 	}
 	
-	buf_chain->cache_node = ptr;
-	buf_chain->cache_line_num = current_line_num;
+	if (cache)
+	{
+		buf_chain->cache_node = ptr;
+		buf_chain->cache_line_num = current_line_num;
+	}
 	
 	return ptr;
 }
 
 void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char *new)
 {
-	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num);
+	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num, FALSE);
 	
 	if (buf_node == NULL) return;
 	

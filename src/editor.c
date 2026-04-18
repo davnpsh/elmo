@@ -8,6 +8,8 @@
 #include "editor.h"
 #include "helper.h"
 
+#define TRUE 1
+#define FALSE 0
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 EDITOR editor;
@@ -35,7 +37,7 @@ void editor_draw(APPEND_BUFFER *ab)
 	if ((editor.buf_chain == NULL) 
 		|| (editor.buf_chain->head == NULL)) return;
 	
-	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset);
+	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset, TRUE);
 	
 	for (int y = 0; y < editor.screen_rows; y++)
 	{
@@ -185,7 +187,7 @@ void editor_move_cursor(int c)
 	}
 	else
 	{
-		current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1);
+		current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
 	}
 	
 	switch (c)
