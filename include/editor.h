@@ -5,10 +5,13 @@
 
 typedef struct EDITOR
 {
-	int cursor_x, cursor_y;
-	int screen_rows, screen_cols;
-	struct termios og_terminal_conf;
+	int cursor_x;
+	int cursor_y;
+	int screen_rows;
+	int screen_cols;
+	int row_offset;
 	BUFFER_CHAIN *buf_chain;
+	struct termios og_terminal_conf;
 } EDITOR;
 
 int editor_get_window_size(int *rows, int *cols);

@@ -48,11 +48,11 @@ void editor_draw(APPEND_BUFFER *ab)
 	if ((editor.buf_chain == NULL) 
 		|| (editor.buf_chain->head == NULL)) return;
 	
-	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1);
+	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset);
 	
 	for (int y = 0; y < editor.screen_rows; y++)
 	{
-		if (y < editor.buf_chain->lines_num)
+		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
 		{
 			int len = current_line->len;
 			if (len > editor.screen_cols) len = editor.screen_cols;
@@ -69,8 +69,25 @@ void editor_draw(APPEND_BUFFER *ab)
 	}
 }
 
+void editor_scroll()
+{
+	// Scroll up
+	if (editor.cursor_y < editor.row_offset)
+	{
+		editor.row_offset = editor.cursor_y;
+	}
+	
+	// Scroll down
+	if (editor.cursor_y >= editor.row_offset + editor.screen_rows)
+	{
+		editor.row_offset = editor.cursor_y - editor.screen_rows + 1;
+	}
+}
+
 void editor_refresh_screen()
 {
+	editor_scroll();
+	
 	APPEND_BUFFER ab = {NULL, 0};
 	
 	ab_append(&ab, "\x1b[?25l", 6);
@@ -80,7 +97,7 @@ void editor_refresh_screen()
 	editor_draw(&ab);
 	
 	char buf[32];
-	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", editor.cursor_y + 1, editor.cursor_x + 1);
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (editor.cursor_y - editor.row_offset) + 1, editor.cursor_x + 1);
 	ab_append(&ab, buf, strlen(buf));
 	ab_append(&ab, "\x1b[?25h", 6);
 	
@@ -162,14 +179,19 @@ void editor_move_cursor(int c)
 			if (editor.cursor_y != 0)
 				editor.cursor_y--;
 			break;
+			
 		case DOWN:
-			if (editor.cursor_y != editor.screen_rows - 1)
+			if (editor.buf_chain == NULL) return;
+		 
+			if (editor.cursor_y < editor.buf_chain->lines_num)
 				editor.cursor_y++;
 			break;
+			
 		case LEFT:
 			if (editor.cursor_x != 0)
 				editor.cursor_x--;
 			break;	
+			
 		case RIGHT:
 			if (editor.cursor_x != editor.screen_cols - 1)
 				editor.cursor_x++;
@@ -231,7 +253,9 @@ int editor_get_cursor_position(int *rows, int *cols)
 
 void init_editor() 
 {
-	editor.cursor_x = editor.cursor_y = 0;
+	editor.cursor_x = 0;
+	editor.cursor_y = 0;
+	editor.row_offset = 0;
 	editor.buf_chain = NULL;
 	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
