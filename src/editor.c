@@ -57,9 +57,14 @@ void editor_draw(APPEND_BUFFER *ab)
 			int len = current_line->len;
 			if (len > editor.screen_cols) len = editor.screen_cols;
 			ab_append(ab, current_line->s, len);
-			ab_append(ab, "\r", 1);
 			
 			current_line = current_line->next;
+		}
+		
+		ab_append(ab, "\x1b[K", 3);
+		if (y < editor.screen_rows - 1)
+		{
+			ab_append(ab, "\n\r", 2);
 		}
 	}
 }

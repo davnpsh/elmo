@@ -38,6 +38,9 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path)
 	
 	while ((len = getline(&s, &linecap, fp)) != -1)
 	{
+		while (len > 0 && (s[len - 1] == '\n' || s[len - 1] == '\r'))
+			len--;
+		
 		char *copy = malloc(sizeof(char) * (len + 1));
 		memcpy(copy, s, len);
 		copy[len] = '\0';
