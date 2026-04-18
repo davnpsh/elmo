@@ -2,8 +2,8 @@ typedef struct BUFFER_NODE
 {
 	char *s;
 	int len;
-	int* prev;
-	int* next;
+	struct BUFFER_NODE *prev;
+	struct BUFFER_NODE *next;
 } BUFFER_NODE;
 
 typedef struct BUFFER_CHAIN

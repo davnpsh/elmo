@@ -3,6 +3,7 @@
 #define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "bufchn.h"
 #include "helper.h"
@@ -13,6 +14,8 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	
 	buf_node->s = s;
 	buf_node->len = len;
+	buf_node->prev = NULL;
+	buf_node->next = NULL;
 	
 	return buf_node;
 }
@@ -20,25 +23,32 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 BUFFER_CHAIN *buf_parse_file(const char *file_path)
 {
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
+	buf_chain->head = NULL;
 	buf_chain->lines_num = 0;
 	
 	FILE *fp = fopen(file_path, "r");
 	if (!fp) die("fopen");
 	
-	BUFFER_NODE *prev, *current;
+	BUFFER_NODE *prev = NULL;
+	BUFFER_NODE *current = NULL;
+	
 	char *s = NULL;
-	int len;
+	ssize_t len;
 	size_t linecap = 0;
 	
 	while ((len = getline(&s, &linecap, fp)) != -1)
 	{
-		current = buf_add_new_line(s, len);
+		char *copy = malloc(sizeof(char) * (len + 1));
+		memcpy(copy, s, len);
+		copy[len] = '\0';
+		
+		current = buf_add_new_line(copy, len);
 		
 		// Double-linked list relations:
 		if (prev != NULL)
 		{
-			prev->next = (int *)current;
-			current->prev = (int *)prev;
+			prev->next = current;
+			current->prev = prev;
 		}
 		// Store the first line (pointer node):
 		else
@@ -49,6 +59,9 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path)
 		buf_chain->lines_num++;
 		prev = current;
 	}
+	
+	fclose(fp);
+	free(s);
 	
 	return buf_chain;
 }
@@ -65,7 +78,8 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
 			return NULL;
 		}
 		
-		ptr = (BUFFER_NODE *)ptr->next;
+		ptr = ptr->next;
+		current_line_num++;
 	}
 	
 	return ptr;
