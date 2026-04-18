@@ -231,7 +231,7 @@ void editor_move_cursor(int c)
 	
 	int row_len = current_line ? current_line->len : 0;
 	
-	if (editor.cursor_x > row_len)
+	if (editor.cache_cursor_x_snap > row_len)
 	{
 		editor.cursor_x = row_len;
 	}
