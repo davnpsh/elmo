@@ -34,10 +34,9 @@ void editor_open(const char *file_path)
 
 void editor_draw(APPEND_BUFFER *ab)
 {
-	if ((editor.buf_chain == NULL) 
-		|| (editor.buf_chain->head == NULL)) return;
-	
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset, TRUE);
+	
+	if (current_line == NULL) return;
 	
 	for (int y = 0; y < editor.screen_rows; y++)
 	{
@@ -195,15 +194,7 @@ void editor_move_cursor(int c)
 {
 	BUFFER_NODE *current_line;
 	
-	if ((editor.buf_chain == NULL) 
-		|| (editor.buf_chain->head == NULL))
-	{
-		current_line = NULL;
-	}
-	else
-	{
-		current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
-	}
+	current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
 	
 	switch (c)
 	{
@@ -230,6 +221,15 @@ void editor_move_cursor(int c)
 				editor.cursor_x++;
 			}
 			break;
+	}
+	
+	current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+	
+	int row_len = current_line ? current_line->len : 0;
+	
+	if (editor.cursor_x > row_len)
+	{
+		editor.cursor_x = row_len;
 	}
 }
 

@@ -80,6 +80,9 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache)
 	BUFFER_NODE *ptr;
 	int current_line_num;
 	
+	if ((buf_chain == NULL) 
+		|| (buf_chain->head == NULL)) return NULL;
+	
 	if (line_num > buf_chain->lines_num) return NULL;
 	
 	// Try to fetch from cache
