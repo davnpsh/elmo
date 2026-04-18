@@ -88,23 +88,38 @@ void editor_scroll()
 }
 
 void editor_refresh_screen()
-{
-	editor_scroll();
+{	
+	// Refresh window dimensiones
+	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
+		die("editor_get_window_size");
 	
 	APPEND_BUFFER ab = {NULL, 0};
 	
-	ab_append(&ab, "\x1b[?25l", 6);
-	ab_append(&ab, "\x1b[2J", 4);
-	ab_append(&ab, "\x1b[H", 3);
-	
-	editor_draw(&ab);
-	
-	char buf[32];
-	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
-		(editor.cursor_y - editor.row_offset) + 1, 
-		(editor.cursor_x - editor.col_offset)+ 1);
-	ab_append(&ab, buf, strlen(buf));
-	ab_append(&ab, "\x1b[?25h", 6);
+	if ((editor.screen_cols < 30) 
+		|| (editor.screen_rows < 10))
+	{
+		ab_append(&ab, "\x1b[?25l", 6);
+		ab_append(&ab, "\x1b[2J", 4);
+		ab_append(&ab, "\x1b[H", 3);
+		ab_append(&ab, "Terminal size too small!", 24);
+	}
+	else
+	{
+		editor_scroll();
+		
+		ab_append(&ab, "\x1b[?25l", 6);
+		ab_append(&ab, "\x1b[2J", 4);
+		ab_append(&ab, "\x1b[H", 3);
+		
+		editor_draw(&ab);
+		
+		char buf[32];
+		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
+			(editor.cursor_y - editor.row_offset) + 1, 
+			(editor.cursor_x - editor.col_offset)+ 1);
+		ab_append(&ab, buf, strlen(buf));
+		ab_append(&ab, "\x1b[?25h", 6);
+	}
 	
 	write(STDOUT_FILENO, ab.b, ab.len);
 	ab_free(&ab);
@@ -221,6 +236,13 @@ void editor_move_cursor(int c)
 void editor_process_keypress()
 {
 	int c = editor_read_key();
+	
+	// Refresh window dimensiones
+	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
+		die("editor_get_window_size");
+	
+	if ((editor.screen_cols < 30) 
+		|| (editor.screen_rows < 10)) return;
 	
 	switch (c)
 	{
