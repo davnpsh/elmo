@@ -25,6 +25,8 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path)
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
 	buf_chain->head = NULL;
 	buf_chain->lines_num = 0;
+	buf_chain->cache_node = NULL;
+	buf_chain->cache_line_num = 0;
 	
 	FILE *fp = fopen(file_path, "r");
 	if (!fp) die("fopen");
@@ -71,19 +73,60 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path)
 
 BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num)
 {
-	BUFFER_NODE *ptr = buf_chain->head;
-	int current_line_num = 1;
+	BUFFER_NODE *ptr;
+	int current_line_num;
 	
-	while (current_line_num != line_num)
+	// Try to fetch from cache
+	if ((buf_chain->cache_node != NULL)
+	 && (abs(line_num - buf_chain->cache_line_num) < line_num))
 	{
-		if (ptr == NULL)
-		{
-			return NULL;
-		}
+		ptr = buf_chain->cache_node;
+		current_line_num = buf_chain->cache_line_num;
 		
-		ptr = ptr->next;
-		current_line_num++;
+		// Backward search
+		if (current_line_num > line_num)
+		{
+			while (current_line_num != line_num)
+			{
+				ptr = ptr->prev;
+				current_line_num--;
+			}
+		}
+		// Forward search
+		else
+		{
+			while (current_line_num != line_num)
+			{
+				if (ptr == NULL)
+				{
+					return NULL;
+				}
+				
+				ptr = ptr->next;
+				current_line_num++;
+			}
+		}
 	}
+	// Fetch from Buffer Chain head instead
+	else
+	{
+		ptr = buf_chain->head;
+		current_line_num = 1;
+		
+		while (current_line_num != line_num)
+		{
+			if (ptr == NULL)
+			{
+				return NULL;
+			}
+			
+			ptr = ptr->next;
+			current_line_num++;
+		}
+	}
+	
+	buf_chain->cache_node = ptr;
+	buf_chain->cache_line_num = current_line_num;
 	
 	return ptr;
 }

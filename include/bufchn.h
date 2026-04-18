@@ -10,6 +10,9 @@ typedef struct BUFFER_CHAIN
 {
 	BUFFER_NODE *head;
 	int lines_num;
+	// Cache
+	BUFFER_NODE *cache_node;
+	int cache_line_num;
 } BUFFER_CHAIN;
 
 /**
