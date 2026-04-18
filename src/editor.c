@@ -41,9 +41,11 @@ void editor_draw(APPEND_BUFFER *ab)
 	{
 		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
 		{
-			int len = current_line->len;
+			int len = current_line->len - editor.col_offset;
+			if (len < 0) len = 0;
 			if (len > editor.screen_cols) len = editor.screen_cols;
-			ab_append(ab, current_line->s, len);
+			
+			ab_append(ab, &current_line->s[editor.col_offset], len);
 			
 			current_line = current_line->next;
 		}
@@ -69,6 +71,18 @@ void editor_scroll()
 	{
 		editor.row_offset = editor.cursor_y - editor.screen_rows + 1;
 	}
+	
+	// Scroll left
+	if (editor.cursor_x < editor.col_offset)
+	{
+		editor.col_offset = editor.cursor_x;
+	}
+	
+	// Scroll right
+	if (editor.cursor_x >= editor.col_offset + editor.screen_cols)
+	{
+		editor.col_offset = editor.cursor_x - editor.screen_cols + 1;
+	}
 }
 
 void editor_refresh_screen()
@@ -84,7 +98,9 @@ void editor_refresh_screen()
 	editor_draw(&ab);
 	
 	char buf[32];
-	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (editor.cursor_y - editor.row_offset) + 1, editor.cursor_x + 1);
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
+		(editor.cursor_y - editor.row_offset) + 1, 
+		(editor.cursor_x - editor.col_offset)+ 1);
 	ab_append(&ab, buf, strlen(buf));
 	ab_append(&ab, "\x1b[?25h", 6);
 	
@@ -160,6 +176,18 @@ int editor_read_key()
 
 void editor_move_cursor(int c)
 {
+	BUFFER_NODE *current_line;
+	
+	if ((editor.buf_chain == NULL) 
+		|| (editor.buf_chain->head == NULL))
+	{
+		current_line = NULL;
+	}
+	else
+	{
+		current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1);
+	}
+	
 	switch (c)
 	{
 		case UP:
@@ -180,8 +208,10 @@ void editor_move_cursor(int c)
 			break;	
 			
 		case RIGHT:
-			if (editor.cursor_x != editor.screen_cols - 1)
+			if (current_line && editor.cursor_x < current_line->len)
+			{
 				editor.cursor_x++;
+			}
 			break;
 	}
 }
@@ -243,6 +273,7 @@ void init_editor()
 	editor.cursor_x = 0;
 	editor.cursor_y = 0;
 	editor.row_offset = 0;
+	editor.col_offset = 0;
 	editor.buf_chain = NULL;
 	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
