@@ -17,6 +17,7 @@ typedef struct EDITOR
 int editor_get_window_size(int *rows, int *cols);
 void editor_open(const char *file_path);
 void editor_draw(APPEND_BUFFER *ab);
+void editor_scroll();
 void editor_refresh_screen();
 int editor_read_key();
 void editor_move_cursor(int c);
