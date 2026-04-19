@@ -34,30 +34,6 @@ void editor_open(const char *file_path)
 	editor.buf_chain = buf_parse_file(file_path);
 }
 
-void editor_draw(APPEND_BUFFER *ab)
-{
-	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset, TRUE);
-	
-	if (current_line == NULL) return;
-	
-	for (int y = 0; y < editor.screen_rows; y++)
-	{
-		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
-		{
-			int len = current_line->rlen - editor.col_offset;
-			if (len < 0) len = 0;
-			if (len > editor.screen_cols) len = editor.screen_cols;
-			
-			ab_append(ab, &current_line->r[editor.col_offset], len);
-			
-			current_line = current_line->next;
-		}
-		
-		ab_append(ab, "\x1b[K", 3);
-		ab_append(ab, "\n\r", 2);
-	}
-}
-
 void editor_scroll()
 {
 	editor.cursor_rx = 0;
@@ -94,6 +70,30 @@ void editor_scroll()
 	}
 }
 
+void editor_draw_file(APPEND_BUFFER *ab)
+{
+	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset, TRUE);
+	
+	if (current_line == NULL) return;
+	
+	for (int y = 0; y < editor.screen_rows; y++)
+	{
+		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
+		{
+			int len = current_line->rlen - editor.col_offset;
+			if (len < 0) len = 0;
+			if (len > editor.screen_cols) len = editor.screen_cols;
+			
+			ab_append(ab, &current_line->r[editor.col_offset], len);
+			
+			current_line = current_line->next;
+		}
+		
+		ab_append(ab, "\x1b[K", 3);
+		ab_append(ab, "\n\r", 2);
+	}
+}
+
 void editor_refresh_screen()
 {	
 	APPEND_BUFFER ab = {NULL, 0};
@@ -114,7 +114,7 @@ void editor_refresh_screen()
 		ab_append(&ab, "\x1b[2J", 4);
 		ab_append(&ab, "\x1b[H", 3);
 		
-		editor_draw(&ab);
+		editor_draw_file(&ab);
 		
 		char buf[32];
 		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
