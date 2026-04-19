@@ -19,12 +19,14 @@ int editor_get_window_size(int *rows, int *cols)
 	struct winsize ws;
 	
 	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) return -1;
-	else
-	{
-		*cols = ws.ws_col;
-	    *rows = ws.ws_row;
-		return 0;
-	}
+	
+	*cols = ws.ws_col;
+    *rows = ws.ws_row;
+    
+    // Reserve space for status and prompt bar
+	*rows -= 2;
+	
+	return 0;
 }
 
 void editor_open(const char *file_path)
@@ -52,10 +54,7 @@ void editor_draw(APPEND_BUFFER *ab)
 		}
 		
 		ab_append(ab, "\x1b[K", 3);
-		if (y < editor.screen_rows - 1)
-		{
-			ab_append(ab, "\n\r", 2);
-		}
+		ab_append(ab, "\n\r", 2);
 	}
 }
 
@@ -97,10 +96,6 @@ void editor_scroll()
 
 void editor_refresh_screen()
 {	
-	// Refresh window dimensiones
-	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
-		die("editor_get_window_size");
-	
 	APPEND_BUFFER ab = {NULL, 0};
 	
 	if ((editor.screen_cols < 30) 
