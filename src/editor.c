@@ -103,8 +103,8 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 	
 	char status[80];
 	
-	int len = snprintf(status, sizeof(status), " %.20s - %d lines", 
-		editor.filename ? editor.filename : "<new buff>", editor.buf_chain->lines_num);
+	int len = snprintf(status, sizeof(status), " %.20s - %d lines - row: %d", 
+		editor.filename ? editor.filename : "<new buff>", editor.buf_chain->lines_num, editor.cursor_y);
 	
 	if (len > editor.screen_cols) len = editor.screen_cols;
 	
@@ -236,7 +236,7 @@ void editor_move_cursor(int c)
 		case DOWN:
 			if (editor.buf_chain == NULL) return;
 		 
-			if (editor.cursor_y < editor.buf_chain->lines_num)
+			if (editor.cursor_y < editor.buf_chain->lines_num - 1)
 				editor.cursor_y++;
 			break;
 			
@@ -263,8 +263,11 @@ void editor_move_cursor(int c)
 			}
 			else if (current_line && editor.cursor_x == current_line->len)
 			{
-				editor.cursor_y++;
-				editor.cursor_x = 0;
+				if (current_line->next)
+				{
+					editor.cursor_y++;
+					editor.cursor_x = 0;
+				}
 			}
 			
 			editor.cache_cursor_x_snap = editor.cursor_x;
