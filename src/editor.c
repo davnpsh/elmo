@@ -29,9 +29,12 @@ int editor_get_window_size(int *rows, int *cols)
 	return 0;
 }
 
-void editor_open(const char *file_path)
+void editor_open(const char *filepath)
 {
-	editor.buf_chain = buf_parse_file(file_path);
+	editor.filename = malloc(strlen(filepath) + 1);
+	strcpy(editor.filename, filepath);
+	
+	editor.buf_chain = buf_parse_file(filepath);
 }
 
 void editor_scroll()
@@ -94,6 +97,20 @@ void editor_draw_file(APPEND_BUFFER *ab)
 	}
 }
 
+void editor_draw_status_bar(APPEND_BUFFER *ab)
+{
+	ab_append(ab, "\x1b[7m", 4);
+	
+	int len = 0;
+	while (len < editor.screen_cols) 
+	{
+		ab_append(ab, " ", 1);
+		len++;
+	}
+	
+	ab_append(ab, "\x1b[m", 3);
+}
+
 void editor_refresh_screen()
 {	
 	APPEND_BUFFER ab = {NULL, 0};
@@ -115,6 +132,7 @@ void editor_refresh_screen()
 		ab_append(&ab, "\x1b[H", 3);
 		
 		editor_draw_file(&ab);
+		editor_draw_status_bar(&ab);
 		
 		char buf[32];
 		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
@@ -355,6 +373,7 @@ void init_editor()
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.buf_chain = NULL;
+	editor.filename = NULL;
 	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
 		die("editor_get_window_size");

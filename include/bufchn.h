@@ -31,7 +31,7 @@ BUFFER_NODE *buf_add_new_line(char *s, int len);
  * @param const char *s Text file path.
  * @return A pointer to a Buffer Chain.
  */
-BUFFER_CHAIN *buf_parse_file(const char *file_path);
+BUFFER_CHAIN *buf_parse_file(const char *filepath);
 
 /**
  * Retrieves a node of the Buffer Chain corresponding to a line in buffer.

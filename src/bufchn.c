@@ -56,7 +56,7 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	return buf_node;
 }
 
-BUFFER_CHAIN *buf_parse_file(const char *file_path)
+BUFFER_CHAIN *buf_parse_file(const char *filepath)
 {
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
 	buf_chain->head = NULL;
@@ -64,7 +64,7 @@ BUFFER_CHAIN *buf_parse_file(const char *file_path)
 	buf_chain->cache_node = NULL;
 	buf_chain->cache_line_num = 0;
 	
-	FILE *fp = fopen(file_path, "r");
+	FILE *fp = fopen(filepath, "r");
 	if (!fp) die("fopen");
 	
 	BUFFER_NODE *prev = NULL;
