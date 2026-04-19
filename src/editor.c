@@ -296,6 +296,10 @@ void editor_process_keypress()
 			break;
 			
 		case HOME_KEY:
+			editor.cursor_x = 0;
+			editor.cache_cursor_x_snap = 0;
+			break;
+			
 		case END_KEY:
 		case DEL_KEY:
 			// Do nothing for now
