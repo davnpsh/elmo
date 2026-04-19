@@ -107,6 +107,23 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 	return buf_chain;
 }
 
+BUFFER_CHAIN *buf_new_canvas()
+{
+	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
+	
+	char s[] = "";
+	
+	buf_chain->head = buf_add_new_line(s, 0);
+	
+	// Free line to start writing!!!
+	buf_chain->lines_num = 1;
+	
+	buf_chain->cache_node = NULL;
+	buf_chain->cache_line_num = 0;
+	
+	return buf_chain;
+}
+
 BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache)
 {
 	BUFFER_NODE *ptr;

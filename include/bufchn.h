@@ -34,6 +34,12 @@ BUFFER_NODE *buf_add_new_line(char *s, int len);
 BUFFER_CHAIN *buf_parse_file(const char *filepath);
 
 /**
+ * Produces a new Buffer Chain.
+ * @return A pointer to a Buffer Chain.
+ */
+BUFFER_CHAIN *buf_new_canvas();
+
+/**
  * Retrieves a node of the Buffer Chain corresponding to a line in buffer.
  * @param BUFFER_CHAIN *buf_chain.
  * @param int line_num The number of the line.

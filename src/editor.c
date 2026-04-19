@@ -380,7 +380,7 @@ void init_editor()
 	editor.cursor_rx = 0;
 	editor.row_offset = 0;
 	editor.col_offset = 0;
-	editor.buf_chain = NULL;
+	editor.buf_chain = buf_new_canvas();
 	editor.filename = NULL;
 	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
