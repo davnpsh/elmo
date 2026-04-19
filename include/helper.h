@@ -1,3 +1,2 @@
 void die(const char *s);
-
-// --- str functions ---
+int cx_to_rx(const char *s, int cursor_x);

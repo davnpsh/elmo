@@ -20,6 +20,7 @@ typedef struct EDITOR
 {
 	int cursor_x;
 	int cursor_y;
+	int cursor_rx;
 	int screen_rows;
 	int screen_cols;
 	int row_offset;

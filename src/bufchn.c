@@ -11,6 +11,7 @@
 #define Bool int
 #define TRUE 1
 #define FALSE 0
+#define TAB_STOP 8
 
 BUFFER_NODE *buf_add_new_line(char *s, int len)
 {
@@ -18,8 +19,39 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	
 	buf_node->s = s;
 	buf_node->len = len;
+	
+	buf_node->r = NULL;
+	buf_node->rlen = 0;
+	
 	buf_node->prev = NULL;
 	buf_node->next = NULL;
+	
+	// Render special characters
+	int tabs = 0;
+	int i;
+	
+	for (i = 0; i < len; i++)
+    	if (s[i] == '\t') tabs++;
+	
+	free(buf_node->r);
+	buf_node->r = malloc(len + tabs*(TAB_STOP - 1) + 1);
+	
+	int k = 0;
+	for (i = 0; i < len; i++)
+	{
+		if (s[i] == '\t')
+		{
+			buf_node->r[k++] = ' ';
+      		while (k % TAB_STOP != 0) buf_node->r[k++] = ' ';
+		}
+		else
+		{
+			buf_node->r[k++] = s[i];
+		}
+	}
+	
+	buf_node->r[k] = '\0';
+	buf_node->rlen = k;
 	
 	return buf_node;
 }

@@ -42,11 +42,11 @@ void editor_draw(APPEND_BUFFER *ab)
 	{
 		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
 		{
-			int len = current_line->len - editor.col_offset;
+			int len = current_line->rlen - editor.col_offset;
 			if (len < 0) len = 0;
 			if (len > editor.screen_cols) len = editor.screen_cols;
 			
-			ab_append(ab, &current_line->s[editor.col_offset], len);
+			ab_append(ab, &current_line->r[editor.col_offset], len);
 			
 			current_line = current_line->next;
 		}
@@ -61,6 +61,15 @@ void editor_draw(APPEND_BUFFER *ab)
 
 void editor_scroll()
 {
+	editor.cursor_rx = 0;
+	
+	if (editor.cursor_y < editor.buf_chain->lines_num)
+	{
+		BUFFER_NODE *buf_node = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+		
+		editor.cursor_rx = cx_to_rx(buf_node->s, editor.cursor_x);
+	}
+	
 	// Scroll up
 	if (editor.cursor_y < editor.row_offset)
 	{
@@ -74,15 +83,15 @@ void editor_scroll()
 	}
 	
 	// Scroll left
-	if (editor.cursor_x < editor.col_offset)
+	if (editor.cursor_rx < editor.col_offset)
 	{
-		editor.col_offset = editor.cursor_x;
+		editor.col_offset = editor.cursor_rx;
 	}
 	
 	// Scroll right
-	if (editor.cursor_x >= editor.col_offset + editor.screen_cols)
+	if (editor.cursor_rx >= editor.col_offset + editor.screen_cols)
 	{
-		editor.col_offset = editor.cursor_x - editor.screen_cols + 1;
+		editor.col_offset = editor.cursor_rx - editor.screen_cols + 1;
 	}
 }
 
@@ -115,7 +124,7 @@ void editor_refresh_screen()
 		char buf[32];
 		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
 			(editor.cursor_y - editor.row_offset) + 1, 
-			(editor.cursor_x - editor.col_offset)+ 1);
+			(editor.cursor_rx - editor.col_offset)+ 1);
 		ab_append(&ab, buf, strlen(buf));
 		ab_append(&ab, "\x1b[?25h", 6);
 	}
@@ -318,6 +327,7 @@ void init_editor()
 {
 	editor.cursor_x = 0;
 	editor.cursor_y = 0;
+	editor.cursor_rx = 0;
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.buf_chain = NULL;
