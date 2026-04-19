@@ -301,6 +301,15 @@ void editor_process_keypress()
 			break;
 			
 		case END_KEY:
+			if (editor.cursor_y < editor.buf_chain->lines_num)
+			{
+				BUFFER_NODE *buf_node = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+				
+				editor.cursor_x = buf_node->len;
+				editor.cache_cursor_x_snap = buf_node->len;
+			}
+			break;
+			
 		case DEL_KEY:
 			// Do nothing for now
 			break;
