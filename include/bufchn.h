@@ -21,7 +21,7 @@ typedef struct BUFFER_CHAIN
 
 /**
  * Adds a new hanging line waiting to be inserted into a buffer.
- * @param char *s Contents of the line.
+ * @param char *s Pointer to the line.
  * @param int len Length of the line.
  */
 BUFFER_NODE *buf_add_new_line(char *s, int len);
