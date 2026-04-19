@@ -292,7 +292,23 @@ void editor_process_keypress()
 			
 		case PAGE_UP:
 		case PAGE_DOWN:
-			// Do nothing for now
+			{
+				if (c == PAGE_UP) 
+				{
+					editor.cursor_y = editor.row_offset;
+				} 
+				else if (c == PAGE_DOWN) 
+				{
+					editor.cursor_y = editor.row_offset + editor.screen_rows - 1;
+					if (editor.cursor_y > editor.buf_chain->lines_num) 
+						editor.cursor_y = editor.buf_chain->lines_num;
+				}
+				
+				int times = editor.screen_rows;
+				
+				while (times--)
+					editor_move_cursor(c == PAGE_UP ? UP : DOWN);
+			}
 			break;
 			
 		case HOME_KEY:
