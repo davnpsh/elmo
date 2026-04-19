@@ -26,7 +26,7 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	buf_node->prev = NULL;
 	buf_node->next = NULL;
 	
-	// Render special characters
+	// Allocation for special chars rendering
 	int tabs = 0;
 	int i;
 	
