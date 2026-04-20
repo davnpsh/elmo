@@ -11,7 +11,7 @@
 #define Bool int
 #define TRUE 1
 #define FALSE 0
-#define TAB_STOP 8
+#define TAB_STOP 4
 
 BUFFER_NODE *buf_add_new_line(char *s, int len)
 {

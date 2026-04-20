@@ -4,7 +4,7 @@
 
 #include "helper.h"
 
-#define TAB_STOP 8
+#define TAB_STOP 4
 
 void die(const char *s) 
 {
