@@ -376,9 +376,19 @@ void editor_process_keypress()
 			}
 			break;
 			
-		case DEL_KEY:
+		case '\r':
 			// Do nothing for now
 			break;
+			
+		case DEL_KEY:
+		case BACKSPACE:
+			// Do nothing for now
+			break;
+			
+		case CTRL_KEY('l'):
+		case CTRL_KEY('h'):
+		case '\x1b':
+		    break;
 			
 		default:
 			editor_insert(c);

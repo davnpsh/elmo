@@ -6,6 +6,7 @@
 
 enum MOV_KEY
 {
+	BACKSPACE = 127,
 	UP = 1000,
 	DOWN,
 	LEFT,
