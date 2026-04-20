@@ -99,10 +99,14 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 {
 	ab_append(ab, "\x1b[7m", 4);
 	
-	char status[80];
+	char status[100];
 	
-	int len = snprintf(status, sizeof(status), " %.20s - %d lines - row: %d", 
-		editor.filename ? editor.filename : "<new buff>", editor.buf_chain->lines_num, editor.cursor_y);
+	int len = snprintf(status, sizeof(status), 
+		" %.20s [%d] - %d:%d", 
+		editor.filename ? editor.filename : "<new buff>", 
+		editor.buf_chain->lines_num, 
+		editor.cursor_y + 1,
+		editor.cursor_x + 1);
 	
 	if (len > editor.screen_cols) len = editor.screen_cols;
 	
