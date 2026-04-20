@@ -1,4 +1,5 @@
 #include <termios.h>
+#include <time.h>
 
 #include "abuf.h"
 #include "bufchn.h"
@@ -28,9 +29,12 @@ typedef struct EDITOR
 	int cache_cursor_x_snap;
 	BUFFER_CHAIN *buf_chain;
 	char *filepath;
+	char status_msg[80];
+	time_t status_msg_time;
 	struct termios og_terminal_conf;
 } EDITOR;
 
+void editor_set_status_msg(const char *fmt, ...);
 int editor_get_window_size(int *rows, int *cols);
 void editor_open(const char *filepath);
 void editor_draw_buffer(APPEND_BUFFER *ab);

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <libgen.h>
+#include <stdarg.h>
 
 #include "editor.h"
 #include "helper.h"
@@ -14,6 +15,15 @@
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 EDITOR editor;
+
+void editor_set_status_msg(const char *fmt, ...) 
+{
+	va_list ap;
+	va_start(ap, fmt);
+	vsnprintf(editor.status_msg, sizeof(editor.status_msg), fmt, ap);
+	va_end(ap);
+	editor.status_msg_time = time(NULL);
+}
 
 int editor_get_window_size(int *rows, int *cols)
 {
@@ -92,7 +102,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 		}
 		
 		ab_append(ab, "\x1b[K", 3);
-		ab_append(ab, "\n\r", 2);
+		ab_append(ab, "\r\n", 2);
 	}
 }
 
@@ -120,6 +130,18 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 	}
 	
 	ab_append(ab, "\x1b[m", 3);
+	ab_append(ab, "\r\n", 2);
+}
+
+void editor_draw_message_bar(APPEND_BUFFER *ab)
+{
+	ab_append(ab, "\x1b[K", 3);
+	
+	int msglen = strlen(editor.status_msg);
+	if (msglen > editor.screen_cols) msglen = editor.screen_cols;
+	
+	if (msglen && time(NULL) - editor.status_msg_time < 5)
+		ab_append(ab, editor.status_msg, msglen);
 }
 
 void editor_refresh_screen()
@@ -144,6 +166,7 @@ void editor_refresh_screen()
 		
 		editor_draw_buffer(&ab);
 		editor_draw_status_bar(&ab);
+		editor_draw_message_bar(&ab);
 		
 		char buf[32];
 		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
@@ -381,6 +404,8 @@ void init_editor()
 	editor.col_offset = 0;
 	editor.buf_chain = buf_new_canvas();
 	editor.filepath = NULL;
+	editor.status_msg[0] = '\0';
+	editor.status_msg_time = 0;
 	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
 		die("editor_get_window_size");
