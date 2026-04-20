@@ -77,8 +77,6 @@ void editor_draw_file(APPEND_BUFFER *ab)
 {
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset, TRUE);
 	
-	if (current_line == NULL) return;
-	
 	for (int y = 0; y < editor.screen_rows; y++)
 	{
 		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
@@ -234,8 +232,6 @@ void editor_move_cursor(int c)
 			break;
 			
 		case DOWN:
-			if (editor.buf_chain == NULL) return;
-		 
 			if (editor.cursor_y < editor.buf_chain->lines_num - 1)
 				editor.cursor_y++;
 			break;
@@ -273,11 +269,9 @@ void editor_move_cursor(int c)
 	
 	current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
 	
-	int row_len = current_line ? current_line->len : 0;
-	
-	if (editor.cache_cursor_x_snap > row_len)
+	if (editor.cache_cursor_x_snap > current_line->len)
 	{
-		editor.cursor_x = row_len;
+		editor.cursor_x = current_line->len;
 	}
 	else
 	{
