@@ -137,7 +137,7 @@ void editor_refresh_screen()
 		ab_append(&ab, "\x1b[2J", 4);
 		ab_append(&ab, "\x1b[H", 3);
 		
-		editor_draw_file(&ab);
+		editor_draw_buffer(&ab);
 		editor_draw_status_bar(&ab);
 		
 		char buf[32];
