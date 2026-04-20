@@ -20,6 +20,12 @@ typedef struct BUFFER_CHAIN
 } BUFFER_CHAIN;
 
 /**
+ * Renders the characters of the buffer to something fancy.
+ * @param BUFFER_CHAIN *buf_chain.
+ */
+void buf_render_line(BUFFER_NODE *buf_node);
+
+/**
  * Adds a new hanging line waiting to be inserted into a buffer.
  * @param char *s Pointer to the line.
  * @param int len Length of the line.
@@ -53,9 +59,9 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache);
  * @param BUFFER_CHAIN *buf_chain.
  * @param int line_num The number of the line.
  * @param int offset Index to start the insert operation from.
- * @param char *new New contents to add to the buffer.
+ * @param char *c New char to add to the buffer.
  */
-void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char *new);
+void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c);
 
 /**
  * Deletes text from the Buffer Chain.

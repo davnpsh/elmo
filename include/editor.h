@@ -43,6 +43,7 @@ void editor_scroll();
 void editor_refresh_screen();
 int editor_read_key();
 void editor_move_cursor(int c);
+void editor_insert(int c);
 void editor_process_keypress();
 int editor_get_cursor_position(int *rows, int *cols);
 void init_editor();

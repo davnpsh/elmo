@@ -307,6 +307,13 @@ void editor_move_cursor(int c)
 	}
 }
 
+void editor_insert(int c)
+{
+	buf_insert(editor.buf_chain, editor.cursor_y + 1, editor.cursor_x, c);
+	
+	editor.cache_cursor_x_snap = ++editor.cursor_x;
+}
+
 void editor_process_keypress()
 {
 	int c = editor_read_key();
@@ -371,6 +378,10 @@ void editor_process_keypress()
 			
 		case DEL_KEY:
 			// Do nothing for now
+			break;
+			
+		default:
+			editor_insert(c);
 			break;
 	}
 }

@@ -13,6 +13,37 @@
 #define FALSE 0
 #define TAB_STOP 4
 
+void buf_render_line(BUFFER_NODE *buf_node)
+{
+	// Allocation for special chars rendering
+	int len = buf_node->len;
+	int tabs = 0;
+	
+	int i;
+	for (i = 0; i < len; i++)
+    	if (buf_node->s[i] == '\t') tabs++;
+	
+	free(buf_node->r);
+	buf_node->r = malloc(len + tabs*(TAB_STOP - 1) + 1);
+	
+	int k = 0;
+	for (i = 0; i < len; i++)
+	{
+		if (buf_node->s[i] == '\t')
+		{
+			buf_node->r[k++] = ' ';
+      		while (k % TAB_STOP != 0) buf_node->r[k++] = ' ';
+		}
+		else
+		{
+			buf_node->r[k++] = buf_node->s[i];
+		}
+	}
+	
+	buf_node->r[k] = '\0';
+	buf_node->rlen = k;
+}
+
 BUFFER_NODE *buf_add_new_line(char *s, int len)
 {
 	BUFFER_NODE *buf_node = malloc(sizeof(BUFFER_NODE));
@@ -26,32 +57,7 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	buf_node->prev = NULL;
 	buf_node->next = NULL;
 	
-	// Allocation for special chars rendering
-	int tabs = 0;
-	int i;
-	
-	for (i = 0; i < len; i++)
-    	if (s[i] == '\t') tabs++;
-	
-	free(buf_node->r);
-	buf_node->r = malloc(len + tabs*(TAB_STOP - 1) + 1);
-	
-	int k = 0;
-	for (i = 0; i < len; i++)
-	{
-		if (s[i] == '\t')
-		{
-			buf_node->r[k++] = ' ';
-      		while (k % TAB_STOP != 0) buf_node->r[k++] = ' ';
-		}
-		else
-		{
-			buf_node->r[k++] = s[i];
-		}
-	}
-	
-	buf_node->r[k] = '\0';
-	buf_node->rlen = k;
+	buf_render_line(buf_node);
 	
 	return buf_node;
 }
@@ -174,21 +180,19 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache)
 	return ptr;
 }
 
-void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char *new)
+void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 {
 	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num, FALSE);
 	
-	if (buf_node == NULL) return;
+	buf_node->s = realloc(buf_node->s, buf_node->len + 1);
 	
-	if (offset > buf_node->len) return;
+	memmove(&buf_node->s[offset + 1], &buf_node->s[offset], buf_node->len - offset + 1);
 	
-	BUFFER_NODE *prev = buf_node;
-	BUFFER_NODE *last = (BUFFER_NODE *)buf_node->next;
+	buf_node->len++;
 	
-	for (int i = 0; *new != '\0'; i++, new++)
-	{
-		// TODO: Implement this!
-	}
+	buf_node->s[offset] = c;
+	
+	buf_render_line(buf_node);
 }
 
 void buf_remove(BUFFER_CHAIN *buf_chain, int line_num, int offset, int len)
