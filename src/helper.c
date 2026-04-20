@@ -31,8 +31,3 @@ int cx_to_rx(const char *s, int cursor_x)
 	
 	return cursor_rx;
 }
-
-// char *get_filename(const char *filepath)
-// {
-// 	return 
-// }
