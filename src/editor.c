@@ -261,13 +261,10 @@ void editor_move_cursor(int c)
 			{
 				editor.cursor_x++;
 			}
-			else if (current_line && editor.cursor_x == current_line->len)
+			else if (current_line && current_line->next && editor.cursor_x == current_line->len)
 			{
-				if (current_line->next)
-				{
-					editor.cursor_y++;
-					editor.cursor_x = 0;
-				}
+				editor.cursor_y++;
+				editor.cursor_x = 0;
 			}
 			
 			editor.cache_cursor_x_snap = editor.cursor_x;
