@@ -33,7 +33,7 @@ typedef struct EDITOR
 
 int editor_get_window_size(int *rows, int *cols);
 void editor_open(const char *filepath);
-void editor_draw_file(APPEND_BUFFER *ab);
+void editor_draw_buffer(APPEND_BUFFER *ab);
 void editor_draw_status_bar(APPEND_BUFFER *ab);
 void editor_scroll();
 void editor_refresh_screen();

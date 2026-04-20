@@ -73,7 +73,7 @@ void editor_scroll()
 	}
 }
 
-void editor_draw_file(APPEND_BUFFER *ab)
+void editor_draw_buffer(APPEND_BUFFER *ab)
 {
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset, TRUE);
 	
