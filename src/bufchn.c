@@ -184,7 +184,7 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 {
 	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num, FALSE);
 	
-	buf_node->s = realloc(buf_node->s, buf_node->len + 1);
+	buf_node->s = realloc(buf_node->s, buf_node->len + 2);
 	
 	memmove(&buf_node->s[offset + 1], &buf_node->s[offset], buf_node->len - offset + 1);
 	
