@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <libgen.h>
 
 #include "editor.h"
 #include "helper.h"
@@ -31,8 +32,8 @@ int editor_get_window_size(int *rows, int *cols)
 
 void editor_open(const char *filepath)
 {
-	editor.filename = malloc(strlen(filepath) + 1);
-	strcpy(editor.filename, filepath);
+	editor.filepath = malloc(strlen(filepath) + 1);
+	strcpy(editor.filepath, filepath);
 	
 	editor.buf_chain = buf_parse_file(filepath);
 }
@@ -103,7 +104,7 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 	
 	int len = snprintf(status, sizeof(status), 
 		" %.20s [%d] - %d:%d", 
-		editor.filename ? editor.filename : "<new buff>", 
+		editor.filepath ? basename(editor.filepath) : "<new buff>", 
 		editor.buf_chain->lines_num, 
 		editor.cursor_y + 1,
 		editor.cursor_x + 1);
@@ -379,7 +380,7 @@ void init_editor()
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.buf_chain = buf_new_canvas();
-	editor.filename = NULL;
+	editor.filepath = NULL;
 	
 	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
 		die("editor_get_window_size");

@@ -27,7 +27,7 @@ typedef struct EDITOR
 	int col_offset;
 	int cache_cursor_x_snap;
 	BUFFER_CHAIN *buf_chain;
-	char *filename;
+	char *filepath;
 	struct termios og_terminal_conf;
 } EDITOR;
 
