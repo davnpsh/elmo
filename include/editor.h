@@ -25,11 +25,11 @@ typedef struct EDITOR
 	int cursor_x;
 	int cursor_y;
 	int cursor_rx;
+	int cursor_x_snap;
 	int screen_rows;
 	int screen_cols;
 	int row_offset;
 	int col_offset;
-	int cache_cursor_x_snap;
 	Bool dirty;
 	BUFFER_CHAIN *buf_chain;
 	char *filepath;

@@ -281,7 +281,7 @@ void editor_move_cursor(int c)
 			if (editor.cursor_x != 0)
 			{
 				editor.cursor_x--;
-				editor.cache_cursor_x_snap = editor.cursor_x;
+				editor.cursor_x_snap = editor.cursor_x;
 			}
 			else if (editor.cursor_y > 0)
 			{
@@ -289,7 +289,7 @@ void editor_move_cursor(int c)
 				
 				current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
 				editor.cursor_x = current_line->len;
-				editor.cache_cursor_x_snap = editor.cursor_x;
+				editor.cursor_x_snap = editor.cursor_x;
 			}
 			break;	
 			
@@ -304,19 +304,19 @@ void editor_move_cursor(int c)
 				editor.cursor_x = 0;
 			}
 			
-			editor.cache_cursor_x_snap = editor.cursor_x;
+			editor.cursor_x_snap = editor.cursor_x;
 			break;
 	}
 	
 	current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
 	
-	if (editor.cache_cursor_x_snap > current_line->len)
+	if (editor.cursor_x_snap > current_line->len)
 	{
 		editor.cursor_x = current_line->len;
 	}
 	else
 	{
-		editor.cursor_x = editor.cache_cursor_x_snap;
+		editor.cursor_x = editor.cursor_x_snap;
 	}
 }
 
@@ -324,7 +324,7 @@ void editor_insert(int c)
 {
 	buf_insert(editor.buf_chain, editor.cursor_y + 1, editor.cursor_x, c);
 	
-	editor.cache_cursor_x_snap = ++editor.cursor_x;
+	editor.cursor_x_snap = ++editor.cursor_x;
 	
 	editor.dirty = TRUE;
 }
@@ -382,7 +382,7 @@ void editor_process_keypress()
 			
 		case HOME_KEY:
 			editor.cursor_x = 0;
-			editor.cache_cursor_x_snap = 0;
+			editor.cursor_x_snap = 0;
 			break;
 			
 		case END_KEY:
@@ -391,7 +391,7 @@ void editor_process_keypress()
 				BUFFER_NODE *buf_node = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
 				
 				editor.cursor_x = buf_node->len;
-				editor.cache_cursor_x_snap = buf_node->len;
+				editor.cursor_x_snap = buf_node->len;
 			}
 			break;
 			
@@ -440,6 +440,7 @@ void init_editor()
 	editor.cursor_x = 0;
 	editor.cursor_y = 0;
 	editor.cursor_rx = 0;
+	editor.cursor_x_snap = 0;
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.dirty = 0;
