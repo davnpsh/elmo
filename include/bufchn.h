@@ -34,7 +34,7 @@ BUFFER_NODE *buf_add_new_line(char *s, int len);
 
 /**
  * Parses a text file into a Buffer Chain.
- * @param const char *s Text file path.
+ * @param const char *filepath Text file path.
  * @return A pointer to a Buffer Chain.
  */
 BUFFER_CHAIN *buf_parse_file(const char *filepath);
@@ -71,3 +71,19 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c);
  * @param len Quantity of characters to delete from the buffer.
  */
 void buf_remove(BUFFER_CHAIN *buf_chain, int line_num, int offset, int len);
+
+/**
+ * Produces a single string ready to be written into a file.
+ * @param BUFFER_CHAIN *buf_chain.
+ * @param int *len A reference to the size of the string.
+ * @return The string.
+ */
+char *buf_read(BUFFER_CHAIN *buf_chain, int *len);
+
+/**
+ * Writes a buffer chain into a file.
+ * @param BUFFER_CHAIN *buf_chain.
+ * @param const char *filepath Text file path.
+ * @return Status code.
+ */
+int buf_save(BUFFER_CHAIN *buf_chain, const char *filepath);

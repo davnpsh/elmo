@@ -48,6 +48,18 @@ void editor_open(const char *filepath)
 	editor.buf_chain = buf_parse_file(filepath);
 }
 
+void editor_save()
+{
+	if (editor.filepath == NULL) return;
+	
+	int err = buf_save(editor.buf_chain, editor.filepath);
+	
+	if (err)
+		editor_set_status_msg("i/o err!: ", strerror(err));
+	else
+		editor_set_status_msg("saved");
+}
+
 void editor_scroll()
 {
 	editor.cursor_rx = 0;
@@ -332,6 +344,10 @@ void editor_process_keypress()
 			write(STDOUT_FILENO, "\x1b[H", 3);
 			exit(0);
 			break;
+			
+		case CTRL_KEY('s'):
+      		editor_save();
+        	break;
 			
 		case UP:
 		case DOWN:

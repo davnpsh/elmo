@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "bufchn.h"
 #include "helper.h"
@@ -199,4 +202,58 @@ void buf_remove(BUFFER_CHAIN *buf_chain, int line_num, int offset, int len)
 {
 	// TODO: Implement this!
 	return;
+}
+
+char *buf_read(BUFFER_CHAIN *buf_chain, int *len)
+{
+	BUFFER_NODE *ptr;
+	
+	*len = 0;
+	ptr = buf_chain->head;
+	while (ptr)
+	{
+		*len += ptr->len + 1;
+		ptr = ptr->next;
+	}
+	
+	char *buf = malloc(*len);
+	char *p = buf; 
+	ptr = buf_chain->head;
+	while (ptr)
+	{
+		memcpy(p, ptr->s, ptr->len);
+	    p += ptr->len;
+	    *p = '\n';
+	    p++;
+		ptr = ptr->next;
+	}
+	
+	return buf;
+}
+
+int buf_save(BUFFER_CHAIN *buf_chain, const char *filepath)
+{
+	int len;
+	char *buf = buf_read(buf_chain, &len);
+	
+	int fd = open(filepath, O_RDWR | O_CREAT, 0644);
+	
+	if (fd != -1) 
+	{
+		if (ftruncate(fd, len) != -1) 
+		{
+			if (write(fd, buf, len) == len) 
+			{
+				close(fd);
+				free(buf);
+				
+				return 0;
+			}
+		}
+		close(fd);
+	}
+	
+	free(buf);
+	
+	return errno;
 }
