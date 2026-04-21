@@ -10,6 +10,7 @@
 #include "editor.h"
 #include "helper.h"
 
+#define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE)
 #define TRUE 1
 #define FALSE 0
 #define CTRL_KEY(k) ((k) & 0x1f)
@@ -67,7 +68,7 @@ void editor_scroll()
 	
 	if (editor.cursor_y < editor.buf_chain->lines_num)
 	{
-		BUFFER_NODE *buf_node = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+		BUFFER_NODE *buf_node = CURRENT_LINE;
 		
 		editor.cursor_rx = cx_to_rx(buf_node->s, editor.cursor_x);
 	}
@@ -264,7 +265,7 @@ void editor_move_cursor(int c)
 {
 	BUFFER_NODE *current_line;
 	
-	current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+	current_line = CURRENT_LINE;
 	
 	switch (c)
 	{
@@ -288,7 +289,7 @@ void editor_move_cursor(int c)
 			{
 				editor.cursor_y--;
 				
-				current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+				current_line = CURRENT_LINE;
 				editor.cursor_x = current_line->len;
 				editor.cursor_x_snap = editor.cursor_x;
 			}
@@ -309,7 +310,7 @@ void editor_move_cursor(int c)
 			break;
 	}
 	
-	current_line = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+	current_line = CURRENT_LINE;
 	
 	if (editor.cursor_x_snap > current_line->len)
 	{
@@ -426,7 +427,7 @@ void editor_process_keypress()
 		case END_KEY:
 			if (editor.cursor_y < editor.buf_chain->lines_num)
 			{
-				BUFFER_NODE *buf_node = buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE);
+				BUFFER_NODE *buf_node = CURRENT_LINE;
 				
 				editor.cursor_x = buf_node->len;
 				editor.cursor_x_snap = buf_node->len;
