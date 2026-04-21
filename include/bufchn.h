@@ -20,14 +20,14 @@ typedef struct BUFFER_CHAIN
 } BUFFER_CHAIN;
 
 /**
- * Renders the characters of the buffer to something fancy.
- * @param BUFFER_CHAIN *buf_chain.
+ * Deallocates a Buffer Node from memory.
+ * @param BUFFER_NODE *buf_node.
  */
 void buf_free_node(BUFFER_NODE *buf_node);
 
 /**
  * Renders the characters of the buffer to something fancy.
- * @param BUFFER_CHAIN *buf_chain.
+ * @param BUFFER_NODE *buf_node.
  */
 void buf_render_line(BUFFER_NODE *buf_node);
 
