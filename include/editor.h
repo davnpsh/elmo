@@ -4,6 +4,8 @@
 #include "abuf.h"
 #include "bufchn.h"
 
+#define Bool int
+
 enum MOV_KEY
 {
 	BACKSPACE = 127,
@@ -28,6 +30,7 @@ typedef struct EDITOR
 	int row_offset;
 	int col_offset;
 	int cache_cursor_x_snap;
+	Bool dirty;
 	BUFFER_CHAIN *buf_chain;
 	char *filepath;
 	char status_msg[80];

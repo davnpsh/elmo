@@ -125,8 +125,9 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 	char status[100];
 	
 	int len = snprintf(status, sizeof(status), 
-		" %.20s [%d] - %d:%d", 
+		" %.20s%s [%d] - %d:%d", 
 		editor.filepath ? basename(editor.filepath) : "<new buff>", 
+		editor.dirty ? "~": "",
 		editor.buf_chain->lines_num, 
 		editor.cursor_y + 1,
 		editor.cursor_x + 1);
@@ -324,6 +325,8 @@ void editor_insert(int c)
 	buf_insert(editor.buf_chain, editor.cursor_y + 1, editor.cursor_x, c);
 	
 	editor.cache_cursor_x_snap = ++editor.cursor_x;
+	
+	editor.dirty = TRUE;
 }
 
 void editor_process_keypress()
@@ -439,6 +442,7 @@ void init_editor()
 	editor.cursor_rx = 0;
 	editor.row_offset = 0;
 	editor.col_offset = 0;
+	editor.dirty = 0;
 	editor.buf_chain = buf_new_canvas();
 	editor.filepath = NULL;
 	editor.status_msg[0] = '\0';
