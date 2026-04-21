@@ -408,8 +408,8 @@ void editor_process_keypress()
 				else if (c == PAGE_DOWN) 
 				{
 					editor.cursor_y = editor.row_offset + editor.screen_rows - 1;
-					if (editor.cursor_y > editor.buf_chain->lines_num) 
-						editor.cursor_y = editor.buf_chain->lines_num;
+					if (editor.cursor_y >= editor.buf_chain->lines_num) 
+						editor.cursor_y = editor.buf_chain->lines_num - 1;
 				}
 				
 				int times = editor.screen_rows;
