@@ -13,6 +13,7 @@
 #define TRUE 1
 #define FALSE 0
 #define CTRL_KEY(k) ((k) & 0x1f)
+#define QUIT_TIMES 2
 
 EDITOR editor;
 
@@ -331,6 +332,8 @@ void editor_insert(int c)
 
 void editor_process_keypress()
 {
+	static int quit_times = QUIT_TIMES;
+	
 	int c = editor_read_key();
 	
 	// Refresh window dimensiones
@@ -343,6 +346,13 @@ void editor_process_keypress()
 	switch (c)
 	{
 		case CTRL_KEY('q'):
+			if (editor.dirty && quit_times > 0)
+			{
+				editor_set_status_msg("unsaved buffer! press ^q %d more time(s) to quit", quit_times);
+				quit_times--;
+				return;
+			}
+			
 			write(STDOUT_FILENO, "\x1b[2J", 4);
 			write(STDOUT_FILENO, "\x1b[H", 3);
 			exit(0);
@@ -413,6 +423,8 @@ void editor_process_keypress()
 			editor_insert(c);
 			break;
 	}
+	
+	quit_times = QUIT_TIMES;
 }
 
 int editor_get_cursor_position(int *rows, int *cols)
