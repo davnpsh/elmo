@@ -16,6 +16,13 @@
 #define FALSE 0
 #define TAB_STOP 4
 
+void buf_free_node(BUFFER_NODE *buf_node)
+{
+	free(buf_node->s);
+	free(buf_node->r);
+	free(buf_node);
+}
+
 void buf_render_line(BUFFER_NODE *buf_node)
 {
 	// Allocation for special chars rendering
@@ -232,6 +239,8 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		
 		if (buf_node->next)
 			buf_node->next->prev = prev_node;
+		
+		buf_free_node(buf_node);
 		
 		buf_chain->lines_num--;
 	}

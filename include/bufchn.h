@@ -23,6 +23,12 @@ typedef struct BUFFER_CHAIN
  * Renders the characters of the buffer to something fancy.
  * @param BUFFER_CHAIN *buf_chain.
  */
+void buf_free_node(BUFFER_NODE *buf_node);
+
+/**
+ * Renders the characters of the buffer to something fancy.
+ * @param BUFFER_CHAIN *buf_chain.
+ */
 void buf_render_line(BUFFER_NODE *buf_node);
 
 /**
