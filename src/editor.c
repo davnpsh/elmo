@@ -330,6 +330,34 @@ void editor_insert(int c)
 	editor.dirty = TRUE;
 }
 
+void editor_delete()
+{
+	if (editor.cursor_x == 0 && editor.cursor_y == 0) return;
+	
+	int len;
+	
+	if (editor.cursor_y > 0)
+	{
+		BUFFER_NODE *prev_line = buf_get_line_at(editor.buf_chain, editor.cursor_y, FALSE);
+		len = prev_line->len;
+	}
+	
+	buf_delete(editor.buf_chain, editor.cursor_y + 1, editor.cursor_x);
+	
+	if (editor.cursor_x > 0)
+	{
+		editor.cursor_x--;
+	}
+	else if (editor.cursor_y > 0)
+	{	
+		editor.cursor_y--;
+		editor.cursor_x = len;
+	}
+	
+	editor.cursor_x_snap = editor.cursor_x;
+	editor.dirty = TRUE;
+}
+
 void editor_process_keypress()
 {
 	static int quit_times = QUIT_TIMES;
@@ -411,7 +439,8 @@ void editor_process_keypress()
 			
 		case DEL_KEY:
 		case BACKSPACE:
-			// Do nothing for now
+			if (c == DEL_KEY) editor_move_cursor(RIGHT);
+			editor_delete();
 			break;
 			
 		case CTRL_KEY('l'):

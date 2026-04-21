@@ -70,7 +70,7 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c);
  * @param int offset Index to start the insert operation from.
  * @param len Quantity of characters to delete from the buffer.
  */
-void buf_remove(BUFFER_CHAIN *buf_chain, int line_num, int offset, int len);
+void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset);
 
 /**
  * Produces a single string ready to be written into a file.
