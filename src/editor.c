@@ -441,7 +441,17 @@ void editor_process_keypress()
 			
 		case DEL_KEY:
 		case BACKSPACE:
-			if (c == DEL_KEY) editor_move_cursor(RIGHT);
+			if (c == DEL_KEY)
+			{
+				BUFFER_NODE *buf_node = CURRENT_LINE;
+				
+				// Avoid DEL on last x,y position
+				if (editor.cursor_x == buf_node->len 
+					&& editor.cursor_y == editor.buf_chain->lines_num - 1) break;
+				
+				editor_move_cursor(RIGHT);
+			}
+			
 			editor_delete();
 			break;
 			
