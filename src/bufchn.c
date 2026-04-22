@@ -210,11 +210,16 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		new->prev = buf_node;
 		new->next = buf_node->next;
 		
+		if (buf_node->next)
+			buf_node->next->prev = new;
+		
 		buf_node->next = new;
 		
 		buf_node->len = offset;
 		
 		buf_node->s[offset] = '\0';
+		
+		buf_node->s = realloc(buf_node->s, buf_node->len + 1);
 		
 		buf_render_line(buf_node);
 		
