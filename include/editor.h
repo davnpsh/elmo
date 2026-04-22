@@ -6,6 +6,12 @@
 
 #define Bool int
 
+typedef enum MODE
+{
+	SAFE,
+	EDIT
+} MODE;
+
 enum MOV_KEY
 {
 	BACKSPACE = 127,
@@ -31,6 +37,7 @@ typedef struct EDITOR
 	int row_offset;
 	int col_offset;
 	Bool dirty;
+	MODE mode;
 	BUFFER_CHAIN *buf_chain;
 	char *filepath;
 	char status_msg[80];

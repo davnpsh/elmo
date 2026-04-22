@@ -127,10 +127,11 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 	char status[100];
 	
 	int len = snprintf(status, sizeof(status), 
-		" %.20s%s [%d] - %d:%d", 
+		" %.20s%s [%d] - %s - %d:%d", 
 		editor.filepath ? basename(editor.filepath) : "<new buff>", 
-		editor.dirty ? "~": "",
+		editor.dirty ? "~" : "",
 		editor.buf_chain->lines_num, 
+		(editor.mode == SAFE) ? "s" : "e",
 		editor.cursor_y + 1,
 		editor.cursor_x + 1);
 	
@@ -395,6 +396,10 @@ void editor_process_keypress()
 		case CTRL_KEY('s'):
       		editor_save();
         	break;
+         
+        case CTRL_KEY('e'):
+         	editor.mode = (editor.mode == SAFE) ? EDIT : SAFE;
+           	break;
 			
 		case UP:
 		case DOWN:
@@ -441,6 +446,8 @@ void editor_process_keypress()
 			
 		case DEL_KEY:
 		case BACKSPACE:
+			if (editor.mode == SAFE) break;
+			
 			if (c == DEL_KEY)
 			{
 				BUFFER_NODE *buf_node = CURRENT_LINE;
@@ -462,6 +469,8 @@ void editor_process_keypress()
 			
 		case '\r':
 		default:
+			if (editor.mode == SAFE) break;
+			
 			editor_insert(c);
 			break;
 	}
@@ -498,6 +507,7 @@ void init_editor()
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.dirty = 0;
+	editor.mode = SAFE;
 	editor.buf_chain = buf_new_canvas();
 	editor.filepath = NULL;
 	editor.status_msg[0] = '\0';
