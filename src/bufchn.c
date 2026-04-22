@@ -194,15 +194,44 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 {
 	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num, FALSE);
 	
-	buf_node->s = realloc(buf_node->s, buf_node->len + 2);
-	
-	memmove(&buf_node->s[offset + 1], &buf_node->s[offset], buf_node->len - offset + 1);
-	
-	buf_node->len++;
-	
-	buf_node->s[offset] = c;
-	
-	buf_render_line(buf_node);
+	if (c == '\r')
+	{
+		int len = buf_node->len - offset;
+		
+		char *copy = malloc(sizeof(char) * (len + 1));
+		
+		memcpy(copy, &buf_node->s[offset], len);
+		
+		copy[len] = '\0';
+		
+		BUFFER_NODE *new = buf_add_new_line(copy, len);
+		
+		// Fix relations
+		new->prev = buf_node;
+		new->next = buf_node->next;
+		
+		buf_node->next = new;
+		
+		buf_node->len = offset;
+		
+		buf_node->s[offset] = '\0';
+		
+		buf_render_line(buf_node);
+		
+		buf_chain->lines_num++;
+	}
+	else
+	{
+		buf_node->s = realloc(buf_node->s, buf_node->len + 2);
+		
+		memmove(&buf_node->s[offset + 1], &buf_node->s[offset], buf_node->len - offset + 1);
+		
+		buf_node->len++;
+		
+		buf_node->s[offset] = c;
+		
+		buf_render_line(buf_node);
+	}
 }
 
 void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)

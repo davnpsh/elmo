@@ -326,7 +326,12 @@ void editor_insert(int c)
 {
 	buf_insert(editor.buf_chain, editor.cursor_y + 1, editor.cursor_x, c);
 	
-	editor.cursor_x_snap = ++editor.cursor_x;
+	if (c == '\r')
+	{
+		editor.cursor_x_snap = editor.cursor_x = 0;
+		editor.cursor_y++;
+	}
+	else editor.cursor_x_snap = ++editor.cursor_x;
 	
 	editor.dirty = TRUE;
 }
@@ -434,10 +439,6 @@ void editor_process_keypress()
 			}
 			break;
 			
-		case '\r':
-			// Do nothing for now
-			break;
-			
 		case DEL_KEY:
 		case BACKSPACE:
 			if (c == DEL_KEY) editor_move_cursor(RIGHT);
@@ -449,6 +450,7 @@ void editor_process_keypress()
 		case '\x1b':
 		    break;
 			
+		case '\r':
 		default:
 			editor_insert(c);
 			break;
