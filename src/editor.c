@@ -6,11 +6,13 @@
 #include <string.h>
 #include <libgen.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include "editor.h"
 #include "helper.h"
 
 #define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE)
+#define Bool int
 #define TRUE 1
 #define FALSE 0
 #define CTRL_KEY(k) ((k) & 0x1f)
@@ -160,7 +162,7 @@ void editor_draw_message_bar(APPEND_BUFFER *ab)
 		ab_append(ab, editor.status_msg, msglen);
 }
 
-void editor_refresh_screen()
+void editor_refresh_screen(Bool in_prompt)
 {	
 	APPEND_BUFFER ab = {NULL, 0};
 	
@@ -185,9 +187,21 @@ void editor_refresh_screen()
 		editor_draw_message_bar(&ab);
 		
 		char buf[32];
-		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", 
-			(editor.cursor_y - editor.row_offset) + 1, 
-			(editor.cursor_rx - editor.col_offset)+ 1);
+		int x, y;
+		
+		if (in_prompt)
+		{
+			x = editor.cursor_px + 1;
+			y = editor.screen_cols + 2;
+		}
+		else
+		{
+			x = (editor.cursor_rx - editor.col_offset) + 1;
+			y = (editor.cursor_y - editor.row_offset) + 1;
+		}
+		
+		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", y, x);
+			
 		ab_append(&ab, buf, strlen(buf));
 		ab_append(&ab, "\x1b[?25h", 6);
 	}
@@ -365,6 +379,98 @@ void editor_delete()
 	editor.dirty = TRUE;
 }
 
+void editor_process_command()
+{
+	
+}
+
+void editor_prompt(const char *command)
+{
+	size_t buf_size = 128;
+	char *buf = malloc(buf_size);
+	
+	size_t buf_len = 1;
+	buf[0] = '/';
+	buf[1] = '\0';
+	
+	editor.cursor_px = 1;
+	
+	if (command != NULL)
+	{
+		int len = (int)strlen(command);
+		
+		memcpy(&buf[1], command, len);
+		buf[len + 1] = '\0';
+		
+		editor.cursor_px += len;
+		buf_len += len;
+	}
+	
+	while (1)
+	{
+		editor_set_status_msg(buf);
+		editor_refresh_screen(TRUE);
+		
+		int c = editor_read_key();
+		
+		// Deletion
+		if (c == BACKSPACE) 
+		{
+			if (buf_len - 1 == 0)
+			{
+				editor_set_status_msg("");
+				free(buf);
+				return;
+			}
+			
+			if (editor.cursor_px > 0)
+			{
+				if (editor.cursor_px != 1 || buf_len <= 1)
+				{
+					memmove(&buf[editor.cursor_px - 1], 
+						&buf[editor.cursor_px], 
+						buf_len - editor.cursor_px);
+					
+					buf[--buf_len] = '\0';
+					
+					editor.cursor_px--;
+				}
+			}
+		}
+		// Movement
+		else if (c == LEFT)
+		{
+			if (editor.cursor_px > 0)
+				editor.cursor_px--;
+		}
+		else if (c == RIGHT)
+		{
+			if (editor.cursor_px < (int)buf_len)
+				editor.cursor_px++;
+		}
+		// Exit
+		else if (c == '\x1b')
+		{
+			editor_set_status_msg("");
+			free(buf);
+			return;
+		}
+		else if (!iscntrl(c) && c < 128) 
+		{
+			if (buf_len == buf_size - 1)
+			{
+				buf_size *= 2;
+				buf = realloc(buf, buf_size);
+			}
+			
+			buf[buf_len++] = c;
+			buf[buf_len] = '\0';
+			
+			editor.cursor_px++;
+		}
+	}
+}
+
 void editor_process_keypress()
 {
 	static int quit_times = QUIT_TIMES;
@@ -466,7 +572,14 @@ void editor_process_keypress()
 		case CTRL_KEY('h'):
 		case '\x1b':
 		    break;
-			
+						
+		case '/':
+			if (editor.mode == SAFE)
+			{
+				editor_prompt("save");
+				break;
+			}
+			/* fall-through */
 		case '\r':
 		default:
 			if (editor.mode == SAFE) break;

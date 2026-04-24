@@ -32,6 +32,7 @@ typedef struct EDITOR
 	int cursor_y;
 	int cursor_rx;
 	int cursor_x_snap;
+	int cursor_px;
 	int screen_rows;
 	int screen_cols;
 	int row_offset;
@@ -52,7 +53,7 @@ void editor_save();
 void editor_draw_buffer(APPEND_BUFFER *ab);
 void editor_draw_status_bar(APPEND_BUFFER *ab);
 void editor_scroll();
-void editor_refresh_screen();
+void editor_refresh_screen(Bool in_prompt);
 int editor_read_key();
 void editor_move_cursor(int c);
 void editor_insert(int c);
