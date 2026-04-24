@@ -413,60 +413,61 @@ void editor_prompt(const char *command)
 		
 		int c = editor_read_key();
 		
-		// Deletion
-		if (c == BACKSPACE) 
+		switch(c)
 		{
-			if (buf_len - 1 == 0)
-			{
+			case BACKSPACE:
+				if (buf_len - 1 == 0)
+				{
+					editor_set_status_msg("");
+					free(buf);
+					return;
+				}
+				
+				if (editor.cursor_px > 0)
+				{
+					if (editor.cursor_px != 1 || buf_len <= 1)
+					{
+						memmove(&buf[editor.cursor_px - 1], 
+							&buf[editor.cursor_px], 
+							buf_len - editor.cursor_px);
+						
+						buf[--buf_len] = '\0';
+						
+						editor.cursor_px--;
+					}
+				}
+				
+				break;
+				
+			case LEFT:
+				if (editor.cursor_px > 0)
+					editor.cursor_px--;
+				break;
+				
+			case RIGHT:
+				if (editor.cursor_px < (int)buf_len)
+					editor.cursor_px++;
+				break;
+				
+			case '\x1b':
 				editor_set_status_msg("");
 				free(buf);
 				return;
-			}
 			
-			if (editor.cursor_px > 0)
-			{
-				if (editor.cursor_px != 1 || buf_len <= 1)
+			default:
+				if (!iscntrl(c) && c < 128) 
 				{
-					memmove(&buf[editor.cursor_px - 1], 
-						&buf[editor.cursor_px], 
-						buf_len - editor.cursor_px);
+					if (buf_len == buf_size - 1)
+					{
+						buf_size *= 2;
+						buf = realloc(buf, buf_size);
+					}
 					
-					buf[--buf_len] = '\0';
+					buf[buf_len++] = c;
+					buf[buf_len] = '\0';
 					
-					editor.cursor_px--;
+					editor.cursor_px++;
 				}
-			}
-		}
-		// Movement
-		else if (c == LEFT)
-		{
-			if (editor.cursor_px > 0)
-				editor.cursor_px--;
-		}
-		else if (c == RIGHT)
-		{
-			if (editor.cursor_px < (int)buf_len)
-				editor.cursor_px++;
-		}
-		// Exit
-		else if (c == '\x1b')
-		{
-			editor_set_status_msg("");
-			free(buf);
-			return;
-		}
-		else if (!iscntrl(c) && c < 128) 
-		{
-			if (buf_len == buf_size - 1)
-			{
-				buf_size *= 2;
-				buf = realloc(buf, buf_size);
-			}
-			
-			buf[buf_len++] = c;
-			buf[buf_len] = '\0';
-			
-			editor.cursor_px++;
 		}
 	}
 }
