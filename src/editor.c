@@ -415,11 +415,19 @@ void editor_prompt(const char *command)
 		
 		switch(c)
 		{
+			case HOME_KEY:
+				editor.cursor_px = 1;
+				break;
+				
+			case END_KEY:
+				editor.cursor_px = (int)buf_len;
+				break;
+				
 			case DEL_KEY:
 			case BACKSPACE:
 				if (c == DEL_KEY)
 				{
-					if (editor.cursor_px == buf_len) break;
+					if (editor.cursor_px == (int)buf_len) break;
 					editor.cursor_px++;
 				}
 				
@@ -584,7 +592,7 @@ void editor_process_keypress()
 		case '/':
 			if (editor.mode == SAFE)
 			{
-				editor_prompt("save");
+				editor_prompt(NULL);
 				break;
 			}
 			/* fall-through */
