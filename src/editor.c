@@ -415,7 +415,14 @@ void editor_prompt(const char *command)
 		
 		switch(c)
 		{
+			case DEL_KEY:
 			case BACKSPACE:
+				if (c == DEL_KEY)
+				{
+					if (editor.cursor_px == buf_len) break;
+					editor.cursor_px++;
+				}
+				
 				if (buf_len - 1 == 0)
 				{
 					editor_set_status_msg("");
@@ -440,7 +447,7 @@ void editor_prompt(const char *command)
 				break;
 				
 			case LEFT:
-				if (editor.cursor_px > 0)
+				if (editor.cursor_px > 1)
 					editor.cursor_px--;
 				break;
 				
