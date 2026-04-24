@@ -54,7 +54,11 @@ void editor_open(const char *filepath)
 
 void editor_save()
 {
-	if (editor.filepath == NULL) return;
+	if (editor.filepath == NULL) 
+	{
+		editor_prompt("save");
+		return;	// this will get called again!
+	}
 	
 	int err = buf_save(editor.buf_chain, editor.filepath);
 	
@@ -379,9 +383,33 @@ void editor_delete()
 	editor.dirty = TRUE;
 }
 
-void editor_process_command()
+void editor_process_command(char* command)
 {
+	// Parsing the command
+	command++; //	delete '/'
 	
+	char *pch;
+	pch = strtok(command, " ");
+	
+	if (strcmp(pch, "save") == 0)
+	{
+		pch = strtok(NULL, " ");
+		
+		if (pch != NULL)
+		{
+			editor.filepath = malloc(strlen(pch) + 1);
+			strcpy(editor.filepath, pch);
+			editor_save();
+		}
+		else
+		{
+			editor_save();
+		}
+	}
+	else
+	{
+		editor_set_status_msg("invalid command!");
+	}
 }
 
 void editor_prompt(const char *command)
@@ -451,7 +479,6 @@ void editor_prompt(const char *command)
 						editor.cursor_px--;
 					}
 				}
-				
 				break;
 				
 			case LEFT:
@@ -466,6 +493,12 @@ void editor_prompt(const char *command)
 				
 			case '\x1b':
 				editor_set_status_msg("");
+				free(buf);
+				return;
+				
+			case '\r':
+				editor_set_status_msg("");
+				editor_process_command(buf);
 				free(buf);
 				return;
 			
