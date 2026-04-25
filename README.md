@@ -10,7 +10,7 @@ So, while researching how to make a text editor, one of the questions (maybe the
 
 I came across the tutorial I mentioned before and it uses an array of strings, with each element of the array representing a line. This works better if you only manipulate a single line, but what about adding a new one? Or merging multiple? Same problem as before, just at a different scale.
 
-To address that specific problem and keep things simple, I use a linked list of lines. I named it **Buffer chain**.
+To address that specific problem and keep things simple (and because I just wanted to experiment and have fun), I use a linked list of lines. I named it **Buffer chain**.
 
 ![Buffer chain](./_static/buffer_chain.png)
 
@@ -21,6 +21,8 @@ Insertion and deletion operations that involve adding or deleting lines just nee
 The problem now is "*What if the window only displays the text starting from line 10?*". Reading operation must begin from **HEAD** because that is the only *entrypoint* to the "chain". To solve this issue, I just cache the node associated with the line from which the text editor will begin to display the text at a certain moment. So, in every screen refresh, the starting line will be fetched directly.
 
 ![Buffer chain](./_static/buffer_chain_cache.png)
+
+A header file describing the operations to interact with a Buffer chain can be found [here](./include/bufchn.h).
 
 ## Build
 
