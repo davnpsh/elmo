@@ -30,6 +30,8 @@ A header file describing the operations to interact with a Buffer chain can be f
 - `gcc`
 - `make`
 
+Run:
+
 ```sh
 make
 ```
