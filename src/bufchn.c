@@ -127,7 +127,8 @@ BUFFER_CHAIN *buf_new_canvas()
 {
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
 	
-	char s[] = "";
+	char *s = malloc(1);
+	s[0] = '\0';
 	
 	buf_chain->head = buf_add_new_line(s, 0);
 	
