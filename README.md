@@ -34,6 +34,8 @@ It will generate the `elmo` binary.
 - [ ] Open file (switch buffer)
 - [ ] Undo/redo actions
 - [ ] Dropup menu (for selecting tasks/opening files)
+- [ ] Manual page
+- [ ] Make install command
 
 ## Third-party notices
 
