@@ -18,6 +18,8 @@
 #define CTRL_KEY(k) ((k) & 0x1f)
 #define QUIT_TIMES 2
 
+#define VERSION "1.0.0"
+
 EDITOR editor;
 
 void editor_set_status_msg(const char *fmt, ...) 
@@ -166,6 +168,79 @@ void editor_draw_message_bar(APPEND_BUFFER *ab)
 		ab_append(ab, editor.status_msg, msglen);
 }
 
+void editor_draw_welcome(APPEND_BUFFER *ab)
+{
+	// Draw Dorothy!!!!!!!!!!!
+	const char *dorothy[] = {
+		"  )............(  ",
+		" /              \\",
+		"|                |",
+		"|          <><   |",
+		" \\              / ",
+		"  ')__________('  "
+	};
+	int dorothy_size = sizeof(dorothy) / sizeof(dorothy[0]);
+
+	int x_padding, y_padding;
+
+	y_padding = (editor.screen_rows - dorothy_size) / 2;
+
+	while (y_padding--)
+	{
+		ab_append(ab, "\x1b[K", 3);
+		ab_append(ab, "\r\n", 2);
+	}
+
+	for (int i = 0; i < 6; i++)
+	{
+		x_padding = (editor.screen_cols - strlen(dorothy[i])) / 2;
+
+		while (x_padding--) ab_append(ab, " ", 1);
+
+		ab_append(ab, dorothy[i], strlen(dorothy[i]));
+
+		ab_append(ab, "\x1b[K", 3);
+		ab_append(ab, "\r\n", 2);
+	}
+
+	ab_append(ab, "\x1b[K", 3);
+	ab_append(ab, "\r\n", 2);
+
+	// Welcome message
+	const char *welcome = "welcome to elmo!";
+	
+	x_padding = (editor.screen_cols - strlen(welcome)) / 2;
+
+	while (x_padding--) ab_append(ab, " ", 1);
+
+	ab_append(ab, welcome, strlen(welcome));
+
+	ab_append(ab, "\x1b[K", 3);
+	ab_append(ab, "\r\n\n", 3);
+
+	// Version
+	char version_str[80];
+	int version_len = snprintf(version_str, sizeof(version_str), "version %s", VERSION);
+
+	x_padding = (editor.screen_cols - version_len) / 2;
+
+	while (x_padding--) ab_append(ab, " ", 1);
+
+	ab_append(ab, version_str, version_len);
+
+	ab_append(ab, "\x1b[K", 3);
+	ab_append(ab, "\r\n", 2);
+
+	// Author
+	const char *author = "by daru";
+	
+	x_padding = (editor.screen_cols - strlen(author)) / 2;
+
+	while (x_padding--) ab_append(ab, " ", 1);
+
+	ab_append(ab, author, strlen(author));
+}
+
 void editor_refresh_screen(Bool in_prompt)
 {	
 	APPEND_BUFFER ab = {NULL, 0};
@@ -176,7 +251,16 @@ void editor_refresh_screen(Bool in_prompt)
 		ab_append(&ab, "\x1b[?25l", 6);
 		ab_append(&ab, "\x1b[2J", 4);
 		ab_append(&ab, "\x1b[H", 3);
+		
 		ab_append(&ab, "Terminal size too small!", 24);
+	}
+	else if (editor.buf_chain == NULL)
+	{
+		ab_append(&ab, "\x1b[?25l", 6);
+		ab_append(&ab, "\x1b[2J", 4);
+		ab_append(&ab, "\x1b[H", 3);
+
+		editor_draw_welcome(&ab);
 	}
 	else
 	{
@@ -532,6 +616,12 @@ void editor_process_keypress()
 	
 	if ((editor.screen_cols < 30) 
 		|| (editor.screen_rows < 10)) return;
+
+	// On any keypress, just start a new canvas
+	if (editor.buf_chain == NULL) 
+	{
+		editor.buf_chain = buf_new_canvas();
+	}
 	
 	switch (c)
 	{
@@ -670,7 +760,7 @@ void init_editor()
 	editor.col_offset = 0;
 	editor.dirty = 0;
 	editor.mode = SAFE;
-	editor.buf_chain = buf_new_canvas();
+	editor.buf_chain = NULL;
 	editor.filepath = NULL;
 	editor.status_msg[0] = '\0';
 	editor.status_msg_time = 0;
