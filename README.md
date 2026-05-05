@@ -22,7 +22,7 @@ It will generate the `elmo` binary.
 
 ## TODO
 
-- [ ] Welcome screen
+- [x] Welcome screen
 - [ ] Search
 - [ ] Search files
 - [ ] Syntax highlight
