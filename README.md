@@ -24,13 +24,16 @@ It will generate the `elmo` binary.
 
 - [ ] Welcome screen
 - [ ] Search
+- [ ] Search files
 - [ ] Syntax highlight
 - [ ] Auto indent
 - [ ] Soft-wrap
+- [ ] Toggle soft-wrap
 - [ ] Tasks
 - [ ] New empty buffer
 - [ ] Open file (switch buffer)
 - [ ] Undo/redo actions
+- [ ] Dropup menu (for selecting tasks/opening files)
 
 ## Third-party notices
 
