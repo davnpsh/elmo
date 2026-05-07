@@ -2,4 +2,4 @@
 elmo
 
 # object files
-src/*.o
+build/
