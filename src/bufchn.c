@@ -117,6 +117,18 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 		prev = current;
 	}
 	
+	// Reading empty file (0 bytes)
+	if (buf_chain->lines_num == 0)
+	{
+		char *s = malloc(1);
+		s[0] = '\0';
+
+		buf_chain->head = buf_add_new_line(s, 0);
+		
+		// Free line to start writing!!!
+		buf_chain->lines_num = 1;
+	}
+	
 	fclose(fp);
 	free(s);
 	
