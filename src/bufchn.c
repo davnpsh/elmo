@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include "bufchn.h"
 #include "helper.h"
@@ -20,7 +21,24 @@ void buf_free_node(BUFFER_NODE *buf_node)
 {
 	free(buf_node->s);
 	free(buf_node->r);
+	free(buf_node->h);
 	free(buf_node);
+}
+
+void buf_update_syntax_highlight(BUFFER_NODE *buf_node)
+{
+	buf_node->h = realloc(buf_node->h, buf_node->rlen * sizeof(TOKEN));
+	
+	int len, idx = 0;
+
+	while (idx < buf_node->rlen - 1)
+	{
+		TOKEN token = tokenize(&buf_node->r[idx], &len);
+
+		memset(&buf_node->h[idx], token, len);
+
+		idx += len;
+	}
 }
 
 void buf_render_line(BUFFER_NODE *buf_node)
@@ -52,6 +70,8 @@ void buf_render_line(BUFFER_NODE *buf_node)
 	
 	buf_node->r[k] = '\0';
 	buf_node->rlen = k;
+
+	buf_update_syntax_highlight(buf_node);
 }
 
 BUFFER_NODE *buf_add_new_line(char *s, int len)
@@ -63,6 +83,8 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	
 	buf_node->r = NULL;
 	buf_node->rlen = 0;
+
+	buf_node->h = NULL;
 	
 	buf_node->prev = NULL;
 	buf_node->next = NULL;

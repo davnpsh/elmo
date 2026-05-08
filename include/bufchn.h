@@ -1,3 +1,5 @@
+#include "token.h"
+
 #define Bool int
 
 typedef struct BUFFER_NODE
@@ -6,6 +8,7 @@ typedef struct BUFFER_NODE
 	int len;
 	char *r;	// Render
 	int rlen;
+	TOKEN *h;	// Highlight map
 	struct BUFFER_NODE *prev;
 	struct BUFFER_NODE *next;
 } BUFFER_NODE;
@@ -24,6 +27,12 @@ typedef struct BUFFER_CHAIN
  * @param BUFFER_NODE *buf_node.
  */
 void buf_free_node(BUFFER_NODE *buf_node);
+
+/**
+ * Updates the syntax highlight map accordingly.
+ * @param BUFFER_NODE *buf_node.
+ */
+void buf_update_syntax_highlight(BUFFER_NODE *buf_node);
 
 /**
  * Renders the characters of the buffer to something fancy.
