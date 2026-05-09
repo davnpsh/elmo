@@ -1,5 +1,3 @@
-#include "token.h"
-
 #define Bool int
 
 typedef struct BUFFER_NODE
@@ -8,7 +6,7 @@ typedef struct BUFFER_NODE
 	int len;
 	char *r;	// Render
 	int rlen;
-	TOKEN *h;	// Highlight map
+	char *h;	// Highlight map
 	struct BUFFER_NODE *prev;
 	struct BUFFER_NODE *next;
 } BUFFER_NODE;

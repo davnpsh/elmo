@@ -1,6 +1,6 @@
 PROGRAM_NAME = elmo
 CC = gcc
-CFLAGS = -Iinclude -Wall -Wextra -std=c99
+CFLAGS = -Iinclude -Wall -Wextra -std=c99 -g -O0
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c, build/%.o, $(SRC))
 

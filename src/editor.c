@@ -10,6 +10,7 @@
 
 #include "editor.h"
 #include "helper.h"
+#include "token.h"
 
 #define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE)
 #define Bool int
@@ -117,8 +118,41 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			int len = current_line->rlen - editor.col_offset;
 			if (len < 0) len = 0;
 			if (len > editor.screen_cols) len = editor.screen_cols;
+
+			char *r = &current_line->r[editor.col_offset];
+			char *h = &current_line->h[editor.col_offset];
+
+			int current_color = -1;	// default
+
+			for (int j = 0; j < len; j++)
+			{
+				// Adjust color
+				if (h[j] == TK_NORMAL) 
+				{
+					if (current_color != -1)
+					{
+						ab_append(ab, "\x1b[39m", 5);
+						current_color = -1;
+					}
+				}
+				else
+				{
+					int color = token_to_color(h[j]);
+
+					if (color != current_color)
+					{
+						current_color = color;
+						char buf[16];
+						int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", color);
+						ab_append(ab, buf, clen);
+					}
+				}
+
+				// Print char
+				ab_append(ab, &r[j], 1);
+			}
 			
-			ab_append(ab, &current_line->r[editor.col_offset], len);
+			ab_append(ab, "\x1b[39m", 5);
 			
 			current_line = current_line->next;
 		}

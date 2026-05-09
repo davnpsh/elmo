@@ -4,6 +4,7 @@
 #include <libgen.h>
 
 #include "helper.h"
+#include "token.h"
 
 #define TAB_STOP 4
 
@@ -30,4 +31,13 @@ int cx_to_rx(const char *s, int cursor_x)
 	}
 	
 	return cursor_rx;
+}
+
+int token_to_color(unsigned char token)
+{
+	switch(token)
+	{
+		case TK_NUMBER: return 92;
+		default: return 37;
+	}
 }

@@ -11,6 +11,7 @@
 
 #include "bufchn.h"
 #include "helper.h"
+#include "token.h"
 
 #define Bool int
 #define TRUE 1
@@ -27,11 +28,11 @@ void buf_free_node(BUFFER_NODE *buf_node)
 
 void buf_update_syntax_highlight(BUFFER_NODE *buf_node)
 {
-	buf_node->h = realloc(buf_node->h, buf_node->rlen * sizeof(TOKEN));
+	buf_node->h = realloc(buf_node->h, buf_node->rlen);
 	
 	int len, idx = 0;
 
-	while (idx < buf_node->rlen - 1)
+	while (idx < buf_node->rlen)
 	{
 		TOKEN token = tokenize(&buf_node->r[idx], &len);
 
