@@ -60,7 +60,7 @@ void editor_save()
 	if (editor.filepath == NULL) 
 	{
 		editor_prompt("save");
-		return;	// this will get called again!
+		return;	// this function will get called again!
 	}
 	
 	int err = buf_save(editor.buf_chain, editor.filepath);
@@ -68,7 +68,10 @@ void editor_save()
 	if (err)
 		editor_set_status_msg("i/o err!: ", strerror(err));
 	else
+	{
 		editor_set_status_msg("saved");
+		editor.dirty = FALSE;
+	}
 }
 
 void editor_scroll()
@@ -792,7 +795,7 @@ void init_editor()
 	editor.cursor_x_snap = 0;
 	editor.row_offset = 0;
 	editor.col_offset = 0;
-	editor.dirty = 0;
+	editor.dirty = FALSE;
 	editor.mode = SAFE;
 	editor.buf_chain = NULL;
 	editor.filepath = NULL;
