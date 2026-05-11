@@ -40,6 +40,7 @@ int token_to_color(unsigned char token)
 		case TK_NUMBER: return 31;
 		case TK_STRING: return 32;
 		// case TK_IDENTIFIER: return 36;
+		case TK_COMMENT: return 90;
 		case TK_KEYWORD: return 33;
 		default: return 37;
 	}

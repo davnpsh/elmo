@@ -116,6 +116,18 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 
 		return TK_IDENTIFIER;
 	}
+	// Single-line comments
+	else if (syntax->singleline_comment != NULL
+		&& (strncmp(c, syntax->singleline_comment, strlen(syntax->singleline_comment)) == 0))
+	{
+		while (*c)
+		{
+			c++;
+			(*len)++;
+		}
+
+		return TK_COMMENT;
+	}
 	// Language specifics
 	else
 	{
