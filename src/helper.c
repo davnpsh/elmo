@@ -4,7 +4,7 @@
 #include <libgen.h>
 
 #include "helper.h"
-#include "token.h"
+#include "syntax_hl.h"
 
 #define TAB_STOP 4
 

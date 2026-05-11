@@ -15,9 +15,9 @@ typedef struct BUFFER_CHAIN
 {
 	BUFFER_NODE *head;
 	int lines_num;
-	// Cache
-	BUFFER_NODE *cache_node;
-	int cache_line_num;
+	BUFFER_NODE *cache_node;	// Cache
+	int cache_line_num;			// Cache
+	void *syntax;
 } BUFFER_CHAIN;
 
 /**
@@ -27,16 +27,11 @@ typedef struct BUFFER_CHAIN
 void buf_free_node(BUFFER_NODE *buf_node);
 
 /**
- * Updates the syntax highlight map accordingly.
- * @param BUFFER_NODE *buf_node.
- */
-void buf_update_syntax_highlight(BUFFER_NODE *buf_node);
-
-/**
  * Renders the characters of the buffer to something fancy.
+ * @param SYNTAX *syntax.
  * @param BUFFER_NODE *buf_node.
  */
-void buf_render_line(BUFFER_NODE *buf_node);
+void buf_render_line(void *syntax, BUFFER_NODE *buf_node);
 
 /**
  * Adds a new hanging line waiting to be inserted into a buffer.

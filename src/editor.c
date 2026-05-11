@@ -10,7 +10,7 @@
 
 #include "editor.h"
 #include "helper.h"
-#include "token.h"
+#include "syntax_hl.h"
 
 #define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE)
 #define Bool int

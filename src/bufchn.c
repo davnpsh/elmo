@@ -11,7 +11,7 @@
 
 #include "bufchn.h"
 #include "helper.h"
-#include "token.h"
+#include "syntax_hl.h"
 
 #define Bool int
 #define TRUE 1
@@ -26,23 +26,7 @@ void buf_free_node(BUFFER_NODE *buf_node)
 	free(buf_node);
 }
 
-void buf_update_syntax_highlight(BUFFER_NODE *buf_node)
-{
-	buf_node->h = realloc(buf_node->h, buf_node->rlen);
-	
-	int len, idx = 0;
-
-	while (idx < buf_node->rlen)
-	{
-		TOKEN token = tokenize(&buf_node->r[idx], &len);
-
-		memset(&buf_node->h[idx], token, len);
-
-		idx += len;
-	}
-}
-
-void buf_render_line(BUFFER_NODE *buf_node)
+void buf_render_line(void *syntax, BUFFER_NODE *buf_node)
 {
 	// Allocation for special chars rendering
 	int len = buf_node->len;
@@ -72,7 +56,7 @@ void buf_render_line(BUFFER_NODE *buf_node)
 	buf_node->r[k] = '\0';
 	buf_node->rlen = k;
 
-	buf_update_syntax_highlight(buf_node);
+	syntax_hl_update(syntax, &buf_node->h, &buf_node->r, buf_node->rlen);
 }
 
 BUFFER_NODE *buf_add_new_line(char *s, int len)
@@ -90,7 +74,7 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	buf_node->prev = NULL;
 	buf_node->next = NULL;
 	
-	buf_render_line(buf_node);
+	buf_render_line(NULL, buf_node);
 	
 	return buf_node;
 }
@@ -102,6 +86,7 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 	buf_chain->lines_num = 0;
 	buf_chain->cache_node = NULL;
 	buf_chain->cache_line_num = 0;
+	buf_chain->syntax = NULL;
 	
 	FILE *fp = fopen(filepath, "r");
 	if (!fp) die("fopen");
@@ -151,6 +136,9 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 		// Free line to start writing!!!
 		buf_chain->lines_num = 1;
 	}
+
+	// Get syntax
+	buf_chain->syntax = get_syntax(filepath);
 	
 	fclose(fp);
 	free(s);
@@ -172,6 +160,8 @@ BUFFER_CHAIN *buf_new_canvas()
 	
 	buf_chain->cache_node = NULL;
 	buf_chain->cache_line_num = 0;
+
+	buf_chain->syntax = NULL;
 	
 	return buf_chain;
 }
@@ -257,7 +247,7 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		
 		buf_node->s = realloc(buf_node->s, buf_node->len + 1);
 		
-		buf_render_line(buf_node);
+		buf_render_line(buf_chain->syntax, buf_node);
 		
 		buf_chain->lines_num++;
 	}
@@ -271,7 +261,7 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		
 		buf_node->s[offset] = c;
 		
-		buf_render_line(buf_node);
+		buf_render_line(buf_chain->syntax, buf_node);
 	}
 }
 
@@ -289,7 +279,7 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		
 		buf_node->s[buf_node->len] = '\0';
 		
-		buf_render_line(buf_node);
+		buf_render_line(buf_chain->syntax, buf_node);
 	}
 	else
 	{
@@ -303,7 +293,7 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		
 		prev_node->s[prev_node->len] = '\0';
 		
-		buf_render_line(prev_node);
+		buf_render_line(buf_chain->syntax, prev_node);
 		
 		prev_node->next = buf_node->next;
 		
@@ -358,6 +348,8 @@ int buf_save(BUFFER_CHAIN *buf_chain, const char *filepath)
 			{
 				close(fd);
 				free(buf);
+
+				buf_chain->syntax = get_syntax(filepath);
 				
 				return 0;
 			}
