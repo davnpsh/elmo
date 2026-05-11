@@ -172,14 +172,14 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 	char status[100];
 	
 	int len = snprintf(status, sizeof(status), 
-		" %.20s%s [%s] - %s - %d:%d", 
+		" %.20s%s [%s] - %s - %d/%d:%d", 
 		editor.filepath ? basename(editor.filepath) : "<new buff>", 
 		editor.dirty ? "~" : "",
-		// editor.buf_chain->lines_num, 
 		editor.buf_chain->syntax ? 
 			((SYNTAX *)editor.buf_chain->syntax)->filetype : "/",
 		(editor.mode == SAFE) ? "s" : "e",
 		editor.cursor_y + 1,
+		editor.buf_chain->lines_num,
 		editor.cursor_x + 1);
 	
 	if (len > editor.screen_cols) len = editor.screen_cols;
