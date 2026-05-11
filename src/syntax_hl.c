@@ -5,7 +5,21 @@
 #include "syntax_hl.h"
 
 char *C_extensions[] = { ".c", ".h", ".cpp", NULL };
-char *C_keywords[] = { "if", NULL };
+char *C_keywords[] = {
+    /* C89/C90 */
+    "auto",     "break",    "case",     "char",
+    "const",    "continue", "default",  "do",
+    "double",   "else",     "enum",     "extern",
+    "float",    "for",      "goto",     "if",
+    "int",      "long",     "register", "return",
+    "short",    "signed",   "sizeof",   "static",
+    "struct",   "switch",   "typedef",  "union",
+    "unsigned", "void",     "volatile", "while",
+    /* C99 */
+    "_Bool",    "_Complex", "_Imaginary", "inline",
+    "restrict",
+    NULL
+};
 
 SYNTAX syntax_db[] = {
 	{
@@ -51,8 +65,12 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 	*len = 0;
 
 	// Number
-	if (isdigit(*c) && (syntax->flags & HL_HIGHLIGHT_NUMBERS))
+	if ((isdigit(*c) || (*c == '-' && isdigit(*(c + 1))))
+	 && (syntax->flags & HL_HIGHLIGHT_NUMBERS))
 	{
+		c++;
+		(*len)++;
+		
 		while (isdigit(*c) || *c == '.')
 		{
 			c++;
@@ -61,11 +79,13 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 
 		return TK_NUMBER;
 	}
-	else if ((*c == '"' || *c == '\'') && (syntax->flags & HL_HIGHLIGHT_STRINGS))
+	// Strings
+	else if ((*c == '"' || *c == '\'') 
+		&& (syntax->flags & HL_HIGHLIGHT_STRINGS))
 	{
 		char quote = *c;
 		
-		// skip opening quote
+		// Skip opening quote
 		c++;
 		(*len)++;
 
@@ -80,14 +100,47 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 		if (*c == quote) return TK_STRING;
 		else return TK_NORMAL;
 	}
-	// else if (isalpha(*c) || *c == '_')
-	// {
-	// 	char buf[256];
+	// Identifiers and keywords
+	else if (isalpha(*c) || *c == '_')
+	{
+		char buf[256];
 		
-	// }
-	// Default
+		while (isalnum(*c) || *c == '_') buf[(*len)++] = *(c++);
+		
+		buf[*len] = '\0';
+
+		for (int i = 0; syntax->keywords[i] != NULL; i++)
+		{
+			if (strcmp(buf, syntax->keywords[i]) == 0) return TK_KEYWORD;
+		}
+
+		return TK_IDENTIFIER;
+	}
+	// Language specifics
 	else
 	{
+		// C
+		if (strcmp(syntax->filetype, "c") == 0)
+		{
+			// System includes
+			if (*c == '<')
+			{
+				c++;
+				(*len)++;
+				
+				while (isalnum(*c) || *c == '.')
+				{
+					c++;
+					(*len)++;
+				}
+
+				(*len)++;
+
+				if (*c == '>') return TK_STRING;
+			}
+		}
+		
+		// Default
 		*len = 1;
 		return TK_NORMAL;
 	}
