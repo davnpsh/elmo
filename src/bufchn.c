@@ -254,7 +254,9 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 	}
 	else
 	{
-		buf_node->s = realloc(buf_node->s, buf_node->len + 2);
+		// buf_node->s = realloc(buf_node->s, buf_node->len + 2);
+		char *tmp = realloc(buf_node->s, buf_node->len + 2);
+		if (tmp) buf_node->s = tmp;
 		
 		memmove(&buf_node->s[offset + 1], &buf_node->s[offset], buf_node->len - offset + 1);
 		
