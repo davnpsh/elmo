@@ -25,7 +25,7 @@ It will generate the `elmo` binary.
 - [x] ~~Welcome screen~~
 - [ ] Search
 - [ ] Search files
-- [x] Syntax highlight
+- [x] ~~Syntax highlight~~
 - [ ] Auto indent
 - [ ] Soft-wrap
 - [ ] Toggle soft-wrap
