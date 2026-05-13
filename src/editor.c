@@ -529,7 +529,8 @@ void editor_process_command(char* command)
 	
 	char *pch;
 	pch = strtok(command, " ");
-	
+
+	// Save
 	if (strcmp(pch, "save") == 0)
 	{
 		pch = strtok(NULL, " ");
@@ -545,6 +546,11 @@ void editor_process_command(char* command)
 		{
 			editor_save();
 		}
+	}
+	// Toggle line number gutter
+	else if (strcmp(pch, "linenumbers") == 0 || strcmp(pch, "nums") == 0)
+	{
+		editor.show_line_num_gutter = !editor.show_line_num_gutter;
 	}
 	else
 	{
@@ -815,7 +821,7 @@ void init_editor()
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.dirty = FALSE;
-	editor.show_line_num_gutter = TRUE;
+	editor.show_line_num_gutter = FALSE;
 	editor.line_num_gutter_width = 0;
 	editor.mode = SAFE;
 	editor.buf_chain = NULL;
