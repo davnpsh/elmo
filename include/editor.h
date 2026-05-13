@@ -4,8 +4,6 @@
 #include "abuf.h"
 #include "bufchn.h"
 
-#define Bool int
-
 typedef enum MODE
 {
 	SAFE,

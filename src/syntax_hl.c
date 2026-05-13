@@ -55,7 +55,7 @@ SYNTAX *get_syntax(const char *filepath)
 	return NULL;
 }
 
-char tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token)
+int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token)
 {
 	if (syntax == NULL)
 	{
@@ -208,17 +208,15 @@ char tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **la
 	}
 }
 
-void syntax_hl_update(SYNTAX *syntax, void *buf_node, char **multiline_end, char **last_token)
+void syntax_hl_update(SYNTAX *syntax, BUFFER_NODE *node, char **multiline_end, char **last_token)
 {
-	BUFFER_NODE *node = (BUFFER_NODE *)buf_node;
-	
 	node->h = realloc(node->h, node->rlen);
 	
 	int len, idx = 0;
 
 	while (idx < node->rlen)
 	{
-		char token = tokenize(syntax, &(node->r)[idx], &len, multiline_end, last_token);
+		int token = tokenize(syntax, &(node->r)[idx], &len, multiline_end, last_token);
 
 		memset(&(node->h)[idx], token, len);
 

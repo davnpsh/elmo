@@ -86,6 +86,8 @@ void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain)
 		syntax_hl_update(buf_chain->syntax, current, &multiline_end, &last_token);
 		current = current->next;
 	}
+
+	free(last_token);
 }
 
 BUFFER_CHAIN *buf_parse_file(const char *filepath)
