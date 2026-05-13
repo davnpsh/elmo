@@ -26,7 +26,7 @@ void buf_free_node(BUFFER_NODE *buf_node)
 	free(buf_node);
 }
 
-void buf_render_line(void *syntax, BUFFER_NODE *buf_node)
+void buf_render_line(BUFFER_NODE *buf_node)
 {
 	// Allocation for special chars rendering
 	int len = buf_node->len;
@@ -55,8 +55,6 @@ void buf_render_line(void *syntax, BUFFER_NODE *buf_node)
 	
 	buf_node->r[k] = '\0';
 	buf_node->rlen = k;
-
-	syntax_hl_update(syntax, &buf_node->h, &buf_node->r, buf_node->rlen);
 }
 
 BUFFER_NODE *buf_add_new_line(char *s, int len)
@@ -74,9 +72,18 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	buf_node->prev = NULL;
 	buf_node->next = NULL;
 	
-	// buf_render_line(NULL, buf_node);
-	
 	return buf_node;
+}
+
+void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain)
+{
+	BUFFER_NODE *current = buf_chain->head;
+
+	while (current)
+	{
+		syntax_hl_update(buf_chain->syntax, current);
+		current = current->next;
+	}
 }
 
 BUFFER_CHAIN *buf_parse_file(const char *filepath)
@@ -108,7 +115,7 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 		copy[len] = '\0';
 		
 		current = buf_add_new_line(copy, len);
-		buf_render_line(buf_chain->syntax, current);
+		buf_render_line(current);
 		
 		// Double-linked list relations:
 		if (prev != NULL)
@@ -133,7 +140,7 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 		s[0] = '\0';
 
 		buf_chain->head = buf_add_new_line(s, 0);
-		buf_render_line(buf_chain->syntax, buf_chain->head);
+		buf_render_line(buf_chain->head);
 		
 		// Free line to start writing!!!
 		buf_chain->lines_num = 1;
@@ -141,6 +148,8 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 	
 	fclose(fp);
 	free(s);
+
+	buf_update_syntax_hl(buf_chain);
 	
 	return buf_chain;
 }
@@ -153,7 +162,7 @@ BUFFER_CHAIN *buf_new_canvas()
 	s[0] = '\0';
 	
 	buf_chain->head = buf_add_new_line(s, 0);
-	buf_render_line(NULL, buf_chain->head);
+	buf_render_line(buf_chain->head);
 	
 	// Free line to start writing!!!
 	buf_chain->lines_num = 1;
@@ -162,6 +171,8 @@ BUFFER_CHAIN *buf_new_canvas()
 	buf_chain->cache_line_num = 0;
 
 	buf_chain->syntax = NULL;
+
+	buf_update_syntax_hl(buf_chain);
 	
 	return buf_chain;
 }
@@ -231,7 +242,7 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		copy[len] = '\0';
 		
 		BUFFER_NODE *new = buf_add_new_line(copy, len);
-		buf_render_line(buf_chain->syntax, new);
+		buf_render_line(new);
 		
 		// Fix relations
 		new->prev = buf_node;
@@ -248,7 +259,7 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		
 		buf_node->s = realloc(buf_node->s, buf_node->len + 1);
 		
-		buf_render_line(buf_chain->syntax, buf_node);
+		buf_render_line(buf_node);
 		
 		buf_chain->lines_num++;
 	}
@@ -264,8 +275,10 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		
 		buf_node->s[offset] = c;
 		
-		buf_render_line(buf_chain->syntax, buf_node);
+		buf_render_line(buf_node);
 	}
+
+	buf_update_syntax_hl(buf_chain);
 }
 
 void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
@@ -282,7 +295,7 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		
 		buf_node->s[buf_node->len] = '\0';
 		
-		buf_render_line(buf_chain->syntax, buf_node);
+		buf_render_line(buf_node);
 	}
 	else
 	{
@@ -296,7 +309,7 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		
 		prev_node->s[prev_node->len] = '\0';
 		
-		buf_render_line(buf_chain->syntax, prev_node);
+		buf_render_line(prev_node);
 		
 		prev_node->next = buf_node->next;
 		
@@ -307,6 +320,8 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		
 		buf_chain->lines_num--;
 	}
+
+	buf_update_syntax_hl(buf_chain);
 }
 
 char *buf_read(BUFFER_CHAIN *buf_chain, int *len)

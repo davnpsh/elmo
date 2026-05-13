@@ -31,4 +31,4 @@ enum TOKEN
 
 SYNTAX *get_syntax(const char *filepath);
 char tokenize(SYNTAX *syntax, char *s, int *len);
-void syntax_hl_update(SYNTAX *syntax, char **h, char **r, int rlen);
+void syntax_hl_update(SYNTAX *syntax, void *buf_node);

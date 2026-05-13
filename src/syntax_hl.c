@@ -3,6 +3,7 @@
 #include <ctype.h>
 
 #include "syntax_hl.h"
+#include "bufchn.h"
 
 char *C_extensions[] = { ".c", ".h", ".cpp", NULL };
 char *C_keywords[] = {
@@ -158,17 +159,19 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 	}
 }
 
-void syntax_hl_update(SYNTAX *syntax, char **h, char **r, int rlen)
+void syntax_hl_update(SYNTAX *syntax, void *buf_node)
 {
-	*h = realloc(*h, rlen);
+	BUFFER_NODE *node = (BUFFER_NODE *)buf_node;
+	
+	node->h = realloc(node->h, node->rlen);
 	
 	int len, idx = 0;
 
-	while (idx < rlen)
+	while (idx < node->rlen)
 	{
-		char token = tokenize(syntax, &(*r)[idx], &len);
+		char token = tokenize(syntax, &(node->r)[idx], &len);
 
-		memset(&(*h)[idx], token, len);
+		memset(&(node->h)[idx], token, len);
 
 		idx += len;
 	}

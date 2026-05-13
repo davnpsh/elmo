@@ -31,7 +31,13 @@ void buf_free_node(BUFFER_NODE *buf_node);
  * @param SYNTAX *syntax.
  * @param BUFFER_NODE *buf_node.
  */
-void buf_render_line(void *syntax, BUFFER_NODE *buf_node);
+void buf_render_line(BUFFER_NODE *buf_node);
+
+/**
+ * Updates the syntax highlight of the entire buffer.
+ * @param BUFFER_CHAIN *buf_chain.
+ */
+void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain);
 
 /**
  * Adds a new hanging line waiting to be inserted into a buffer.
