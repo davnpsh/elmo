@@ -30,5 +30,5 @@ enum TOKEN
 };
 
 SYNTAX *get_syntax(const char *filepath);
-char tokenize(SYNTAX *syntax, char *s, int *len);
-void syntax_hl_update(SYNTAX *syntax, void *buf_node);
+char tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token);
+void syntax_hl_update(SYNTAX *syntax, void *buf_node, char **multiline_end, char **last_token);

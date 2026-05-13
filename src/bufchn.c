@@ -79,9 +79,12 @@ void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain)
 {
 	BUFFER_NODE *current = buf_chain->head;
 
+	char *multiline_end = NULL;
+	char *last_token = malloc(sizeof(char));
+	
 	while (current)
 	{
-		syntax_hl_update(buf_chain->syntax, current);
+		syntax_hl_update(buf_chain->syntax, current, &multiline_end, &last_token);
 		current = current->next;
 	}
 }

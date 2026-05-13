@@ -52,7 +52,7 @@ SYNTAX *get_syntax(const char *filepath)
 	return NULL;
 }
 
-char tokenize(SYNTAX *syntax, char *s, int *len)
+char tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token)
 {
 	if (syntax == NULL)
 	{
@@ -64,6 +64,25 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 
 	c = s;
 	*len = 0;
+
+	// For multi-line comments and strings terminators
+	if (*multiline_end != NULL)
+	{
+		while (*c)
+		{
+			if (strncmp(c, *multiline_end, strlen(*multiline_end)) == 0)
+			{
+				(*len) += strlen(*multiline_end);
+				*multiline_end = NULL;
+				return **last_token;
+			}
+
+			c++;
+			(*len)++;
+		}
+
+		return **last_token;
+	}
 
 	// Number
 	if ((isdigit(*c) || (*c == '-' && isdigit(*(c + 1))))
@@ -129,6 +148,33 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 
 		return TK_COMMENT;
 	}
+	// Multi-line comments
+	else if (syntax->multiline_comment_start != NULL 
+		&& (strncmp(c, syntax->multiline_comment_start, strlen(syntax->multiline_comment_start)) == 0))
+	{
+		// Skip opening
+		c += strlen(syntax->multiline_comment_start);
+		(*len) += strlen(syntax->multiline_comment_start);
+		
+		while (*c)
+		{
+			// If it ends on the same line
+			if (strncmp(c, syntax->multiline_comment_end, strlen(syntax->multiline_comment_end)) == 0)
+			{
+				(*len) += strlen(syntax->multiline_comment_end);
+				return TK_COMMENT;
+			}
+			
+			c++;
+			(*len)++;
+		}
+
+		// If it is indeed, multi-line
+		*multiline_end = syntax->multiline_comment_end;
+		**last_token = TK_COMMENT;
+
+		return TK_COMMENT;
+	}
 	// Language specifics
 	else
 	{
@@ -159,7 +205,7 @@ char tokenize(SYNTAX *syntax, char *s, int *len)
 	}
 }
 
-void syntax_hl_update(SYNTAX *syntax, void *buf_node)
+void syntax_hl_update(SYNTAX *syntax, void *buf_node, char **multiline_end, char **last_token)
 {
 	BUFFER_NODE *node = (BUFFER_NODE *)buf_node;
 	
@@ -169,7 +215,7 @@ void syntax_hl_update(SYNTAX *syntax, void *buf_node)
 
 	while (idx < node->rlen)
 	{
-		char token = tokenize(syntax, &(node->r)[idx], &len);
+		char token = tokenize(syntax, &(node->r)[idx], &len, multiline_end, last_token);
 
 		memset(&(node->h)[idx], token, len);
 
