@@ -36,6 +36,8 @@ typedef struct EDITOR
 	int row_offset;
 	int col_offset;
 	Bool dirty;
+	Bool show_line_num_gutter;
+	int line_num_gutter_width;
 	MODE mode;
 	BUFFER_CHAIN *buf_chain;
 	char *filepath;

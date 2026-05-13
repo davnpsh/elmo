@@ -105,7 +105,7 @@ void editor_scroll()
 	// Scroll right
 	if (editor.cursor_rx >= editor.col_offset + editor.screen_cols)
 	{
-		editor.col_offset = editor.cursor_rx - editor.screen_cols + 1;
+		editor.col_offset = editor.cursor_rx - editor.screen_cols + 1 + editor.line_num_gutter_width;
 	}
 }
 
@@ -117,9 +117,20 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 	{
 		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
 		{
+			// Line number
+			if (editor.show_line_num_gutter)
+			{
+				char gutter_buf[32];
+	
+				snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, editor.row_offset + 1 + y);
+	
+				ab_append(ab, gutter_buf, editor.line_num_gutter_width);
+			}
+				
 			int len = current_line->rlen - editor.col_offset;
 			if (len < 0) len = 0;
-			if (len > editor.screen_cols) len = editor.screen_cols;
+			if (len > editor.screen_cols - editor.line_num_gutter_width) 
+				len = editor.screen_cols - editor.line_num_gutter_width;
 
 			char *r = &current_line->r[editor.col_offset];
 			char *h = &current_line->h[editor.col_offset];
@@ -302,6 +313,12 @@ void editor_refresh_screen(Bool in_prompt)
 	}
 	else
 	{
+		editor.line_num_gutter_width = 0;
+		if (editor.show_line_num_gutter)
+		{
+			editor.line_num_gutter_width = digit_count(editor.buf_chain->lines_num) + 1;
+		}
+		
 		editor_scroll();
 		
 		ab_append(&ab, "\x1b[?25l", 6);
@@ -322,7 +339,7 @@ void editor_refresh_screen(Bool in_prompt)
 		}
 		else
 		{
-			x = (editor.cursor_rx - editor.col_offset) + 1;
+			x = (editor.cursor_rx - editor.col_offset) + 1 + editor.line_num_gutter_width;
 			y = (editor.cursor_y - editor.row_offset) + 1;
 		}
 		
@@ -798,6 +815,8 @@ void init_editor()
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.dirty = FALSE;
+	editor.show_line_num_gutter = TRUE;
+	editor.line_num_gutter_width = 0;
 	editor.mode = SAFE;
 	editor.buf_chain = NULL;
 	editor.filepath = NULL;

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "helper.h"
 #include "syntax_hl.h"
@@ -42,4 +43,11 @@ int token_to_color(unsigned char token)
 		case TK_KEYWORD: return 33;
 		default: return 37;
 	}
+}
+
+int digit_count(int n)
+{
+	char buf[32];
+    sprintf(buf, "%d", abs(n));
+    return strlen(buf);
 }
