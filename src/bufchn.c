@@ -13,7 +13,6 @@
 #include "helper.h"
 #include "syntax_hl.h"
 
-#define Bool int
 #define TRUE 1
 #define FALSE 0
 #define TAB_STOP 4
@@ -157,7 +156,7 @@ BUFFER_CHAIN *buf_parse_file(const char *filepath)
 	return buf_chain;
 }
 
-BUFFER_CHAIN *buf_new_canvas()
+BUFFER_CHAIN *buf_new_chain()
 {
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
 	

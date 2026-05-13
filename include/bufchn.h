@@ -1,4 +1,7 @@
-#define Bool int
+#ifndef BUFCHN_H
+#define BUFCHN_H
+
+typedef int Bool;
 
 typedef struct BUFFER_NODE
 {
@@ -34,7 +37,7 @@ void buf_render_line(BUFFER_NODE *buf_node);
 
 /**
  * Updates the syntax highlight of the entire buffer.
- * @param BUFFER_CHAIN *buf_chain.
+ * @param BUFFER_CHAIN *buf_chain
  */
 void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain);
 
@@ -47,16 +50,16 @@ BUFFER_NODE *buf_add_new_line(char *s, int len);
 
 /**
  * Parses a text file into a Buffer Chain.
- * @param const char *filepath Text file path.
- * @return A pointer to a Buffer Chain.
+ * @param const char *filepath Text file path
+ * @return A pointer to a Buffer Chain
  */
 BUFFER_CHAIN *buf_parse_file(const char *filepath);
 
 /**
  * Produces a new Buffer Chain.
- * @return A pointer to a Buffer Chain.
+ * @return A pointer to a Buffer Chain
  */
-BUFFER_CHAIN *buf_new_canvas();
+BUFFER_CHAIN *buf_new_chain();
 
 /**
  * Retrieves a node of the Buffer Chain corresponding to a line in buffer.
@@ -99,3 +102,5 @@ char *buf_read(BUFFER_CHAIN *buf_chain, int *len);
  * @return 0 on success, errno on failure
  */
 int buf_save(BUFFER_CHAIN *buf_chain, const char *filepath);
+
+#endif /* BUFCHN_H */

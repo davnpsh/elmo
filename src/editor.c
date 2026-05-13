@@ -656,10 +656,10 @@ void editor_process_keypress()
 	if ((editor.screen_cols < 30) 
 		|| (editor.screen_rows < 10)) return;
 
-	// On any keypress, just start a new canvas
+	// On any keypress, just start a new chain
 	if (editor.buf_chain == NULL) 
 	{
-		editor.buf_chain = buf_new_canvas();
+		editor.buf_chain = buf_new_chain();
 	}
 	
 	switch (c)
