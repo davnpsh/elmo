@@ -38,14 +38,17 @@ SYNTAX *get_syntax(const char *filepath)
 {
 	const char *extension = strrchr(filepath, '.');
 
-	for (unsigned int i = 0; i < SYNTAX_ENTRIES; i++)
+	if (extension != NULL)
 	{
-		SYNTAX *syntax = &syntax_db[i];
-
-		for (int j = 0; syntax->filematch[j] != NULL; j++)
+		for (unsigned int i = 0; i < SYNTAX_ENTRIES; i++)
 		{
-			if (strcmp(extension, syntax->filematch[j]) == 0)
-				return syntax;
+			SYNTAX *syntax = &syntax_db[i];
+
+			for (int j = 0; syntax->filematch[j] != NULL; j++)
+			{
+				if (strcmp(extension, syntax->filematch[j]) == 0)
+					return syntax;
+			}
 		}
 	}
 	
