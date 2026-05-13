@@ -121,10 +121,20 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			if (editor.show_line_num_gutter)
 			{
 				char gutter_buf[32];
-	
-				snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, editor.row_offset + 1 + y);
-	
+
+				if (editor.row_offset + 1 + y == editor.cursor_y + 1)
+				{
+					ab_append(ab, "\x1b[34m", 5);
+					snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, editor.row_offset + 1 + y);
+				}
+				else 
+				{
+					ab_append(ab, "\x1b[90m", 5);
+					snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", editor.line_num_gutter_width - 1, editor.row_offset + 1 + y);
+				}
+
 				ab_append(ab, gutter_buf, editor.line_num_gutter_width);
+				ab_append(ab, "\x1b[39m", 5);
 			}
 				
 			int len = current_line->rlen - editor.col_offset;
@@ -316,7 +326,11 @@ void editor_refresh_screen(Bool in_prompt)
 		editor.line_num_gutter_width = 0;
 		if (editor.show_line_num_gutter)
 		{
-			editor.line_num_gutter_width = digit_count(editor.buf_chain->lines_num) + 1;
+			editor.line_num_gutter_width = digit_count(editor.buf_chain->lines_num) 
+				// Padding left or right
+				+ 1
+				// Space separator
+				+ 1;
 		}
 		
 		editor_scroll();
