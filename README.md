@@ -33,6 +33,8 @@ It will generate the `elmo` binary.
 - [ ] Tasks
 - [x] ~~Line numbers~~
 - [x] ~~Toggle line numbers (on/off; absolute/relative)~~
+- [ ] Jump to line
+- [ ] Git integration
 - [ ] New empty buffer
 - [ ] Open file (switch buffer)
 - [ ] Undo/redo actions
