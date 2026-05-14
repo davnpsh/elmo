@@ -50,6 +50,32 @@ char *Makefile_keywords[] = {
     NULL
 };
 
+char *Python_extensions[] = { ".py", ".pyw", ".pyi", NULL };
+char *Python_keywords[] = {
+    /* control flow */
+    "if",       "elif",     "else",     "for",
+    "while",    "break",    "continue", "pass",
+    "return",   "yield",
+    /* exceptions */
+    "try",      "except",   "finally",  "raise",
+    "with",     "as",
+    /* definitions */
+    "def",      "class",    "lambda",   "async",
+    "await",
+    /* imports */
+    "import",   "from",
+    /* scope */
+    "global",   "nonlocal", "del",
+    /* operators */
+    "and",      "or",       "not",      "in",
+    "not in",   "is",       "is not",
+    /* literals */
+    "True",     "False",    "None",
+    /* other */
+    "assert",   "match",    "case",     "type",
+    NULL
+};
+
 SYNTAX syntax_db[] = {
 	{
 		"c",
@@ -68,6 +94,15 @@ SYNTAX syntax_db[] = {
 		NULL,
 		NULL,
 		0
+	},
+	{
+		"python",
+		Python_extensions,
+		Python_keywords,
+		"#",
+		NULL,
+		NULL,
+		HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
 	}
 };
 
