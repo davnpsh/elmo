@@ -10,6 +10,12 @@ typedef enum MODE
 	EDIT
 } MODE;
 
+typedef enum POSITION
+{
+	ABSOLUTE,
+	RELATIVE
+} POSITION;
+
 enum MOV_KEY
 {
 	BACKSPACE = 127,
@@ -37,6 +43,7 @@ typedef struct EDITOR
 	int col_offset;
 	Bool dirty;
 	Bool show_line_num_gutter;
+	POSITION line_num_position;
 	int line_num_gutter_width;
 	MODE mode;
 	BUFFER_CHAIN *buf_chain;

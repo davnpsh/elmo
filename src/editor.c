@@ -121,16 +121,22 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			if (editor.show_line_num_gutter)
 			{
 				char gutter_buf[32];
+				int line_number;	// for display
+				
+				if (editor.line_num_position == ABSOLUTE)
+					line_number = editor.row_offset + 1 + y;
+				else
+					line_number = abs((editor.row_offset + 1 + y) - (editor.cursor_y + 1));
 
 				if (editor.row_offset + 1 + y == editor.cursor_y + 1)
 				{
 					ab_append(ab, "\x1b[34m", 5);
-					snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, editor.row_offset + 1 + y);
+					snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
 				}
 				else 
 				{
 					ab_append(ab, "\x1b[90m", 5);
-					snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", editor.line_num_gutter_width - 1, editor.row_offset + 1 + y);
+					snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", editor.line_num_gutter_width - 1, line_number);
 				}
 
 				ab_append(ab, gutter_buf, editor.line_num_gutter_width);
@@ -564,7 +570,24 @@ void editor_process_command(char* command)
 	// Toggle line number gutter
 	else if (strcmp(pch, "linenumbers") == 0 || strcmp(pch, "nums") == 0)
 	{
-		editor.show_line_num_gutter = !editor.show_line_num_gutter;
+		pch = strtok(NULL, " ");
+
+		if (pch == NULL)
+		{
+			editor.show_line_num_gutter = !editor.show_line_num_gutter;
+		}
+		else if (strcmp(pch, "rel") == 0)
+		{
+			editor.line_num_position = RELATIVE;
+		}
+		else if (strcmp(pch, "abs") == 0)
+		{
+			editor.line_num_position = ABSOLUTE;
+		}
+		else
+		{
+			editor_set_status_msg("what?");
+		}
 	}
 	else
 	{
@@ -836,6 +859,7 @@ void init_editor()
 	editor.col_offset = 0;
 	editor.dirty = FALSE;
 	editor.show_line_num_gutter = FALSE;
+	editor.line_num_position = ABSOLUTE;
 	editor.line_num_gutter_width = 0;
 	editor.mode = SAFE;
 	editor.buf_chain = NULL;
