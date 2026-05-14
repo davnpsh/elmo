@@ -31,8 +31,8 @@ It will generate the `elmo` binary.
 - [ ] Soft-wrap
 - [ ] Toggle soft-wrap
 - [ ] Tasks
-- [ ] Line numbers
-- [ ] Toggle line numbers (on/off; absolute/relative)
+- [x] ~~Line numbers~~
+- [x] ~~Toggle line numbers (on/off; absolute/relative)~~
 - [ ] New empty buffer
 - [ ] Open file (switch buffer)
 - [ ] Undo/redo actions
