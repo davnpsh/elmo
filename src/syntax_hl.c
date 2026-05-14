@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <libgen.h>
 
 #include "syntax_hl.h"
 #include "bufchn.h"
@@ -22,6 +23,33 @@ char *C_keywords[] = {
     NULL
 };
 
+char *Makefile_names[] = { "Makefile", "makefile", "GNUmakefile", NULL };
+char *Makefile_keywords[] = {
+    /* directives */
+    "define",    "endef",      "undefine",
+    "ifdef",     "ifndef",     "ifeq",       "ifneq",
+    "else",      "endif",
+    "include",   "-include",   "sinclude",
+    "override",  "export",     "unexport",
+    "vpath",     "private",
+
+    /* built-in functions */
+    "subst",     "patsubst",   "strip",
+    "findstring","filter",     "filter-out",
+    "sort",      "word",       "words",      "wordlist",
+    "firstword", "lastword",
+    "dir",       "notdir",     "suffix",     "basename",
+    "addsuffix", "addprefix",  "join",
+    "wildcard",  "realpath",   "abspath",
+    "error",     "warning",    "info",
+    "shell",     "origin",     "flavor",
+    "foreach",   "if",         "or",         "and",
+    "call",      "eval",       "file",       "value",
+    "let",       "intcmp",
+
+    NULL
+};
+
 SYNTAX syntax_db[] = {
 	{
 		"c",
@@ -31,19 +59,30 @@ SYNTAX syntax_db[] = {
 		"/*",
 		"*/",
 		HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
+	},
+	{
+		"makefile",
+		Makefile_names,
+		Makefile_keywords,
+		"#",
+		NULL,
+		NULL,
+		0
 	}
 };
 
-SYNTAX *get_syntax(const char *filepath)
+SYNTAX *get_syntax(char *filepath)
 {
 	const char *extension = strrchr(filepath, '.');
+	
 
+	// Match by extension
 	if (extension != NULL)
 	{
 		for (unsigned int i = 0; i < SYNTAX_ENTRIES; i++)
 		{
 			SYNTAX *syntax = &syntax_db[i];
-
+			
 			for (int j = 0; syntax->filematch[j] != NULL; j++)
 			{
 				if (strcmp(extension, syntax->filematch[j]) == 0)
@@ -51,7 +90,21 @@ SYNTAX *get_syntax(const char *filepath)
 			}
 		}
 	}
-	
+	// Match by filename
+	else
+	{
+		for (unsigned int i = 0; i < SYNTAX_ENTRIES; i++)
+		{
+			SYNTAX *syntax = &syntax_db[i];
+			
+			for (int j = 0; syntax->filematch[j] != NULL; j++)
+			{
+				if (strcmp(filepath, syntax->filematch[j]) == 0)
+					return syntax;
+			}
+		}
+	}
+
 	return NULL;
 }
 
@@ -199,6 +252,25 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 				(*len)++;
 
 				if (*c == '>') return TK_STRING;
+			}
+		}
+		else if (strcmp(syntax->filetype, "makefile") == 0)
+		{
+			// Shell invokations
+			if (*c == '$' && *(c + 1) == '(')
+			{
+				c += 2;
+				(*len) += 2;
+
+				while (isalnum(*c) || *c == '_')
+				{
+					c++;
+					(*len)++;
+				}
+
+				(*len)++;
+
+				if (*c == ')') return TK_STRING;
 			}
 		}
 		

@@ -53,7 +53,7 @@ BUFFER_NODE *buf_add_new_line(char *s, int len);
  * @param const char *filepath Text file path
  * @return A pointer to a Buffer Chain
  */
-BUFFER_CHAIN *buf_parse_file(const char *filepath);
+BUFFER_CHAIN *buf_parse_file(char *filepath);
 
 /**
  * Produces a new Buffer Chain.
@@ -101,6 +101,6 @@ char *buf_read(BUFFER_CHAIN *buf_chain, int *len);
  * @param const char *filepath Text file path
  * @return 0 on success, errno on failure
  */
-int buf_save(BUFFER_CHAIN *buf_chain, const char *filepath);
+int buf_save(BUFFER_CHAIN *buf_chain, char *filepath);
 
 #endif /* BUFCHN_H */

@@ -46,7 +46,7 @@ int editor_get_window_size(int *rows, int *cols)
 	return 0;
 }
 
-void editor_open(const char *filepath)
+void editor_open(char *filepath)
 {
 	editor.filepath = malloc(strlen(filepath) + 1);
 	strcpy(editor.filepath, filepath);

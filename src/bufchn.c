@@ -90,7 +90,7 @@ void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain)
 	free(last_token);
 }
 
-BUFFER_CHAIN *buf_parse_file(const char *filepath)
+BUFFER_CHAIN *buf_parse_file(char *filepath)
 {
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
 	buf_chain->head = NULL;
@@ -355,7 +355,7 @@ char *buf_read(BUFFER_CHAIN *buf_chain, int *len)
 	return buf;
 }
 
-int buf_save(BUFFER_CHAIN *buf_chain, const char *filepath)
+int buf_save(BUFFER_CHAIN *buf_chain, char *filepath)
 {
 	int len;
 	char *buf = buf_read(buf_chain, &len);
