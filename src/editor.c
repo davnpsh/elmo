@@ -858,7 +858,7 @@ void init_editor()
 	editor.row_offset = 0;
 	editor.col_offset = 0;
 	editor.dirty = FALSE;
-	editor.show_line_num_gutter = FALSE;
+	editor.show_line_num_gutter = TRUE;
 	editor.line_num_position = ABSOLUTE;
 	editor.line_num_gutter_width = 0;
 	editor.mode = SAFE;
