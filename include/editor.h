@@ -35,8 +35,9 @@ typedef struct EDITOR
 	int cursor_x;
 	int cursor_y;
 	int cursor_rx;
+	int cursor_ry;
 	int cursor_x_snap;
-	int cursor_px;
+	int cursor_px;	// x position in prompt
 	int screen_rows;
 	int screen_cols;
 	int row_offset;

@@ -103,7 +103,7 @@ void editor_scroll()
 	}
 	
 	// Scroll right
-	if (editor.cursor_rx >= editor.col_offset + editor.screen_cols)
+	if (editor.cursor_rx >= editor.col_offset + editor.screen_cols - editor.line_num_gutter_width)
 	{
 		editor.col_offset = editor.cursor_rx - editor.screen_cols + 1 + editor.line_num_gutter_width;
 	}
@@ -854,6 +854,7 @@ void init_editor()
 	editor.cursor_x = 0;
 	editor.cursor_y = 0;
 	editor.cursor_rx = 0;
+	editor.cursor_ry = 0;
 	editor.cursor_x_snap = 0;
 	editor.row_offset = 0;
 	editor.col_offset = 0;
