@@ -112,9 +112,16 @@ void editor_scroll()
 void editor_draw_buffer(APPEND_BUFFER *ab)
 {
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + editor.row_offset, TRUE);
+	Bool reset_current_line_hl = FALSE;
 	
 	for (int y = 0; y < editor.screen_rows; y++)
 	{
+		if (reset_current_line_hl)
+		{
+			ab_append(ab, "\x1b[0m", 4);
+			reset_current_line_hl = FALSE;
+		}
+		
 		if ((y + editor.row_offset) < editor.buf_chain->lines_num)
 		{
 			// Line number
@@ -128,10 +135,14 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				else
 					line_number = abs((editor.row_offset + 1 + y) - (editor.cursor_y + 1));
 
+				// current cursor line
 				if (editor.row_offset + 1 + y == editor.cursor_y + 1)
 				{
+					ab_append(ab, "\x1b[48;5;238m", 11);
 					ab_append(ab, "\x1b[34m", 5);
 					snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
+
+					reset_current_line_hl = TRUE;
 				}
 				else 
 				{
