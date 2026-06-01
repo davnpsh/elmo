@@ -510,7 +510,6 @@ void editor_move_cursor(int c)
 			if (current_wrap_offset > 0)
 			{
 				editor.cursor_x -= editable_area_width;
-				// editor.cursor_x_snap = editor.cursor_x;
 			}
 			// Moving up, changing y
 			else if (editor.cursor_y != 0)
@@ -525,12 +524,10 @@ void editor_move_cursor(int c)
 				if ((current_line->len - editable_area_width * prev_wrap_offset) < editor.cursor_x)
 				{
 					editor.cursor_x = current_line->len;
-					// editor.cursor_x_snap = editor.cursor_x;
 				}
 				else
 				{
 					editor.cursor_x += editable_area_width * prev_wrap_offset;
-					// editor.cursor_x_snap = editor.cursor_x;
 				}
 			}
 		}
@@ -585,7 +582,6 @@ void editor_move_cursor(int c)
 			if (editor.cursor_x != 0)
 			{
 				editor.cursor_x--;
-				// editor.cursor_x_snap = editor.cursor_x;
 			}
 			else if (editor.cursor_y > 0)
 			{
@@ -593,7 +589,6 @@ void editor_move_cursor(int c)
 				
 				current_line = CURRENT_LINE;
 				editor.cursor_x = current_line->len;
-				// editor.cursor_x_snap = editor.cursor_x;
 			}
 			break;	
 			
@@ -607,21 +602,8 @@ void editor_move_cursor(int c)
 				editor.cursor_y++;
 				editor.cursor_x = 0;
 			}
-			
-			// editor.cursor_x_snap = editor.cursor_x;
 			break;
 	}
-	
-	// current_line = CURRENT_LINE;
-	
-	// if (editor.cursor_x_snap > current_line->len)
-	// {
-	// 	editor.cursor_x = current_line->len;
-	// }
-	// else
-	// {
-	// 	editor.cursor_x = editor.cursor_x_snap;
-	// }
 }
 
 void editor_insert(int c)
@@ -630,10 +612,10 @@ void editor_insert(int c)
 	
 	if (c == '\r')
 	{
-		editor.cursor_x_snap = editor.cursor_x = 0;
+		editor.cursor_x = 0;
 		editor.cursor_y++;
 	}
-	else editor.cursor_x_snap = ++editor.cursor_x;
+	else editor.cursor_x++;
 	
 	editor.dirty = TRUE;
 }
@@ -662,7 +644,6 @@ void editor_delete()
 		editor.cursor_x = len;
 	}
 	
-	editor.cursor_x_snap = editor.cursor_x;
 	editor.dirty = TRUE;
 }
 
@@ -899,7 +880,6 @@ void editor_process_keypress()
 			
 		case HOME_KEY:
 			editor.cursor_x = 0;
-			// editor.cursor_x_snap = 0;
 			break;
 			
 		case END_KEY:
@@ -908,7 +888,6 @@ void editor_process_keypress()
 				BUFFER_NODE *buf_node = CURRENT_LINE;
 				
 				editor.cursor_x = buf_node->len;
-				// editor.cursor_x_snap = buf_node->len;
 			}
 			break;
 			
@@ -953,33 +932,12 @@ void editor_process_keypress()
 	quit_times = QUIT_TIMES;
 }
 
-// int editor_get_cursor_position(int *rows, int *cols)
-// {
-// 	char buf[32];
-// 	unsigned int i = 0;
-	
-// 	if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4) return -1;
-	
-// 	while (i < sizeof(buf) - 1) {
-// 		if (read(STDIN_FILENO, &buf[i], 1) != 1) break;
-// 		if (buf[i] == 'R') break;
-// 		i++;
-// 	}
-// 	buf[i] = '\0';
-	
-// 	if (buf[0] != '\x1b' || buf[1] != '[') return -1;
-// 	if (sscanf(&buf[2], "%d;%d", rows, cols) != 2) return -1;
-	
-// 	return 0;
-// }
-
 void init_editor() 
 {
 	editor.cursor_x = 0;
 	editor.cursor_y = 0;
 	editor.cursor_rx = 0;
 	editor.cursor_ry = 0;
-	// editor.cursor_x_snap = 0;
 	editor.render_offset = 0;
 	editor.dirty = FALSE;
 	editor.highlight_current_line = TRUE;
