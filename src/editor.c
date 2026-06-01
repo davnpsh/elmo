@@ -498,20 +498,94 @@ void editor_move_cursor(int c)
 	switch (c)
 	{
 		case UP:
-			if (editor.cursor_y != 0)
+		{
+			if (editor.cursor_ry == 0) break;
+			
+			int editable_area_width = editor_get_editable_area_width();
+			
+			int current_row_offset, current_wrap_offset;	
+			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_ry, editor.buf_chain, editable_area_width);
+
+			// Moving up, but in the same logical line
+			if (current_wrap_offset > 0)
+			{
+				editor.cursor_x -= editable_area_width;
+				// editor.cursor_x_snap = editor.cursor_x;
+			}
+			// Moving up, changing y
+			else if (editor.cursor_y != 0)
+			{
+				int prev_row_offset, prev_wrap_offset;
+				get_offset_coordinates(&prev_row_offset, &prev_wrap_offset, editor.cursor_ry - 1, editor.buf_chain, editable_area_width);
+
 				editor.cursor_y--;
+
+				current_line = CURRENT_LINE;
+
+				if ((current_line->len - editable_area_width * prev_wrap_offset) < editor.cursor_x)
+				{
+					editor.cursor_x = current_line->len;
+					// editor.cursor_x_snap = editor.cursor_x;
+				}
+				else
+				{
+					editor.cursor_x += editable_area_width * prev_wrap_offset;
+					// editor.cursor_x_snap = editor.cursor_x;
+				}
+			}
+		}
 			break;
 			
 		case DOWN:
-			if (editor.cursor_y < editor.buf_chain->lines_num - 1)
+		{
+			int editable_area_width = editor_get_editable_area_width();
+			
+			if (editor.cursor_ry > get_total_display_rows(editor.buf_chain, editable_area_width)) break;
+
+			int current_row_offset, current_wrap_offset;	
+			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_ry, editor.buf_chain, editable_area_width);
+
+			int next_row_offset, next_wrap_offset;
+			get_offset_coordinates(&next_row_offset, &next_wrap_offset, editor.cursor_ry + 1, editor.buf_chain, editable_area_width);
+
+			// Moving down, but in the same logical line
+			if (current_row_offset == next_row_offset)
+			{
+				current_line = CURRENT_LINE;
+				
+				if ((current_line->len - editable_area_width * next_wrap_offset) < (editor.cursor_x - editable_area_width * current_wrap_offset))
+				{
+					editor.cursor_x = current_line->len;
+				}
+				else
+				{
+					editor.cursor_x += editable_area_width;
+				}
+			}
+			// Moving down, changing y
+			else if (editor.cursor_y < editor.buf_chain->lines_num - 1)
+			{
 				editor.cursor_y++;
+				
+				current_line = CURRENT_LINE;
+				
+				if (current_line->len < (editor.cursor_x - editable_area_width * current_wrap_offset))
+				{
+					editor.cursor_x = current_line->len;
+				}
+				else
+				{
+					editor.cursor_x -= editable_area_width * current_wrap_offset;
+				}
+			}
+		}
 			break;
 			
 		case LEFT:
 			if (editor.cursor_x != 0)
 			{
 				editor.cursor_x--;
-				editor.cursor_x_snap = editor.cursor_x;
+				// editor.cursor_x_snap = editor.cursor_x;
 			}
 			else if (editor.cursor_y > 0)
 			{
@@ -519,7 +593,7 @@ void editor_move_cursor(int c)
 				
 				current_line = CURRENT_LINE;
 				editor.cursor_x = current_line->len;
-				editor.cursor_x_snap = editor.cursor_x;
+				// editor.cursor_x_snap = editor.cursor_x;
 			}
 			break;	
 			
@@ -534,20 +608,20 @@ void editor_move_cursor(int c)
 				editor.cursor_x = 0;
 			}
 			
-			editor.cursor_x_snap = editor.cursor_x;
+			// editor.cursor_x_snap = editor.cursor_x;
 			break;
 	}
 	
-	current_line = CURRENT_LINE;
+	// current_line = CURRENT_LINE;
 	
-	if (editor.cursor_x_snap > current_line->len)
-	{
-		editor.cursor_x = current_line->len;
-	}
-	else
-	{
-		editor.cursor_x = editor.cursor_x_snap;
-	}
+	// if (editor.cursor_x_snap > current_line->len)
+	// {
+	// 	editor.cursor_x = current_line->len;
+	// }
+	// else
+	// {
+	// 	editor.cursor_x = editor.cursor_x_snap;
+	// }
 }
 
 void editor_insert(int c)
@@ -825,7 +899,7 @@ void editor_process_keypress()
 			
 		case HOME_KEY:
 			editor.cursor_x = 0;
-			editor.cursor_x_snap = 0;
+			// editor.cursor_x_snap = 0;
 			break;
 			
 		case END_KEY:
@@ -834,7 +908,7 @@ void editor_process_keypress()
 				BUFFER_NODE *buf_node = CURRENT_LINE;
 				
 				editor.cursor_x = buf_node->len;
-				editor.cursor_x_snap = buf_node->len;
+				// editor.cursor_x_snap = buf_node->len;
 			}
 			break;
 			
@@ -905,7 +979,7 @@ void init_editor()
 	editor.cursor_y = 0;
 	editor.cursor_rx = 0;
 	editor.cursor_ry = 0;
-	editor.cursor_x_snap = 0;
+	// editor.cursor_x_snap = 0;
 	editor.render_offset = 0;
 	editor.dirty = FALSE;
 	editor.highlight_current_line = TRUE;

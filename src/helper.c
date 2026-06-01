@@ -71,25 +71,25 @@ void render_coords(int *rx, int *ry, int x, int y, BUFFER_CHAIN *buf_chain, int 
 	*rx = rx_pos % width;
 }
 
-void get_offset_coordinates(int *row_offset, int *wrap_offset, int render_offset, BUFFER_CHAIN *buf_chain, int width)
+void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CHAIN *buf_chain, int width)
 {
 	int r_offset = 0;
 	int w_offset = 0;
 
 	BUFFER_NODE *current_line = buf_chain->head;
 
-	while (render_offset > 0)
+	while (ry > 0)
 	{
 		int lines = get_line_display_rows(current_line->rlen, width);
 
-		if (lines > render_offset) 
+		if (lines > ry) 
 		{
-			w_offset = render_offset;
+			w_offset = ry;
 			break;
 		}
 		else
 		{
-			render_offset -= lines;
+			ry -= lines;
 			r_offset++;
 		}
 		
