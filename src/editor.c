@@ -123,6 +123,13 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 		if (y + editor.render_offset < get_total_display_rows(editor.buf_chain, current_width))
 		{
+			// Highlight current line
+			if (editor.highlight_current_line && editor.cursor_ry == editor.render_offset + y)
+			{
+				ab_append(ab, "\x1b[48;5;238m", 11);
+				reset_current_line_hl = TRUE;
+			}
+			
 			// Line number
 			if (editor.show_line_num_gutter)
 			{
@@ -136,11 +143,8 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					else
 						line_number = abs(logical_line - editor.cursor_y + 1);
 
-					// current cursor line
 					if (logical_line == editor.cursor_y + 1)
 					{
-						// ab_append(ab, "\x1b[48;5;238m", 11);
-						// reset_current_line_hl = TRUE;
 						ab_append(ab, "\x1b[34m", 5);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
 					}
@@ -903,10 +907,8 @@ void init_editor()
 	editor.cursor_ry = 0;
 	editor.cursor_x_snap = 0;
 	editor.render_offset = 0;
-	// editor.row_offset = 0;
-	// editor.col_offset = 0;
-	// editor.inner_row_offset = 0;
 	editor.dirty = FALSE;
+	editor.highlight_current_line = TRUE;
 	editor.show_line_num_gutter = TRUE;
 	editor.line_num_position = ABSOLUTE;
 	editor.line_num_gutter_width = 0;

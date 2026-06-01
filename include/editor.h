@@ -37,14 +37,12 @@ typedef struct EDITOR
 	int cursor_rx;
 	int cursor_ry;
 	int cursor_x_snap;
-	int cursor_px;	// x position in prompt
+	int cursor_px;
 	int screen_rows;
 	int screen_cols;
 	int render_offset;
-	// int row_offset;
-	// int col_offset;
-	// int inner_row_offset;
 	Bool dirty;
+	Bool highlight_current_line;
 	Bool show_line_num_gutter;
 	POSITION line_num_position;
 	int line_num_gutter_width;
