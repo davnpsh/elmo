@@ -28,8 +28,7 @@ It will generate the `elmo` binary.
 - [x] ~~Syntax highlight~~
 - [ ] Auto indent
 - [ ] Auto pairs ((); {})
-- [ ] Soft-wrap
-- [ ] Toggle soft-wrap
+- [x] ~~Wrap lines~~
 - [ ] Tasks
 - [x] ~~Line numbers~~
 - [x] ~~Toggle line numbers (on/off; absolute/relative)~~
