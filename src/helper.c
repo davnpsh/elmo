@@ -5,6 +5,7 @@
 
 #include "helper.h"
 #include "syntax_hl.h"
+#include "bufchn.h"
 
 #define TAB_STOP 4
 
@@ -16,7 +17,7 @@ void die(const char *s)
 	exit(1);
 }
 
-int cx_to_rx(const char *s, int cursor_x)
+int calc_rx_pos(const char *s, int cursor_x)
 {
 	int cursor_rx = 0;
 	
@@ -31,6 +32,72 @@ int cx_to_rx(const char *s, int cursor_x)
 	}
 	
 	return cursor_rx;
+}
+
+int get_line_display_rows(int line_len, int width)
+{
+	if (line_len == 0) return 1;
+	return (line_len + width - 1) / width;
+}
+
+int get_total_display_rows(BUFFER_CHAIN *buf_chain, int width)
+{
+	BUFFER_NODE *current = buf_chain->head;
+	int total = 0;
+
+	while (current)
+	{
+		total += get_line_display_rows(current->rlen, width);
+		current = current->next;
+	}
+
+	return total;
+}
+
+void render_coords(int *rx, int *ry, int x, int y, BUFFER_CHAIN *buf_chain, int width)
+{
+	BUFFER_NODE *current_line = buf_chain->head;
+	int display_row = 0;
+
+	for (int i = 0; i < y && current_line; i++)
+	{
+		display_row += get_line_display_rows(current_line->rlen, width);
+		current_line = current_line->next;
+	}
+
+	int rx_pos = calc_rx_pos(current_line->s, x);
+
+	*ry = display_row + rx_pos / width;
+	*rx = rx_pos % width;
+}
+
+void get_offset_coordinates(int *row_offset, int *wrap_offset, int render_offset, BUFFER_CHAIN *buf_chain, int width)
+{
+	int r_offset = 0;
+	int w_offset = 0;
+
+	BUFFER_NODE *current_line = buf_chain->head;
+
+	while (render_offset > 0)
+	{
+		int lines = get_line_display_rows(current_line->rlen, width);
+
+		if (lines > render_offset) 
+		{
+			w_offset = render_offset;
+			break;
+		}
+		else
+		{
+			render_offset -= lines;
+			r_offset++;
+		}
+		
+		current_line = current_line->next;
+	}
+
+	*row_offset = r_offset;
+	*wrap_offset = w_offset;
 }
 
 int token_to_color(unsigned char token)

@@ -40,8 +40,10 @@ typedef struct EDITOR
 	int cursor_px;	// x position in prompt
 	int screen_rows;
 	int screen_cols;
-	int row_offset;
-	int col_offset;
+	int render_offset;
+	// int row_offset;
+	// int col_offset;
+	// int inner_row_offset;
 	Bool dirty;
 	Bool show_line_num_gutter;
 	POSITION line_num_position;
