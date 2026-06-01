@@ -141,7 +141,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					if (editor.line_num_position == ABSOLUTE)
 						line_number = logical_line;
 					else
-						line_number = abs(logical_line - editor.cursor_y + 1);
+						line_number = abs(logical_line - editor.cursor_y - 1);
 
 					if (logical_line == editor.cursor_y + 1)
 					{
