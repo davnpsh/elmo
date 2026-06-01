@@ -32,15 +32,26 @@ enum MOV_KEY
 
 typedef struct EDITOR
 {
+	// Real coordinates
 	int cursor_x;
 	int cursor_y;
+
+	// Render coordinates
+	// (tabs, split lines)
 	int cursor_rx;
 	int cursor_ry;
+
+	// Cursor position snap between lines
 	int cursor_x_snap;
+
+	// Cursor position in prompt
 	int cursor_px;
 	int screen_rows;
 	int screen_cols;
+
+	// Offset in total display rows
 	int render_offset;
+	
 	Bool dirty;
 	Bool highlight_current_line;
 	Bool show_line_num_gutter;
