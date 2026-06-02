@@ -126,7 +126,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			// Highlight current line
 			if (editor.highlight_current_line && editor.cursor_ry == editor.render_offset + y)
 			{
-				ab_append(ab, "\x1b[48;5;238m", 11);
+				ab_append(ab, "\x1b[48;5;236m", 11);
 				reset_current_line_hl = TRUE;
 			}
 			
@@ -860,21 +860,13 @@ void editor_process_keypress()
 		case PAGE_UP:
 		case PAGE_DOWN:
 			{
-				// if (c == PAGE_UP) 
-				// {
-				// 	editor.cursor_y = editor.row_offset;
-				// } 
-				// else if (c == PAGE_DOWN) 
-				// {
-				// 	editor.cursor_y = editor.row_offset + editor.screen_rows - 1;
-				// 	if (editor.cursor_y >= editor.buf_chain->lines_num) 
-				// 		editor.cursor_y = editor.buf_chain->lines_num - 1;
-				// }
+				int times = editor.screen_rows - 1;
 				
-				// int times = editor.screen_rows;
-				
-				// while (times--)
-				// 	editor_move_cursor(c == PAGE_UP ? UP : DOWN);
+				while (times--)
+				{
+					editor_move_cursor(c == PAGE_UP ? UP : DOWN);
+					editor_scroll();
+				}
 			}
 			break;
 			
