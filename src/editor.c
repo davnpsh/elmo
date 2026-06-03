@@ -88,6 +88,12 @@ void editor_scroll()
 	
 	render_coords(&editor.cursor_rx, &editor.cursor_ry, editor.cursor_x, editor.cursor_y, editor.buf_chain, current_width);
 
+	if (editor.sticky_col_update)
+	{
+		editor.sticky_col = editor.cursor_rx;
+		editor.sticky_col_update = FALSE;
+	}
+
 	// Scroll up
 	if (editor.cursor_ry < editor.render_offset)
     	editor.render_offset = editor.cursor_ry;
@@ -509,7 +515,8 @@ void editor_move_cursor(int c)
 			// Moving up, but in the same logical line
 			if (current_wrap_offset > 0)
 			{
-				editor.cursor_x -= editable_area_width;
+				// editor.cursor_x -= editable_area_width;
+				editor.cursor_x = editable_area_width * (current_wrap_offset - 1) + editor.sticky_col;
 			}
 			// Moving up, changing y
 			else if (editor.cursor_y != 0)
@@ -521,13 +528,18 @@ void editor_move_cursor(int c)
 
 				current_line = CURRENT_LINE;
 
-				if ((current_line->len - editable_area_width * prev_wrap_offset) < editor.cursor_x)
+				if (
+					((current_line->len - editable_area_width * prev_wrap_offset) < editor.cursor_x)
+					|| ((current_line->len - editable_area_width * prev_wrap_offset) < editor.sticky_col)
+				)
 				{
 					editor.cursor_x = current_line->len;
 				}
 				else
 				{
-					editor.cursor_x += editable_area_width * prev_wrap_offset;
+					// editor.cursor_x += editable_area_width * prev_wrap_offset;
+					// editor.cursor_x = editor.sticky_col;
+					editor.cursor_x = editable_area_width * prev_wrap_offset + editor.sticky_col;
 				}
 			}
 		}
@@ -566,13 +578,16 @@ void editor_move_cursor(int c)
 				
 				current_line = CURRENT_LINE;
 				
-				if (current_line->len < (editor.cursor_x - editable_area_width * current_wrap_offset))
+				if (
+					(current_line->len < (editor.cursor_x - editable_area_width * current_wrap_offset))
+					|| (current_line->len < editor.sticky_col)
+				)
 				{
 					editor.cursor_x = current_line->len;
 				}
 				else
 				{
-					editor.cursor_x -= editable_area_width * current_wrap_offset;
+					editor.cursor_x = editor.sticky_col;
 				}
 			}
 		}
@@ -590,6 +605,8 @@ void editor_move_cursor(int c)
 				current_line = CURRENT_LINE;
 				editor.cursor_x = current_line->len;
 			}
+
+			editor.sticky_col_update = TRUE;
 			break;	
 			
 		case RIGHT:
@@ -602,6 +619,8 @@ void editor_move_cursor(int c)
 				editor.cursor_y++;
 				editor.cursor_x = 0;
 			}
+
+			editor.sticky_col_update = TRUE;
 			break;
 	}
 }
@@ -931,6 +950,8 @@ void init_editor()
 	editor.cursor_rx = 0;
 	editor.cursor_ry = 0;
 	editor.render_offset = 0;
+	editor.sticky_col = 0;
+	editor.sticky_col_update = FALSE;
 	editor.dirty = FALSE;
 	editor.highlight_current_line = TRUE;
 	editor.show_line_num_gutter = TRUE;

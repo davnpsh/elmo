@@ -41,17 +41,19 @@ typedef struct EDITOR
 	int cursor_rx;
 	int cursor_ry;
 
-	// Cursor position snap between lines
-	int cursor_x_snap;
+	// Sticky cursor in X
+	// (based on render coordinates)
+	int sticky_col;
+	Bool sticky_col_update;
 
 	// Cursor position in prompt
 	int cursor_px;
-	int screen_rows;
-	int screen_cols;
 
 	// Offset in total display rows
 	int render_offset;
-	
+
+	int screen_rows;
+	int screen_cols;
 	Bool dirty;
 	Bool highlight_current_line;
 	Bool show_line_num_gutter;
