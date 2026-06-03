@@ -890,6 +890,7 @@ void editor_process_keypress()
 			
 		case HOME_KEY:
 			editor.cursor_x = 0;
+			editor.sticky_col_update = TRUE;
 			break;
 			
 		case END_KEY:
@@ -898,6 +899,7 @@ void editor_process_keypress()
 				BUFFER_NODE *buf_node = CURRENT_LINE;
 				
 				editor.cursor_x = buf_node->len;
+				editor.sticky_col_update = TRUE;
 			}
 			break;
 			
