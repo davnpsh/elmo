@@ -17,6 +17,7 @@
 #define FALSE 0
 #define CTRL_KEY(k) ((k) & 0x1f)
 #define QUIT_TIMES 2
+#define RESERVED_ROWS 2
 
 #define VERSION "1.0.0"
 
@@ -31,17 +32,27 @@ void editor_set_status_msg(const char *fmt, ...)
 	editor.status_msg_time = time(NULL);
 }
 
-int editor_get_window_size(int *rows, int *cols)
+int editor_set_window_size()
 {
 	struct winsize ws;
 	
-	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) return -1;
-	
-	*cols = ws.ws_col;
-    *rows = ws.ws_row;
-    
-    // Reserve space for status and prompt bar
-	*rows -= 2;
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 
+		|| ws.ws_col == 0 
+		|| ws.ws_row - RESERVED_ROWS == 0) return -1;
+
+	// Reset position on actual change
+	if (editor.screen_rows != ws.ws_row - RESERVED_ROWS || editor.screen_cols != ws.ws_col)
+	{
+		editor.cursor_x = 0;
+		editor.cursor_y = 0;
+
+		// Skip initialization
+		if (editor.screen_rows != 0 && editor.screen_cols != 0)
+			editor_set_status_msg("window resized!");
+	}
+
+	editor.screen_rows = ws.ws_row - RESERVED_ROWS;	// reserve space for status and prompt bar
+	editor.screen_cols = ws.ws_col;
 	
 	return 0;
 }
@@ -366,16 +377,7 @@ void editor_refresh_screen(Bool in_prompt)
 {	
 	APPEND_BUFFER ab = {NULL, 0};
 	
-	if ((editor.screen_cols < 30) 
-		|| (editor.screen_rows < 10))
-	{
-		ab_append(&ab, "\x1b[?25l", 6);
-		ab_append(&ab, "\x1b[2J", 4);
-		ab_append(&ab, "\x1b[H", 3);
-		
-		ab_append(&ab, "Terminal size too small!", 24);
-	}
-	else if (editor.buf_chain == NULL)
+	if (editor.buf_chain == NULL)
 	{
 		ab_append(&ab, "\x1b[?25l", 6);
 		ab_append(&ab, "\x1b[2J", 4);
@@ -834,11 +836,8 @@ void editor_process_keypress()
 	int c = editor_read_key();
 	
 	// Refresh window dimensiones
-	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
-		die("editor_get_window_size");
-	
-	if ((editor.screen_cols < 30) 
-		|| (editor.screen_rows < 10)) return;
+	if (editor_set_window_size() == -1) 
+		die("editor_set_window_size");
 
 	// On any keypress, just start a new chain
 	if (editor.buf_chain == NULL) 
@@ -963,6 +962,6 @@ void init_editor()
 	editor.status_msg[0] = '\0';
 	editor.status_msg_time = 0;
 	
-	if (editor_get_window_size(&editor.screen_rows, &editor.screen_cols) == -1) 
-		die("editor_get_window_size");
+	if (editor_set_window_size() == -1) 
+		die("editor_set_window_size");
 }

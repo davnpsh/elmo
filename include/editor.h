@@ -68,7 +68,7 @@ typedef struct EDITOR
 } EDITOR;
 
 void editor_set_status_msg(const char *fmt, ...);
-int editor_get_window_size(int *rows, int *cols);
+int editor_set_window_size();
 void editor_open(char *filepath);
 void editor_save();
 void editor_draw_buffer(APPEND_BUFFER *ab);
