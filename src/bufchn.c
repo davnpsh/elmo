@@ -97,7 +97,7 @@ BUFFER_CHAIN *buf_parse_file(char *filepath)
 	buf_chain->lines_num = 0;
 	buf_chain->cache_node = NULL;
 	buf_chain->cache_line_num = 0;
-	buf_chain->syntax = get_syntax(filepath);
+	buf_chain->syntax = get_syntax_by_filematch(filepath);
 	
 	FILE *fp = fopen(filepath, "r");
 	if (!fp) die("fopen");
@@ -371,7 +371,7 @@ int buf_save(BUFFER_CHAIN *buf_chain, char *filepath)
 				close(fd);
 				free(buf);
 
-				buf_chain->syntax = get_syntax(filepath);
+				buf_chain->syntax = get_syntax_by_filematch(filepath);
 				
 				return 0;
 			}

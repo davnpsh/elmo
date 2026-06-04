@@ -694,7 +694,8 @@ void editor_process_command(char* command)
 		}
 	}
 	// Toggle line number gutter
-	else if (strcmp(pch, "linenumbers") == 0 || strcmp(pch, "nums") == 0)
+	else if (strcmp(pch, "linenumbers") == 0
+	 	  || strcmp(pch, "nums") == 0)
 	{
 		pch = strtok(NULL, " ");
 
@@ -714,6 +715,47 @@ void editor_process_command(char* command)
 		{
 			editor_set_status_msg("what?");
 		}
+	}
+	else if (strcmp(pch, "syntax") == 0)
+	{
+		pch = strtok(NULL, " ");
+		
+		if (pch != NULL)
+		{
+			SYNTAX *syntax = get_syntax_by_filetype(pch);
+
+			if (syntax == NULL) 
+			{
+				editor_set_status_msg("invalid filetype!");
+				return;
+			}
+
+			editor.buf_chain->syntax = syntax;
+			buf_update_syntax_hl(editor.buf_chain);
+		}
+		else
+		{
+			editor_set_status_msg("what?");
+		}
+	}
+	else if (strcmp(pch, "quit") == 0)
+	{
+		if (editor.dirty)
+		{
+			editor_set_status_msg("use /quit! to exit without saving.");
+		}
+		else
+		{
+			write(STDOUT_FILENO, "\x1b[2J", 4);
+			write(STDOUT_FILENO, "\x1b[H", 3);
+			exit(0);
+		}
+	}
+	else if (strcmp(pch, "quit!") == 0)
+	{
+		write(STDOUT_FILENO, "\x1b[2J", 4);
+		write(STDOUT_FILENO, "\x1b[H", 3);
+		exit(0);
 	}
 	else
 	{

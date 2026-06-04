@@ -118,7 +118,20 @@ SYNTAX syntax_db[] = {
 	}
 };
 
-SYNTAX *get_syntax(char *filepath)
+SYNTAX *get_syntax_by_filetype(char *filetype)
+{
+	for (unsigned int i = 0; i < SYNTAX_ENTRIES; i++)
+	{
+		SYNTAX *syntax = &syntax_db[i];
+
+		if (strcmp(syntax->filetype, filetype) == 0)
+			return syntax;
+	}
+
+	return NULL;
+}
+
+SYNTAX *get_syntax_by_filematch(char *filepath)
 {
 	const char *extension = strrchr(filepath, '.');
 	

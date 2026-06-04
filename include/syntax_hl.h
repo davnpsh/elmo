@@ -31,6 +31,7 @@ enum TOKEN
 	TK_EOF
 };
 
-SYNTAX *get_syntax(char *filepath);
+SYNTAX *get_syntax_by_filetype(char *filepath);
+SYNTAX *get_syntax_by_filematch(char *filepath);
 int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token);
 void syntax_hl_update(SYNTAX *syntax, BUFFER_NODE *buf_node, char **multiline_end, char **last_token);
