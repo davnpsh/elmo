@@ -689,6 +689,35 @@ void editor_insert(int c)
 	editor.dirty = TRUE;
 }
 
+void editor_jump(int shift)
+{
+	int target;
+	
+	if (editor.line_num_position == ABSOLUTE)
+	{
+		target = shift - 1;
+		
+		if (!(target >= 0 && target < editor.buf_chain->lines_num))
+		{
+			editor_set_status_msg("invalid line!");
+			return;
+		}
+	}
+	else
+	{
+		target = editor.cursor_y + shift;
+
+		if (!(target >= 0 && target < editor.buf_chain->lines_num))
+		{
+			editor_set_status_msg("invalid line!");
+			return;
+		}
+	}
+
+	editor.cursor_x = 0;
+	editor.cursor_y = target;
+}
+
 void editor_delete()
 {
 	if (editor.cursor_x == 0 && editor.cursor_y == 0) return;
@@ -804,6 +833,20 @@ void editor_process_command(char* command)
 		write(STDOUT_FILENO, "\x1b[2J", 4);
 		write(STDOUT_FILENO, "\x1b[H", 3);
 		exit(0);
+	}
+	else if (strcmp(pch, "jump") == 0
+		|| strcmp(pch, "j") == 0)
+	{
+		pch = strtok(NULL, " ");
+		
+		if (pch != NULL)
+		{
+			editor_jump(atoi(pch));
+		}
+		else
+		{
+			editor_set_status_msg("what?");
+		}
 	}
 	else
 	{
