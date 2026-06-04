@@ -667,8 +667,8 @@ void editor_move_word(int c)
 			return;
 		}
 
-		while (pos < current_line->len && current_line->s[pos + 1] == ' ') pos++;
-		while (pos < current_line->len && current_line->s[pos + 1] != ' ') pos++;
+		while (pos < current_line->len && current_line->s[pos] == ' ') pos++;
+		while (pos < current_line->len && current_line->s[pos] != ' ') pos++;
 	}
 
 	editor.cursor_x = pos;
