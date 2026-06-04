@@ -444,7 +444,7 @@ int editor_read_key()
 	
 	if (c == '\x1b')
 	{
-	 	char seq[3];
+	 	char seq[5];
 			
 	    if (read(STDIN_FILENO, &seq[0], 1) != 1) return '\x1b';
 	    if (read(STDIN_FILENO, &seq[1], 1) != 1) return '\x1b';
@@ -468,6 +468,22 @@ int editor_read_key()
                         case '8': return END_KEY;
                		}
         		}
+				else if (seq[2] == ';')
+				{
+					if (read(STDIN_FILENO, &seq[3], 1) != 1) return '\x1b';
+            		if (read(STDIN_FILENO, &seq[4], 1) != 1) return '\x1b';
+
+              		if (seq[3] == '5')
+                	{
+                 		switch (seq[4])
+                   		{
+                     		case 'A': return CTRL_UP;
+		                    case 'B': return CTRL_DOWN;
+                            case 'C': return CTRL_RIGHT;
+                            case 'D': return CTRL_LEFT;
+                     	}
+                 	}
+				}
 			}
 			else
 			{
@@ -625,6 +641,38 @@ void editor_move_cursor(int c)
 			editor.sticky_col_update = TRUE;
 			break;
 	}
+}
+
+void editor_move_word(int c)
+{
+	BUFFER_NODE *current_line = CURRENT_LINE;
+	int pos = editor.cursor_x;
+	
+	if (c == CTRL_LEFT)
+	{
+		if (editor.cursor_x == 0)
+		{
+			editor_move_cursor(LEFT);
+			return;
+		}
+		
+		while (pos > 0 && current_line->s[pos - 1] == ' ') pos--;
+		while (pos > 0 && current_line->s[pos - 1] != ' ') pos--;
+	}
+	else
+	{
+		if (editor.cursor_x == current_line->len)
+		{
+			editor_move_cursor(RIGHT);
+			return;
+		}
+
+		while (pos < current_line->len && current_line->s[pos + 1] == ' ') pos++;
+		while (pos < current_line->len && current_line->s[pos + 1] != ' ') pos++;
+	}
+
+	editor.cursor_x = pos;
+	editor.sticky_col_update = TRUE;
 }
 
 void editor_insert(int c)
@@ -967,6 +1015,13 @@ void editor_process_keypress()
 		case CTRL_KEY('h'):
 		case '\x1b':
 		    break;
+
+		// case CTRL_UP:
+		// case CTRL_DOWN:
+		case CTRL_LEFT:
+		case CTRL_RIGHT:
+			editor_move_word(c);
+			break;
 						
 		case '/':
 			if (editor.mode == SAFE)

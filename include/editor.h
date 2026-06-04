@@ -30,6 +30,14 @@ enum MOV_KEY
 	DEL_KEY
 };
 
+enum CTRL_KEYS
+{
+	CTRL_UP,
+	CTRL_DOWN,
+	CTRL_LEFT,
+	CTRL_RIGHT
+};
+
 typedef struct EDITOR
 {
 	// Real coordinates
@@ -78,6 +86,7 @@ void editor_scroll();
 void editor_refresh_screen(Bool in_prompt);
 int editor_read_key();
 void editor_move_cursor(int c);
+void editor_move_word(int c);
 void editor_insert(int c);
 void editor_delete();
 void editor_process_command(char* command);
