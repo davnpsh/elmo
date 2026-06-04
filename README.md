@@ -23,17 +23,17 @@ It will generate the `elmo` binary.
 ## TODO
 
 - [x] ~~Welcome screen~~
-- [ ] Search
-- [ ] Search files
-- [x] ~~Syntax highlight~~
-- [ ] Auto indent
-- [ ] Auto pairs ((); {})
-- [x] ~~Wrap lines~~
-- [ ] Tasks
 - [x] ~~Line numbers~~
 - [x] ~~Toggle line numbers (on/off; absolute/relative)~~
-- [ ] Jump to line
+- [x] ~~Jump to line~~
 - [x] ~~Navigate words with CTRL~~
+- [x] ~~Syntax highlight~~
+- [x] ~~Wrap lines~~
+- [ ] Search
+- [ ] Search files
+- [ ] Auto indent
+- [ ] Auto pairs ((); {})
+- [ ] Tasks
 - [ ] Git integration
 - [ ] New empty buffer
 - [ ] Open file (switch buffer)
