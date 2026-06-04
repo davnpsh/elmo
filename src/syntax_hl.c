@@ -76,6 +76,9 @@ char *Python_keywords[] = {
     NULL
 };
 
+char *Markdown_extensions[] = { ".md", NULL };
+char *Markdown_keywords[] = { NULL };
+
 SYNTAX syntax_db[] = {
 	{
 		"c",
@@ -103,6 +106,15 @@ SYNTAX syntax_db[] = {
 		NULL,
 		NULL,
 		HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
+	},
+	{
+		"markdown",
+		Markdown_extensions,
+		Markdown_keywords,
+		NULL,
+		NULL,
+		NULL,
+		0
 	}
 };
 
@@ -110,7 +122,6 @@ SYNTAX *get_syntax(char *filepath)
 {
 	const char *extension = strrchr(filepath, '.');
 	
-
 	// Match by extension
 	if (extension != NULL)
 	{
@@ -289,6 +300,7 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 				if (*c == '>') return TK_STRING;
 			}
 		}
+		// Makefile
 		else if (strcmp(syntax->filetype, "makefile") == 0)
 		{
 			// Shell invokations
@@ -306,6 +318,63 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 				(*len)++;
 
 				if (*c == ')') return TK_STRING;
+			}
+		}
+		// Markdown
+		else if (strcmp(syntax->filetype, "markdown") == 0)
+		{
+			if (*c == '#')
+			{
+				while (*c)
+				{
+					c++;
+					(*len)++;
+				}
+
+				return TK_KEYWORD;
+			}
+			else if (*c == '!' || *c == '[')
+			{
+				if (*c == '!' && *(c + 1) != '[')
+				{
+					c++;
+					(*len)++;
+					return TK_NORMAL;
+				}
+				
+				while (*c && *c != '(')
+			    {
+			        c++;
+			        (*len)++;
+			    }
+
+				if (*c == '(') 
+				{
+					**last_token = TK_NUMBER;
+					return TK_NUMBER;
+				}
+			}
+			else if (**last_token == TK_NUMBER)
+			{
+				if (*c != '(')
+				{
+					**last_token = TK_NORMAL;
+				}
+				else
+				{
+					while (*c && *c != ')')
+					{
+						c++;
+     					(*len)++;
+					}
+
+					if (*c == ')') 
+					{
+						c++;
+     					(*len)++;
+						return TK_STRING;
+					}
+				}
 			}
 		}
 		
