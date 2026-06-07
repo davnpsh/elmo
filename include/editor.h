@@ -10,11 +10,11 @@ typedef enum MODE
 	EDIT
 } MODE;
 
-typedef enum POSITION
+typedef enum LINE_NUMBER_MODE
 {
 	ABSOLUTE,
 	RELATIVE
-} POSITION;
+} LINE_NUMBER_MODE;
 
 enum MOV_KEY
 {
@@ -32,11 +32,25 @@ enum MOV_KEY
 
 enum CTRL_KEYS
 {
-	CTRL_UP,
+	CTRL_UP = 2000,
 	CTRL_DOWN,
 	CTRL_LEFT,
 	CTRL_RIGHT
 };
+
+enum SHIFT_KEYS
+{
+	SHIFT_UP = 3000,
+	SHIFT_DOWN,
+	SHIFT_LEFT,
+	SHIFT_RIGHT
+};
+
+typedef struct POSITION
+{
+	int x;
+	int y;
+} POSITION;
 
 typedef struct EDITOR
 {
@@ -60,12 +74,19 @@ typedef struct EDITOR
 	// Offset in total display rows
 	int render_offset;
 
+	// Select text
+	Bool text_selected;
+	POSITION select_start;
+	POSITION select_end;
+	POSITION r_select_start;	// render
+	POSITION r_select_end;		// render
+
 	int screen_rows;
 	int screen_cols;
 	Bool dirty;
 	Bool highlight_current_line;
 	Bool show_line_num_gutter;
-	POSITION line_num_position;
+	LINE_NUMBER_MODE line_num_mode;
 	int line_num_gutter_width;
 	MODE mode;
 	BUFFER_CHAIN *buf_chain;

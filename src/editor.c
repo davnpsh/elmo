@@ -123,10 +123,12 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 	get_offset_coordinates(&row_offset, &wrap_offset, editor.render_offset, editor.buf_chain, current_width);
 	
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + row_offset, TRUE);
-	Bool reset_current_line_hl = FALSE;
 
 	int inner_offset = wrap_offset;
 	int logical_line = row_offset + 1;
+
+	Bool reset_current_line_hl = FALSE;
+	Bool highlighting_selected_text = FALSE;
 
 	if (inner_offset > 0) logical_line++;
 	
@@ -140,14 +142,16 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 		if (y + editor.render_offset < get_total_display_rows(editor.buf_chain, current_width))
 		{
-			// Highlight current line
-			if (editor.highlight_current_line && editor.cursor_ry == editor.render_offset + y)
+			// -- HIGHLIGHT CURRENT LINE --
+			if (!editor.text_selected 
+				&& editor.highlight_current_line 
+				&& editor.cursor_ry == editor.render_offset + y)
 			{
 				ab_append(ab, "\x1b[48;5;236m", 11);
 				reset_current_line_hl = TRUE;
 			}
 			
-			// Line number
+			// -- LINE NUMBER --
 			if (editor.show_line_num_gutter)
 			{
 				char gutter_buf[32];
@@ -155,7 +159,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 				if (inner_offset == 0)
 				{
-					if (editor.line_num_position == ABSOLUTE)
+					if (editor.line_num_mode == ABSOLUTE)
 						line_number = logical_line;
 					else
 						line_number = abs(logical_line - editor.cursor_y - 1);
@@ -175,7 +179,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				}
 				else if (inner_offset == 1)
 				{
-					if (logical_line == editor.cursor_y + 2)
+					if (logical_line - 1 == editor.cursor_y + 1)
 					{
 						ab_append(ab, "\x1b[34m", 5);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, ">");
@@ -195,11 +199,13 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				ab_append(ab, "\x1b[39m", 5);
 			}
 
-			// Some pre-calcs
+			// -- PRE-CALCS --
 
+			// Calculate which segment of the logical part
+			// print in the display line
 			int line_display_rows = get_line_display_rows(current_line->rlen, current_width);
 
-			int start = (current_width) * inner_offset;
+			int start = current_width * inner_offset;
 
 			char *r = &current_line->r[start];
 			char *h = &current_line->h[start];
@@ -207,8 +213,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			int len = current_line->rlen - start;
 
 			if (len < 0) len = 0;
-			if (len > current_width)
-				len = current_width;
+			if (len > current_width) len = current_width;
 
 			if (inner_offset == line_display_rows - 1)
 			{
@@ -218,13 +223,67 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			else
 				inner_offset++;
 
-			// Print line
-
+			// -- PRINT LINE --
 			int current_color = -1;	// default
+
+			if (highlighting_selected_text)
+			{
+				ab_append(ab, "\x1b[48;5;240m", 11);
+				
+				if (len == 0)
+				{
+					ab_append(ab, " ", 1);
+					ab_append(ab, "\x1b[0m", 4);
+				}
+			}
+
+			if (editor.text_selected && len == 0)
+			{
+				// Start of the selected text
+				if (editor.render_offset + y == editor.r_select_start.y)
+				{
+					ab_append(ab, "\x1b[48;5;240m", 11);
+					ab_append(ab, " ", 1);
+					ab_append(ab, "\x1b[0m", 4);
+					highlighting_selected_text = TRUE;
+				}
+
+				// End of the selected text
+				if (editor.render_offset + y == editor.r_select_end.y)
+				{
+					ab_append(ab, " ", 1);
+					ab_append(ab, "\x1b[0m", 4);
+					highlighting_selected_text = FALSE;
+				}
+			}
 
 			for (int j = 0; j < len; j++)
 			{
-				// Adjust color
+				// Highlight selected text
+				if (editor.text_selected)
+				{
+					// Start of the selected text
+					if (editor.render_offset + y == editor.r_select_start.y)
+					{
+						if (j == editor.r_select_start.x % current_width)
+						{
+							ab_append(ab, "\x1b[48;5;240m", 11);
+							highlighting_selected_text = TRUE;
+						}
+					}
+
+					// End of the selected text
+					if (editor.render_offset + y == editor.r_select_end.y)
+					{
+						if (j == editor.r_select_end.x % current_width)
+						{
+							ab_append(ab, "\x1b[0m", 4);
+							highlighting_selected_text = FALSE;
+						}
+					}
+				}
+				
+				// Adjust color for text
 				if (h[j] == TK_NORMAL) 
 				{
 					if (current_color != -1)
@@ -246,8 +305,11 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					}
 				}
 
-				// Print char
+				// Print character
 				ab_append(ab, &r[j], 1);
+
+				if (highlighting_selected_text && j == len - 1)
+					ab_append(ab, "\x1b[0m", 4);
 			}
 			
 			ab_append(ab, "\x1b[39m", 5);
@@ -483,6 +545,16 @@ int editor_read_key()
                             case 'D': return CTRL_LEFT;
                      	}
                  	}
+	                else if (seq[3] == '2')
+	                {
+	                    switch (seq[4])
+	                    {
+	                        case 'A': return SHIFT_UP;
+	                        case 'B': return SHIFT_DOWN;
+	                        case 'C': return SHIFT_RIGHT;
+	                        case 'D': return SHIFT_LEFT;
+	                    }
+	                }
 				}
 			}
 			else
@@ -675,6 +747,65 @@ void editor_move_word(int c)
 	editor.sticky_col_update = TRUE;
 }
 
+void editor_select(int c)
+{
+	if (editor.text_selected == FALSE)
+	{
+		editor.text_selected = TRUE;
+		editor.select_start = (POSITION){ editor.cursor_x, editor.cursor_y };
+	}
+	
+	switch (c)
+	{
+		case SHIFT_UP:
+			editor_move_cursor(UP);
+			break;
+			
+		case SHIFT_DOWN:
+			editor_move_cursor(DOWN);
+			break;
+
+		case SHIFT_LEFT:
+			editor_move_cursor(LEFT);
+			break;
+			
+		case SHIFT_RIGHT:
+			editor_move_cursor(RIGHT);
+			break;
+	}
+
+	if ((editor.select_start.x == editor.cursor_x) 
+		&& (editor.select_start.y == editor.cursor_y)) 
+	{
+		editor.text_selected = FALSE;
+		return;
+	}
+
+	editor.select_end = (POSITION){ editor.cursor_x, editor.cursor_y };
+
+	POSITION start, end;
+
+	if (
+		(editor.select_start.y < editor.cursor_y)
+		|| ((editor.select_start.y == editor.cursor_y) 
+			&& (editor.select_start.x < editor.cursor_x))
+	)
+	{
+		start = editor.select_start;
+		end = editor.select_end;
+	}
+	else
+	{
+		start = editor.select_end;
+		end = editor.select_start;
+	}
+
+	int current_width = editor_get_editable_area_width();
+
+	render_coords(&editor.r_select_start.x, &editor.r_select_start.y, start.x, start.y, editor.buf_chain, current_width);
+	render_coords(&editor.r_select_end.x, &editor.r_select_end.y, end.x, end.y, editor.buf_chain, current_width);
+}
+
 void editor_insert(int c)
 {
 	buf_insert(editor.buf_chain, editor.cursor_y + 1, editor.cursor_x, c);
@@ -693,7 +824,7 @@ void editor_jump(int shift)
 {
 	int target;
 	
-	if (editor.line_num_position == ABSOLUTE)
+	if (editor.line_num_mode == ABSOLUTE)
 	{
 		target = shift - 1;
 		
@@ -782,11 +913,11 @@ void editor_process_command(char* command)
 		}
 		else if (strcmp(pch, "rel") == 0)
 		{
-			editor.line_num_position = RELATIVE;
+			editor.line_num_mode = RELATIVE;
 		}
 		else if (strcmp(pch, "abs") == 0)
 		{
-			editor.line_num_position = ABSOLUTE;
+			editor.line_num_mode = ABSOLUTE;
 		}
 		else
 		{
@@ -1005,11 +1136,13 @@ void editor_process_keypress()
 		case DOWN:
 		case LEFT:
 		case RIGHT:
+			editor.text_selected = FALSE;
 			editor_move_cursor(c);
 			break;
 			
 		case PAGE_UP:
 		case PAGE_DOWN:
+			editor.text_selected = FALSE;
 			{
 				int times = editor.screen_rows - 1;
 				
@@ -1022,11 +1155,13 @@ void editor_process_keypress()
 			break;
 			
 		case HOME_KEY:
+			editor.text_selected = FALSE;
 			editor.cursor_x = 0;
 			editor.sticky_col_update = TRUE;
 			break;
 			
 		case END_KEY:
+			editor.text_selected = FALSE;
 			if (editor.cursor_y < editor.buf_chain->lines_num)
 			{
 				BUFFER_NODE *buf_node = CURRENT_LINE;
@@ -1059,11 +1194,16 @@ void editor_process_keypress()
 		case '\x1b':
 		    break;
 
-		// case CTRL_UP:
-		// case CTRL_DOWN:
 		case CTRL_LEFT:
 		case CTRL_RIGHT:
 			editor_move_word(c);
+			break;
+
+		case SHIFT_UP:
+		case SHIFT_DOWN:
+		case SHIFT_LEFT:
+		case SHIFT_RIGHT:
+			editor_select(c);
 			break;
 						
 		case '/':
@@ -1093,10 +1233,11 @@ void init_editor()
 	editor.render_offset = 0;
 	editor.sticky_col = 0;
 	editor.sticky_col_update = FALSE;
+	editor.text_selected = FALSE;
 	editor.dirty = FALSE;
 	editor.highlight_current_line = TRUE;
 	editor.show_line_num_gutter = TRUE;
-	editor.line_num_position = ABSOLUTE;
+	editor.line_num_mode = ABSOLUTE;
 	editor.line_num_gutter_width = 0;
 	editor.mode = SAFE;
 	editor.buf_chain = NULL;
