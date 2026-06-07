@@ -126,11 +126,14 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 	int inner_offset = wrap_offset;
 	int logical_line = row_offset + 1;
-
+	
 	Bool reset_current_line_hl = FALSE;
 	Bool highlighting_selected_text = FALSE;
 
 	if (inner_offset > 0) logical_line++;
+
+	if (editor.text_selected && editor.render_offset > editor.r_select_start.y)
+		highlighting_selected_text = TRUE;
 	
 	for (int y = 0; y < editor.screen_rows; y++)
 	{
@@ -436,7 +439,7 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 }
 
 void editor_refresh_screen(Bool in_prompt)
-{	
+{
 	APPEND_BUFFER ab = {NULL, 0};
 	
 	if (editor.buf_chain == NULL)
