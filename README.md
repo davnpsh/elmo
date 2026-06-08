@@ -20,10 +20,6 @@ make
 
 It will generate the `elmo` binary.
 
-## TODO
-
-See the [checklist](./TODO.md) for features I plan to add.
-
 ## Third-party notices
 
 This project is based on third-party code. See the [NOTICE](./NOTICE) file for attribution and licensing details.
