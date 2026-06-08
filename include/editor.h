@@ -1,8 +1,9 @@
 #include <termios.h>
 #include <time.h>
 
-#include "abuf.h"
 #include "bufchn.h"
+
+typedef struct APPEND_BUFFER APPEND_BUFFER;
 
 typedef enum MODE
 {

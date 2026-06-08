@@ -9,6 +9,7 @@
 #include <ctype.h>
 
 #include "editor.h"
+#include "abuf.h"
 #include "helper.h"
 #include "syntax_hl.h"
 
@@ -139,7 +140,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 	{
 		if (reset_current_line_hl)
 		{
-			ab_append(ab, "\x1b[0m", 4);
+			ab_append_esc_seq(ab, ESC_RESET_BG);
 			reset_current_line_hl = FALSE;
 		}
 
@@ -150,7 +151,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				&& editor.highlight_current_line 
 				&& editor.cursor_ry == editor.render_offset + y)
 			{
-				ab_append(ab, "\x1b[48;5;236m", 11);
+				ab_append_esc_seq(ab, ESC_BG_HL);
 				reset_current_line_hl = TRUE;
 			}
 			
@@ -169,12 +170,12 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 					if (logical_line == editor.cursor_y + 1)
 					{
-						ab_append(ab, "\x1b[34m", 5);
+						ab_append_esc_seq(ab, ESC_FG_BLUE);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
 					}
 					else 
 					{
-						ab_append(ab, "\x1b[90m", 5);
+						ab_append_esc_seq(ab, ESC_FG_GRAY);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", editor.line_num_gutter_width - 1, line_number);
 					}
 
@@ -184,12 +185,12 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				{
 					if (logical_line - 1 == editor.cursor_y + 1)
 					{
-						ab_append(ab, "\x1b[34m", 5);
+						ab_append_esc_seq(ab, ESC_FG_BLUE);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, ">");
 					}
 					else
 					{
-						ab_append(ab, "\x1b[90m", 5);
+						ab_append_esc_seq(ab, ESC_FG_GRAY);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%-*s ", editor.line_num_gutter_width - 1, ">");
 					}
 				}
@@ -198,8 +199,8 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, "");
 				}
 
-				ab_append(ab, gutter_buf, editor.line_num_gutter_width);
-				ab_append(ab, "\x1b[39m", 5);
+				ab_append_string(ab, gutter_buf);
+				ab_append_esc_seq(ab, ESC_RESET_FG);
 			}
 
 			// -- PRE-CALCS --
@@ -231,12 +232,12 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 			if (highlighting_selected_text)
 			{
-				ab_append(ab, "\x1b[48;5;240m", 11);
+				ab_append_esc_seq(ab, ESC_BG_SELECT);
 				
 				if (len == 0)
 				{
-					ab_append(ab, " ", 1);
-					ab_append(ab, "\x1b[0m", 4);
+					ab_append_string(ab, " ");
+					ab_append_esc_seq(ab, ESC_RESET);
 				}
 			}
 
@@ -245,17 +246,17 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				// Start of the selected text
 				if (editor.render_offset + y == editor.r_select_start.y)
 				{
-					ab_append(ab, "\x1b[48;5;240m", 11);
-					ab_append(ab, " ", 1);
-					ab_append(ab, "\x1b[0m", 4);
+					ab_append_esc_seq(ab, ESC_BG_SELECT);
+					ab_append_string(ab, " ");
+					ab_append_esc_seq(ab, ESC_RESET);
 					highlighting_selected_text = TRUE;
 				}
 
 				// End of the selected text
 				if (editor.render_offset + y == editor.r_select_end.y)
 				{
-					ab_append(ab, " ", 1);
-					ab_append(ab, "\x1b[0m", 4);
+					ab_append_string(ab, " ");
+					ab_append_esc_seq(ab, ESC_RESET);
 					highlighting_selected_text = FALSE;
 				}
 			}
@@ -270,7 +271,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					{
 						if (j == editor.r_select_start.x % current_width)
 						{
-							ab_append(ab, "\x1b[48;5;240m", 11);
+							ab_append_esc_seq(ab, ESC_BG_SELECT);
 							highlighting_selected_text = TRUE;
 						}
 					}
@@ -280,7 +281,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					{
 						if (j == editor.r_select_end.x % current_width)
 						{
-							ab_append(ab, "\x1b[0m", 4);
+							ab_append_esc_seq(ab, ESC_RESET);
 							highlighting_selected_text = FALSE;
 						}
 					}
@@ -291,7 +292,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				{
 					if (current_color != -1)
 					{
-						ab_append(ab, "\x1b[39m", 5);
+						ab_append_esc_seq(ab, ESC_RESET_FG);
 						current_color = -1;
 					}
 				}
@@ -303,29 +304,29 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					{
 						current_color = color;
 						char buf[16];
-						int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", color);
-						ab_append(ab, buf, clen);
+						snprintf(buf, sizeof(buf), "\x1b[%dm", color);
+						ab_append_esc_seq(ab, buf);
 					}
 				}
 
 				// Print character
-				ab_append(ab, &r[j], 1);
+				ab_append_char(ab, r[j]);
 
 				if (highlighting_selected_text && j == len - 1)
-					ab_append(ab, "\x1b[0m", 4);
+					ab_append_esc_seq(ab, ESC_RESET);
 			}
 			
-			ab_append(ab, "\x1b[39m", 5);
+			ab_append_esc_seq(ab, ESC_RESET_FG);
 		}
 		
-		ab_append(ab, "\x1b[K", 3);
-		ab_append(ab, "\r\n", 2);
+		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
 	}
 }
 
 void editor_draw_status_bar(APPEND_BUFFER *ab)
 {
-	ab_append(ab, "\x1b[7m", 4);
+	ab_append_esc_seq(ab, ESC_REVERSE);
 	
 	char status[100];
 	
@@ -342,33 +343,33 @@ void editor_draw_status_bar(APPEND_BUFFER *ab)
 	
 	if (len > editor.screen_cols) len = editor.screen_cols;
 	
-	ab_append(ab, status, len);
+	ab_append_string(ab, status);
 	
 	while (len < editor.screen_cols) 
 	{
-		ab_append(ab, " ", 1);
+		ab_append_string(ab, " ");
 		len++;
 	}
 	
-	ab_append(ab, "\x1b[m", 3);
-	ab_append(ab, "\r\n", 2);
+	ab_append_esc_seq(ab, ESC_RESET);
+	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
 }
 
 void editor_draw_message_bar(APPEND_BUFFER *ab)
 {
-	ab_append(ab, "\x1b[K", 3);
+	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
 	
 	int msglen = strlen(editor.status_msg);
 	if (msglen > editor.screen_cols) msglen = editor.screen_cols;
 	
 	if (msglen && time(NULL) - editor.status_msg_time < 5)
-		ab_append(ab, editor.status_msg, msglen);
+		ab_append_string(ab, editor.status_msg);
 }
 
 void editor_draw_welcome(APPEND_BUFFER *ab)
 {
 	// Draw Dorothy!!!!!!!!!!!
-	const char *dorothy[] = {
+	char *dorothy[] = {
 		"  )............(  ",
 		" /              \\",
 		"|                |",
@@ -384,36 +385,36 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 
 	while (y_padding--)
 	{
-		ab_append(ab, "\x1b[K", 3);
-		ab_append(ab, "\r\n", 2);
+		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
 	}
 
 	for (int i = 0; i < 6; i++)
 	{
 		x_padding = (editor.screen_cols - strlen(dorothy[i])) / 2;
 
-		while (x_padding--) ab_append(ab, " ", 1);
+		while (x_padding--) ab_append_string(ab, " ");
 
-		ab_append(ab, dorothy[i], strlen(dorothy[i]));
-
-		ab_append(ab, "\x1b[K", 3);
-		ab_append(ab, "\r\n", 2);
+		ab_append_string(ab, dorothy[i]);
+		
+		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
 	}
 
-	ab_append(ab, "\x1b[K", 3);
-	ab_append(ab, "\r\n", 2);
-
+	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+	
 	// Welcome message
-	const char *welcome = "welcome to elmo!";
+	char *welcome = "welcome to elmo!";
 	
 	x_padding = (editor.screen_cols - strlen(welcome)) / 2;
 
-	while (x_padding--) ab_append(ab, " ", 1);
+	while (x_padding--) ab_append_string(ab, " ");
 
-	ab_append(ab, welcome, strlen(welcome));
+	ab_append_string(ab, welcome);
 
-	ab_append(ab, "\x1b[K", 3);
-	ab_append(ab, "\r\n\n", 3);
+	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
 
 	// Version
 	char version_str[80];
@@ -421,32 +422,32 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 
 	x_padding = (editor.screen_cols - version_len) / 2;
 
-	while (x_padding--) ab_append(ab, " ", 1);
+	while (x_padding--) ab_append_string(ab, " ");
 
-	ab_append(ab, version_str, version_len);
+	ab_append_string(ab, version_str);
 
-	ab_append(ab, "\x1b[K", 3);
-	ab_append(ab, "\r\n", 2);
-
+	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+	
 	// Author
-	const char *author = "by daru";
+	char *author = "by daru";
 	
 	x_padding = (editor.screen_cols - strlen(author)) / 2;
 
-	while (x_padding--) ab_append(ab, " ", 1);
+	while (x_padding--) ab_append_string(ab, " ");
 
-	ab_append(ab, author, strlen(author));
+	ab_append_string(ab, author);
 }
 
 void editor_refresh_screen(Bool in_prompt)
 {
-	APPEND_BUFFER ab = {NULL, 0};
+	APPEND_BUFFER ab = AB_INIT;
 	
 	if (editor.buf_chain == NULL)
 	{
-		ab_append(&ab, "\x1b[?25l", 6);
-		ab_append(&ab, "\x1b[2J", 4);
-		ab_append(&ab, "\x1b[H", 3);
+		ab_append_esc_seq(&ab, ESC_HIDE_CURSOR);
+		ab_append_esc_seq(&ab, ESC_CLEAR_SCREEN);
+		ab_append_esc_seq(&ab, ESC_CURSOR_HOME);
 
 		editor_draw_welcome(&ab);
 	}
@@ -464,9 +465,9 @@ void editor_refresh_screen(Bool in_prompt)
 		
 		editor_scroll();
 		
-		ab_append(&ab, "\x1b[?25l", 6);
-		ab_append(&ab, "\x1b[2J", 4);
-		ab_append(&ab, "\x1b[H", 3);
+		ab_append_esc_seq(&ab, ESC_HIDE_CURSOR);
+		ab_append_esc_seq(&ab, ESC_CLEAR_SCREEN);
+		ab_append_esc_seq(&ab, ESC_CURSOR_HOME);
 		
 		editor_draw_buffer(&ab);
 		editor_draw_status_bar(&ab);
@@ -488,8 +489,8 @@ void editor_refresh_screen(Bool in_prompt)
 		
 		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", y, x);
 			
-		ab_append(&ab, buf, strlen(buf));
-		ab_append(&ab, "\x1b[?25h", 6);
+		ab_append_esc_seq(&ab, buf);
+		ab_append_esc_seq(&ab, ESC_SHOW_CURSOR);
 	}
 	
 	write(STDOUT_FILENO, ab.b, ab.len);
