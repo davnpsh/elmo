@@ -54,13 +54,11 @@ typedef struct POSITION
 typedef struct EDITOR
 {
 	// Real coordinates
-	int cursor_x;
-	int cursor_y;
+	POSITION cursor;
 
 	// Render coordinates
 	// (tabs, split lines)
-	int cursor_rx;
-	int cursor_ry;
+	POSITION cursor_render;
 
 	// Sticky cursor in X
 	// (based on render coordinates)
