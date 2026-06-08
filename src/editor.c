@@ -1082,8 +1082,13 @@ void editor_prompt(char *command)
 						buf = realloc(buf, buf_size);
 					}
 					
-					buf[buf_len++] = c;
-					buf[buf_len] = '\0';
+					memmove(&buf[editor.cursor_px + 1],
+						&buf[editor.cursor_px],
+						buf_len - editor.cursor_px + 1);
+
+					buf_len++;
+
+					buf[editor.cursor_px] = c;
 					
 					editor.cursor_px++;
 				}
