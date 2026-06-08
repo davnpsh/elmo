@@ -1,4 +1,6 @@
-This product includes software from the kilo project
+This product was inspired by and initially derived from the kilo project
  * Copyright (C) 2016 Salvatore Sanfilippo <antirez at gmail dot com>
  * Licensed under the BSD 2-Clause License
  * https://github.com/antirez/kilo
+
+The original code has been significantly modified and extended.
