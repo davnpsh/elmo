@@ -22,28 +22,8 @@ It will generate the `elmo` binary.
 
 ## TODO
 
-- [x] ~~Welcome screen~~
-- [x] ~~Line numbers~~
-- [x] ~~Toggle line numbers (on/off; absolute/relative)~~
-- [x] ~~Jump to line~~
-- [x] ~~Navigate words with CTRL~~
-- [x] ~~Syntax highlight~~
-- [x] ~~Wrap lines~~
-- [ ] Search
-- [ ] Search files
-- [ ] Auto indent
-- [ ] Auto pairs ((); {})
-- [ ] Tasks
-- [ ] Git integration
-- [ ] New empty buffer
-- [ ] Open file (switch buffer)
-- [ ] Undo/redo actions
-- [ ] Dropup menu (for selecting tasks/opening files)
-- [ ] Select text
-- [ ] Toggle comments
-- [ ] Manual page
-- [ ] Make install command
+See the [checklist](./TODO.md) for features I plan to add.
 
 ## Third-party notices
 
-This project includes third-party code. See the [NOTICE](./NOTICE) file for attribution and licensing details.
+This project is based on third-party code. See the [NOTICE](./NOTICE) file for attribution and licensing details.
