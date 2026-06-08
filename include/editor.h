@@ -1,9 +1,15 @@
+#ifndef EDITOR_H
+#define EDITOR_H
+
 #include <termios.h>
 #include <time.h>
 
-#include "bufchn.h"
-
 typedef struct APPEND_BUFFER APPEND_BUFFER;
+typedef struct BUFFER_CHAIN BUFFER_CHAIN;
+
+typedef int Bool;
+#define TRUE 1
+#define FALSE 0
 
 typedef enum MODE
 {
@@ -28,20 +34,12 @@ enum MOV_KEY
 	PAGE_DOWN,
 	HOME_KEY,
 	END_KEY,
-	DEL_KEY
-};
-
-enum CTRL_KEYS
-{
-	CTRL_UP = 2000,
+	DEL_KEY,
+	CTRL_UP,
 	CTRL_DOWN,
 	CTRL_LEFT,
-	CTRL_RIGHT
-};
-
-enum SHIFT_KEYS
-{
-	SHIFT_UP = 3000,
+	CTRL_RIGHT,
+	SHIFT_UP,
 	SHIFT_DOWN,
 	SHIFT_LEFT,
 	SHIFT_RIGHT
@@ -97,22 +95,33 @@ typedef struct EDITOR
 	struct termios og_terminal_conf;
 } EDITOR;
 
-void editor_set_status_msg(const char *fmt, ...);
+#define CTRL_KEY(k) ((k) & 0x1f)
+#define QUIT_TIMES 2
+#define RESERVED_ROWS 2
+
+#define VERSION "1.0.0"
+
+void editor_set_status_msg(char *fmt, ...);
 int editor_set_window_size();
 void editor_open(char *filepath);
 void editor_save();
+int editor_get_editable_area_width();
+void editor_scroll();
 void editor_draw_buffer(APPEND_BUFFER *ab);
 void editor_draw_status_bar(APPEND_BUFFER *ab);
+void editor_draw_message_bar(APPEND_BUFFER *ab);
 void editor_draw_welcome(APPEND_BUFFER *ab);
-void editor_scroll();
 void editor_refresh_screen(Bool in_prompt);
 int editor_read_key();
 void editor_move_cursor(int c);
 void editor_move_word(int c);
+void editor_select(int c);
 void editor_insert(int c);
+void editor_jump(int shift);
 void editor_delete();
-void editor_process_command(char* command);
-void editor_prompt(const char *command);
+void editor_process_command(char *command);
+void editor_prompt(char *command);
 void editor_process_keypress();
-int editor_get_cursor_position(int *rows, int *cols);
 void init_editor();
+
+#endif

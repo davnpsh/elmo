@@ -12,19 +12,13 @@
 #include "abuf.h"
 #include "helper.h"
 #include "syntax_hl.h"
+#include "bufchn.h"
 
 #define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor_y + 1, FALSE)
-#define TRUE 1
-#define FALSE 0
-#define CTRL_KEY(k) ((k) & 0x1f)
-#define QUIT_TIMES 2
-#define RESERVED_ROWS 2
-
-#define VERSION "1.0.0"
 
 EDITOR editor;
 
-void editor_set_status_msg(const char *fmt, ...) 
+void editor_set_status_msg(char *fmt, ...) 
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -989,7 +983,7 @@ void editor_process_command(char* command)
 	}
 }
 
-void editor_prompt(const char *command)
+void editor_prompt(char *command)
 {
 	size_t buf_size = 128;
 	char *buf = malloc(buf_size);
