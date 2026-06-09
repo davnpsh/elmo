@@ -603,7 +603,6 @@ void editor_move_cursor(int c)
 			// Moving up, but in the same logical line
 			if (current_wrap_offset > 0)
 			{
-				// editor.cursor.x -= editable_area_width;
 				editor.cursor.x = editable_area_width * (current_wrap_offset - 1) + editor.sticky_col;
 			}
 			// Moving up, changing y
@@ -625,8 +624,6 @@ void editor_move_cursor(int c)
 				}
 				else
 				{
-					// editor.cursor.x += editable_area_width * prev_wrap_offset;
-					// editor.cursor.x = editor.sticky_col;
 					editor.cursor.x = editable_area_width * prev_wrap_offset + editor.sticky_col;
 				}
 			}
