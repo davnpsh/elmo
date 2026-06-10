@@ -1193,7 +1193,10 @@ void editor_process_keypress()
 			
 		case CTRL_KEY('l'):
 		case CTRL_KEY('h'):
+			break; 
+			
 		case '\x1b':
+			if (editor.mode == EDIT) editor.mode = SAFE;
 		    break;
 
 		case CTRL_LEFT:
