@@ -946,9 +946,12 @@ void editor_process_command(char* command)
 			editor_set_status_msg("what?");
 		}
 	}
-	else if (strcmp(pch, "quit") == 0)
+	else if (strcmp(pch, "quit") == 0 
+		|| strcmp(pch, "q") == 0
+		|| strcmp(pch, "quit!") == 0
+		|| strcmp(pch, "q!") == 0)
 	{
-		if (editor.dirty)
+		if (editor.dirty && (strcmp(pch, "quit") == 0 || strcmp(pch, "q") == 0))
 		{
 			editor_set_status_msg("use /quit! to exit without saving.");
 		}
@@ -958,12 +961,6 @@ void editor_process_command(char* command)
 			write(STDOUT_FILENO, "\x1b[H", 3);
 			exit(0);
 		}
-	}
-	else if (strcmp(pch, "quit!") == 0)
-	{
-		write(STDOUT_FILENO, "\x1b[2J", 4);
-		write(STDOUT_FILENO, "\x1b[H", 3);
-		exit(0);
 	}
 	else if (strcmp(pch, "jump") == 0
 		|| strcmp(pch, "j") == 0)
