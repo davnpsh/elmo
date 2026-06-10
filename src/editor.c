@@ -105,8 +105,13 @@ void editor_scroll()
     	editor.render_offset = editor.cursor_render.y;
 	
 	// Scroll down
-	if (editor.cursor_render.y >= editor.render_offset + editor.screen_rows)
-    	editor.render_offset = editor.cursor_render.y - editor.screen_rows + 1;
+	int below_visible_rows = 2;
+	
+	if ((editor.cursor_render.y >= editor.render_offset + editor.screen_rows - below_visible_rows)
+		&& (editor.render_offset + editor.screen_rows < get_total_display_rows(editor.buf_chain, current_width)))
+	{
+		editor.render_offset = editor.cursor_render.y - editor.screen_rows + 1 + below_visible_rows;
+	}
 }
 
 void editor_draw_buffer(APPEND_BUFFER *ab)
