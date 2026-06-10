@@ -17,16 +17,31 @@ void die(const char *s)
 	exit(1);
 }
 
-int calc_rx_pos(const char *s, int cursor_x)
+int rx_to_cx(char *s, int len, int cursor_rx)
+{
+    int rx = 0;
+    
+    for (int i = 0; i < len; i++)
+    {
+        if (s[i] == '\t')
+            rx += TAB_STOP - (rx % TAB_STOP);
+        else
+            rx++;
+        
+        if (rx > cursor_rx) return i;
+    }
+    
+    return len;
+}
+
+int cx_to_rx(char *s, int cursor_x)
 {
 	int cursor_rx = 0;
 	
 	for (int j = 0; j < cursor_x; j++)
 	{
 		if (s[j] == '\t')
-		{
 			cursor_rx += (TAB_STOP - 1) - (cursor_rx % TAB_STOP);
-		}
 		
 		cursor_rx++;
 	}
@@ -65,7 +80,7 @@ void render_coords(int *rx, int *ry, int x, int y, BUFFER_CHAIN *buf_chain, int 
 		current_line = current_line->next;
 	}
 
-	int rx_pos = calc_rx_pos(current_line->s, x);
+	int rx_pos = cx_to_rx(current_line->s, x);
 
 	*ry = display_row + rx_pos / width;
 	*rx = rx_pos % width;

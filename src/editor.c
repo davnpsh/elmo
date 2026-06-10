@@ -96,7 +96,7 @@ void editor_scroll()
 
 	if (editor.sticky_col_update)
 	{
-		editor.sticky_col = editor.cursor_render.x;
+		editor.sticky_col = editor.cursor_render.x % current_width;
 		editor.sticky_col_update = FALSE;
 	}
 
@@ -608,7 +608,8 @@ void editor_move_cursor(int c)
 			// Moving up, but in the same logical line
 			if (current_wrap_offset > 0)
 			{
-				editor.cursor.x = editable_area_width * (current_wrap_offset - 1) + editor.sticky_col;
+				int rx = editable_area_width * (current_wrap_offset - 1) + editor.sticky_col;
+				editor.cursor.x = rx_to_cx(current_line->s, current_line->len, rx);
 			}
 			// Moving up, changing y
 			else if (editor.cursor.y != 0)
@@ -620,17 +621,8 @@ void editor_move_cursor(int c)
 
 				current_line = CURRENT_LINE;
 
-				if (
-					((current_line->len - editable_area_width * prev_wrap_offset) < editor.cursor.x)
-					|| ((current_line->len - editable_area_width * prev_wrap_offset) < editor.sticky_col)
-				)
-				{
-					editor.cursor.x = current_line->len;
-				}
-				else
-				{
-					editor.cursor.x = editable_area_width * prev_wrap_offset + editor.sticky_col;
-				}
+				int rx = editable_area_width * prev_wrap_offset + editor.sticky_col;
+				editor.cursor.x = rx_to_cx(current_line->s, current_line->len, rx);
 			}
 		}
 			break;
@@ -650,16 +642,8 @@ void editor_move_cursor(int c)
 			// Moving down, but in the same logical line
 			if (current_row_offset == next_row_offset)
 			{
-				current_line = CURRENT_LINE;
-				
-				if ((current_line->len - editable_area_width * next_wrap_offset) < (editor.cursor.x - editable_area_width * current_wrap_offset))
-				{
-					editor.cursor.x = current_line->len;
-				}
-				else
-				{
-					editor.cursor.x += editable_area_width;
-				}
+				int rx = editable_area_width * next_wrap_offset + editor.sticky_col;
+				editor.cursor.x = rx_to_cx(current_line->s, current_line->len, rx);
 			}
 			// Moving down, changing y
 			else if (editor.cursor.y < editor.buf_chain->lines_num - 1)
@@ -667,18 +651,9 @@ void editor_move_cursor(int c)
 				editor.cursor.y++;
 				
 				current_line = CURRENT_LINE;
-				
-				if (
-					(current_line->len < (editor.cursor.x - editable_area_width * current_wrap_offset))
-					|| (current_line->len < editor.sticky_col)
-				)
-				{
-					editor.cursor.x = current_line->len;
-				}
-				else
-				{
-					editor.cursor.x = editor.sticky_col;
-				}
+
+				int rx = editor.sticky_col;
+				editor.cursor.x = rx_to_cx(current_line->s, current_line->len, rx);
 			}
 		}
 			break;
