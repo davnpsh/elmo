@@ -205,8 +205,20 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 	{
 		c++;
 		(*len)++;
+
+		if (*c && *c == 'x')
+		{
+			c++;
+			(*len)++;
+		}
 		
 		while (isdigit(*c) || *c == '.')
+		{
+			c++;
+			(*len)++;
+		}
+
+		if (*c && *c == 'f')
 		{
 			c++;
 			(*len)++;
