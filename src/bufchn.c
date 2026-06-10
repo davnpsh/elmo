@@ -11,7 +11,7 @@
 
 #include "bufchn.h"
 #include "helper.h"
-#include "syntax_hl.h"
+#include "syntax.h"
 
 #define TRUE 1
 #define FALSE 0

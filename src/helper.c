@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "helper.h"
-#include "syntax_hl.h"
+#include "syntax.h"
 #include "bufchn.h"
 
 #define TAB_STOP 4

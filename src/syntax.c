@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <libgen.h>
 
-#include "syntax_hl.h"
+#include "syntax.h"
 #include "bufchn.h"
 
 char *C_extensions[] = { ".c", ".h", ".cpp", NULL };

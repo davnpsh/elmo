@@ -11,7 +11,7 @@
 #include "editor.h"
 #include "abuf.h"
 #include "helper.h"
-#include "syntax_hl.h"
+#include "syntax.h"
 #include "bufchn.h"
 
 #define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor.y + 1, FALSE)
