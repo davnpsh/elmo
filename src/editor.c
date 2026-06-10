@@ -703,8 +703,10 @@ void editor_move_word(int c)
 			return;
 		}
 		
-		while (pos > 0 && current_line->s[pos - 1] == ' ') pos--;
-		while (pos > 0 && current_line->s[pos - 1] != ' ') pos--;
+		while (pos > 0 
+			&& (current_line->s[pos - 1] == ' ' || current_line->s[pos - 1] == '\t')) pos--;
+		while (pos > 0 
+			&& (current_line->s[pos - 1] != ' ' && current_line->s[pos - 1] != '\t')) pos--;
 	}
 	else
 	{
@@ -714,8 +716,10 @@ void editor_move_word(int c)
 			return;
 		}
 
-		while (pos < current_line->len && current_line->s[pos] == ' ') pos++;
-		while (pos < current_line->len && current_line->s[pos] != ' ') pos++;
+		while (pos < current_line->len 
+			&& (current_line->s[pos - 1] == ' ' || current_line->s[pos - 1] == '\t')) pos++;
+		while (pos < current_line->len 
+			&& (current_line->s[pos - 1] != ' ' && current_line->s[pos - 1] != '\t')) pos++;
 	}
 
 	editor.cursor.x = pos;
