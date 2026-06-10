@@ -314,7 +314,7 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 				c++;
 				(*len)++;
 				
-				while (isalnum(*c) || *c == '.')
+				while (*c && *c != '>')
 				{
 					c++;
 					(*len)++;
