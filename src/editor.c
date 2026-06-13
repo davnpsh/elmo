@@ -994,7 +994,7 @@ void editor_prompt(char *command)
 	while (1)
 	{
 		editor_set_status_msg(buf);
-		editor_refresh_screen(TRUE);
+		editor_refresh_screen();
 		
 		int c = editor_read_key();
 		
