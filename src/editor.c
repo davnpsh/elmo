@@ -1209,9 +1209,10 @@ void editor_process_keypress()
 			/* fall-through */
 		case '\r':
 		default:
-			if (editor.mode == SAFE) break;
-			
-			editor_insert(c);
+			if (editor.mode == SAFE)
+				editor_set_status_msg("you are on safe mode!");
+			else
+				editor_insert(c);
 			break;
 	}
 	
