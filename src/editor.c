@@ -1049,11 +1049,15 @@ void editor_prompt(char *command)
 				return;
 				
 			case '\r':
-				editor.in_prompt = FALSE;
-				editor_set_status_msg("");
-				editor_process_command(buf);
-				free(buf);
-				return;
+				if (buf_len != 1)
+				{
+					editor.in_prompt = FALSE;
+					editor_set_status_msg("");
+					editor_process_command(buf);
+					free(buf);
+					return;
+				}
+				break;
 			
 			default:
 				if (!iscntrl(c) && c < 128) 
