@@ -1,6 +1,4 @@
 #define _DEFAULT_SOURCE
-#define _BSD_SOURCE
-#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -14,9 +12,6 @@
 #include "render.h"
 #include "syntax.h"
 #include "util.h"
-
-#define TRUE 1
-#define FALSE 0
 
 void buf_free_node(BUFFER_NODE *buf_node)
 {

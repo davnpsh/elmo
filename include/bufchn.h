@@ -2,6 +2,8 @@
 #define BUFCHN_H
 
 typedef int Bool;
+#define TRUE 1
+#define FALSE 0
 
 typedef struct BUFFER_NODE
 {
