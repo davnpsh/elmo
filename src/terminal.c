@@ -5,14 +5,14 @@
 
 #include "terminal.h"
 #include "editor.h"
+#include "abuf.h"
 #include "util.h"
 
 extern EDITOR editor;
 
 void disable_raw_mode()
 {
-	// Disable mouse tracking
-	write(STDOUT_FILENO, "\x1b[?1049l", 8);
+	write(STDOUT_FILENO, ESC_ALT_SCREEN_DISABLE, 8);
 	
 	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &editor.og_terminal_conf) == -1) 
 		die("tcsetattr");
@@ -34,8 +34,7 @@ void enable_raw_mode()
 	raw.c_cc[VMIN] = 0;
 	raw.c_cc[VTIME] = 1;
 	
-	// Enable mouse tracking
-	write(STDOUT_FILENO, "\x1b[?1049h", 8);
+	write(STDOUT_FILENO, ESC_ALT_SCREEN_ENABLE, 8);
 	
 	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) 
 		die("tcsetattr");

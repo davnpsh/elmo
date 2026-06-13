@@ -23,6 +23,8 @@ typedef struct APPEND_BUFFER
 #define ESC_REVERSE         	"\x1b[7m"
 #define ESC_BG_HL           	"\x1b[48;5;235m"
 #define ESC_BG_SELECT       	"\x1b[48;5;238m"
+#define ESC_ALT_SCREEN_ENABLE  	"\x1b[?1049h"
+#define ESC_ALT_SCREEN_DISABLE 	"\x1b[?1049l"
 
 #define ab_append_esc_seq(ab, s) ab_append_string(ab, s)
 
