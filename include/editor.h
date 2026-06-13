@@ -65,7 +65,8 @@ typedef struct EDITOR
 	int sticky_col;
 	Bool sticky_col_update;
 
-	// Cursor position in prompt
+	// Prompt
+	Bool in_prompt;
 	int cursor_px;
 
 	// Offset in total display rows
@@ -109,7 +110,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab);
 void editor_draw_status_bar(APPEND_BUFFER *ab);
 void editor_draw_message_bar(APPEND_BUFFER *ab);
 void editor_draw_welcome(APPEND_BUFFER *ab);
-void editor_refresh_screen(Bool in_prompt);
+void editor_refresh_screen();
 int editor_read_key();
 void editor_move_cursor(int c);
 void editor_move_word(int c);

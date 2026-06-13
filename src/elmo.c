@@ -2,8 +2,6 @@
 #include "helper.h"
 #include "editor.h"
 
-#define FALSE 0
-
 int main(int argc, char **argv) 
 {
 	enable_raw_mode();
@@ -16,7 +14,7 @@ int main(int argc, char **argv)
 	
 	while (1) 
 	{
-		editor_refresh_screen(FALSE);
+		editor_refresh_screen();
 		editor_process_keypress();
 	}
 	

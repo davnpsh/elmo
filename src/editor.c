@@ -438,7 +438,7 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 	ab_append_string(ab, author);
 }
 
-void editor_refresh_screen(Bool in_prompt)
+void editor_refresh_screen()
 {
 	APPEND_BUFFER ab = AB_INIT;
 	
@@ -475,7 +475,7 @@ void editor_refresh_screen(Bool in_prompt)
 		char buf[32];
 		int x, y;
 		
-		if (in_prompt)
+		if (editor.in_prompt)
 		{
 			x = editor.cursor_px + 1;
 			y = editor.screen_rows + 2;
@@ -982,6 +982,8 @@ void editor_prompt(char *command)
 		editor.cursor_px += len;
 		buf_len += len;
 	}
+
+	editor.in_prompt = TRUE;
 	
 	while (1)
 	{
@@ -1041,11 +1043,13 @@ void editor_prompt(char *command)
 				break;
 				
 			case '\x1b':
+				editor.in_prompt = FALSE;
 				editor_set_status_msg("");
 				free(buf);
 				return;
 				
 			case '\r':
+				editor.in_prompt = FALSE;
 				editor_set_status_msg("");
 				editor_process_command(buf);
 				free(buf);
@@ -1212,6 +1216,8 @@ void init_editor()
 {
 	editor.cursor = (POSITION){0, 0};
 	editor.cursor_render = (POSITION){0, 0};
+	editor.in_prompt = FALSE;
+	editor.cursor_px = 0;
 	editor.render_offset = 0;
 	editor.sticky_col = 0;
 	editor.sticky_col_update = FALSE;
