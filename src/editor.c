@@ -115,6 +115,55 @@ void editor_scroll()
 	}
 }
 
+void editor_draw_line_number(APPEND_BUFFER *ab, int *number, int offset)
+{
+	if (!editor.show_line_num_gutter) return;
+	
+	char gutter_buf[32];
+	int line_number;	// for display
+
+	if (offset == 0)
+	{
+		if (editor.line_num_mode == ABSOLUTE)
+			line_number = *number;
+		else
+			line_number = abs(*number - editor.cursor.y - 1);
+
+		if ((*number == editor.cursor.y + 1) && !editor.in_prompt)
+		{
+			ab_append_esc_seq(ab, ESC_FG_BLUE);
+			snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
+		}
+		else 
+		{
+			ab_append_esc_seq(ab, ESC_FG_GRAY);
+			snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", editor.line_num_gutter_width - 1, line_number);
+		}
+
+		(*number)++;
+	}
+	else if (offset == 1)
+	{
+		if ((*number - 1 == editor.cursor.y + 1) && !editor.in_prompt)
+		{
+			ab_append_esc_seq(ab, ESC_FG_BLUE);
+			snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, ">");
+		}
+		else
+		{
+			ab_append_esc_seq(ab, ESC_FG_GRAY);
+			snprintf(gutter_buf, sizeof(gutter_buf), "%-*s ", editor.line_num_gutter_width - 1, ">");
+		}
+	}
+	else
+	{
+		snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, "");
+	}
+
+	ab_append_string(ab, gutter_buf);
+	ab_append_esc_seq(ab, ESC_RESET_FG);
+}
+
 void editor_draw_buffer(APPEND_BUFFER *ab)
 {
 	int current_width = editor_get_editable_area_width();
@@ -126,12 +175,12 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + row_offset, TRUE);
 
 	int inner_offset = wrap_offset;
-	int logical_line = row_offset + 1;
+	int displayed_line_number = row_offset + 1;
 	
 	Bool reset_current_line_hl = FALSE;
 	Bool highlighting_selected_text = FALSE;
 
-	if (inner_offset > 0) logical_line++;
+	if (inner_offset > 0) displayed_line_number++;
 
 	if (editor.text_selected && editor.render_offset > editor.r_select_start.y)
 		highlighting_selected_text = TRUE;
@@ -157,52 +206,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			}
 			
 			// -- LINE NUMBER --
-			if (editor.show_line_num_gutter)
-			{
-				char gutter_buf[32];
-				int line_number;	// for display
-
-				if (inner_offset == 0)
-				{
-					if (editor.line_num_mode == ABSOLUTE)
-						line_number = logical_line;
-					else
-						line_number = abs(logical_line - editor.cursor.y - 1);
-
-					if ((logical_line == editor.cursor.y + 1) && !editor.in_prompt)
-					{
-						ab_append_esc_seq(ab, ESC_FG_BLUE);
-						snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
-					}
-					else 
-					{
-						ab_append_esc_seq(ab, ESC_FG_GRAY);
-						snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", editor.line_num_gutter_width - 1, line_number);
-					}
-
-					logical_line++;
-				}
-				else if (inner_offset == 1)
-				{
-					if ((logical_line - 1 == editor.cursor.y + 1) && !editor.in_prompt)
-					{
-						ab_append_esc_seq(ab, ESC_FG_BLUE);
-						snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, ">");
-					}
-					else
-					{
-						ab_append_esc_seq(ab, ESC_FG_GRAY);
-						snprintf(gutter_buf, sizeof(gutter_buf), "%-*s ", editor.line_num_gutter_width - 1, ">");
-					}
-				}
-				else
-				{
-					snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, "");
-				}
-
-				ab_append_string(ab, gutter_buf);
-				ab_append_esc_seq(ab, ESC_RESET_FG);
-			}
+			editor_draw_line_number(ab, &displayed_line_number, inner_offset);
 
 			// -- PRE-CALCS --
 

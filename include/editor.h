@@ -11,11 +11,11 @@ typedef int Bool;
 #define TRUE 1
 #define FALSE 0
 
-typedef enum MODE
+typedef enum EDITOR_MODE
 {
 	SAFE,
 	EDIT
-} MODE;
+} EDITOR_MODE;
 
 typedef enum LINE_NUMBER_MODE
 {
@@ -86,7 +86,7 @@ typedef struct EDITOR
 	Bool show_line_num_gutter;
 	LINE_NUMBER_MODE line_num_mode;
 	int line_num_gutter_width;
-	MODE mode;
+	EDITOR_MODE mode;
 	BUFFER_CHAIN *buf_chain;
 	char *filepath;
 	char status_msg[80];
@@ -106,6 +106,7 @@ void editor_open(char *filepath);
 void editor_save();
 int editor_get_editable_area_width();
 void editor_scroll();
+void editor_draw_line_number(APPEND_BUFFER *ab, int *number, int offset);
 void editor_draw_buffer(APPEND_BUFFER *ab);
 void editor_draw_status_bar(APPEND_BUFFER *ab);
 void editor_draw_message_bar(APPEND_BUFFER *ab);
