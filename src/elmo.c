@@ -1,5 +1,4 @@
 #include "terminal.h"
-#include "helper.h"
 #include "editor.h"
 
 int main(int argc, char **argv) 

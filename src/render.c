@@ -3,19 +3,9 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "helper.h"
+#include "render.h"
 #include "syntax.h"
 #include "bufchn.h"
-
-#define TAB_STOP 4
-
-void die(const char *s) 
-{
-	write(STDOUT_FILENO, "\x1b[2J", 4);
-	write(STDOUT_FILENO, "\x1b[H", 3);
-	perror(s);
-	exit(1);
-}
 
 int rx_to_cx(char *s, int len, int cursor_rx)
 {

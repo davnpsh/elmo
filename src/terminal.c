@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "editor.h"
-#include "helper.h"
 #include "terminal.h"
+#include "editor.h"
+#include "util.h"
 
 extern EDITOR editor;
 

@@ -1,6 +1,12 @@
+/*
+ * This file contains helper functions
+ * for rendering text in the editor
+ */
+
 typedef struct BUFFER_CHAIN BUFFER_CHAIN;
 
-void die(const char *s);
+#define TAB_STOP 4
+
 int rx_to_cx(char *s, int len, int cursor_rx);
 int cx_to_rx(char *s, int cursor_x);
 int get_line_display_rows(int line_len, int width);

@@ -10,12 +10,12 @@
 #include <ctype.h>
 
 #include "bufchn.h"
-#include "helper.h"
+#include "render.h"
 #include "syntax.h"
+#include "util.h"
 
 #define TRUE 1
 #define FALSE 0
-#define TAB_STOP 4
 
 void buf_free_node(BUFFER_NODE *buf_node)
 {
