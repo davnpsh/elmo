@@ -124,7 +124,7 @@ void editor_draw_line_number(APPEND_BUFFER *ab, int *number, int offset)
 
 	if (offset == 0)
 	{
-		if (editor.line_num_mode == ABSOLUTE)
+		if (editor.line_num_mode == ABSOLUTE || (*number == editor.cursor.y + 1))
 			line_number = *number;
 		else
 			line_number = abs(*number - editor.cursor.y - 1);
