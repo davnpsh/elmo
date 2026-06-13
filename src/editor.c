@@ -148,6 +148,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 		{
 			// -- HIGHLIGHT CURRENT LINE --
 			if (!editor.text_selected 
+				&& !editor.in_prompt
 				&& editor.highlight_current_line 
 				&& editor.cursor_render.y == editor.render_offset + y)
 			{
@@ -168,7 +169,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					else
 						line_number = abs(logical_line - editor.cursor.y - 1);
 
-					if (logical_line == editor.cursor.y + 1)
+					if ((logical_line == editor.cursor.y + 1) && !editor.in_prompt)
 					{
 						ab_append_esc_seq(ab, ESC_FG_BLUE);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
@@ -183,7 +184,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				}
 				else if (inner_offset == 1)
 				{
-					if (logical_line - 1 == editor.cursor.y + 1)
+					if ((logical_line - 1 == editor.cursor.y + 1) && !editor.in_prompt)
 					{
 						ab_append_esc_seq(ab, ESC_FG_BLUE);
 						snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, ">");
