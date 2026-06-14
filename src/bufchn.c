@@ -13,6 +13,12 @@
 #include "syntax.h"
 #include "util.h"
 
+void buf_invalidate_cache(BUFFER_CHAIN* buf_chain)
+{
+	buf_chain->cache_node = NULL;
+    buf_chain->cache_line_num = 0;
+}
+
 void buf_free_node(BUFFER_NODE *buf_node)
 {
 	free(buf_node->s);
@@ -262,6 +268,8 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		buf_render_line(buf_node);
 		
 		buf_chain->lines_num++;
+
+		buf_invalidate_cache(buf_chain);
 	}
 	else
 	{
@@ -319,6 +327,8 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		buf_free_node(buf_node);
 		
 		buf_chain->lines_num--;
+
+		buf_invalidate_cache(buf_chain);
 	}
 
 	buf_update_syntax_hl(buf_chain);
