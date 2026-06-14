@@ -409,18 +409,28 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 	}
 }
 
-void syntax_hl_update(SYNTAX *syntax, BUFFER_NODE *node, char **multiline_end, char **last_token)
+void syntax_hl_update(BUFFER_CHAIN *buf_chain)
 {
-	node->h = realloc(node->h, node->rlen);
+	BUFFER_NODE *current = buf_chain->head;
+
+	char *multiline_end = NULL;
+	char *last_token = malloc(sizeof(char));
 	
-	int len, idx = 0;
-
-	while (idx < node->rlen)
+	while (current)
 	{
-		int token = tokenize(syntax, &(node->r)[idx], &len, multiline_end, last_token);
+		current->h = realloc(current->h, current->rlen);
+		
+		int len, idx = 0;
 
-		memset(&(node->h)[idx], token, len);
-
-		idx += len;
+		while (idx < current->rlen)
+		{
+			int token = tokenize(buf_chain->syntax, &(current->r)[idx], &len, &multiline_end, &last_token);
+			memset(&(current->h)[idx], token, len);
+			idx += len;
+		}
+		
+		current = current->next;
 	}
+
+	free(last_token);
 }

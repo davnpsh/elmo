@@ -76,22 +76,6 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	return buf_node;
 }
 
-void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain)
-{
-	BUFFER_NODE *current = buf_chain->head;
-
-	char *multiline_end = NULL;
-	char *last_token = malloc(sizeof(char));
-	
-	while (current)
-	{
-		syntax_hl_update(buf_chain->syntax, current, &multiline_end, &last_token);
-		current = current->next;
-	}
-
-	free(last_token);
-}
-
 BUFFER_CHAIN *buf_parse_file(char *filepath)
 {
 	BUFFER_CHAIN *buf_chain = malloc(sizeof(BUFFER_CHAIN));
@@ -155,7 +139,7 @@ BUFFER_CHAIN *buf_parse_file(char *filepath)
 	fclose(fp);
 	free(s);
 
-	buf_update_syntax_hl(buf_chain);
+	syntax_hl_update(buf_chain);
 	
 	return buf_chain;
 }
@@ -178,7 +162,7 @@ BUFFER_CHAIN *buf_new_chain()
 
 	buf_chain->syntax = NULL;
 
-	buf_update_syntax_hl(buf_chain);
+	syntax_hl_update(buf_chain);
 	
 	return buf_chain;
 }
@@ -286,7 +270,7 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		buf_render_line(buf_node);
 	}
 
-	buf_update_syntax_hl(buf_chain);
+	syntax_hl_update(buf_chain);
 }
 
 void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
@@ -331,7 +315,7 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		buf_invalidate_cache(buf_chain);
 	}
 
-	buf_update_syntax_hl(buf_chain);
+	syntax_hl_update(buf_chain);
 }
 
 char *buf_read(BUFFER_CHAIN *buf_chain, int *len)

@@ -924,7 +924,8 @@ void editor_process_command(char* command)
 			}
 
 			editor.buf_chain->syntax = syntax;
-			buf_update_syntax_hl(editor.buf_chain);
+			// buf_update_syntax_hl(editor.buf_chain);
+			syntax_hl_update(editor.buf_chain);
 		}
 		else
 		{

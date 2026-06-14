@@ -1,3 +1,4 @@
+typedef struct BUFFER_CHAIN BUFFER_CHAIN;
 typedef struct BUFFER_NODE BUFFER_NODE;
 
 typedef struct SYNTAX 
@@ -34,4 +35,4 @@ enum TOKEN
 SYNTAX *get_syntax_by_filetype(char *filepath);
 SYNTAX *get_syntax_by_filematch(char *filepath);
 int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token);
-void syntax_hl_update(SYNTAX *syntax, BUFFER_NODE *buf_node, char **multiline_end, char **last_token);
+void syntax_hl_update(BUFFER_CHAIN *buf_chain);

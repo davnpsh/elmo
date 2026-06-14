@@ -38,12 +38,6 @@ void buf_free_node(BUFFER_NODE *buf_node);
 void buf_render_line(BUFFER_NODE *buf_node);
 
 /**
- * Updates the syntax highlight of the entire buffer.
- * @param BUFFER_CHAIN *buf_chain
- */
-void buf_update_syntax_hl(BUFFER_CHAIN *buf_chain);
-
-/**
  * Allocates a new BUFFER_NODE wrapping the given string.
  * @param char *s Pointer to the line
  * @param int len Length of the line
