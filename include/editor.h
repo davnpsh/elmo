@@ -102,6 +102,7 @@ typedef struct EDITOR
 
 void editor_set_status_msg(char *fmt, ...);
 int editor_set_window_size();
+void editor_handle_window_resize(int sig);
 void editor_open(char *filepath);
 void editor_save();
 int editor_get_editable_area_width();

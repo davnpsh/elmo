@@ -1,3 +1,5 @@
+#define _DEFAULT_SOURCE
+
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <errno.h>
@@ -7,6 +9,7 @@
 #include <libgen.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <signal.h>
 
 #include "editor.h"
 #include "abuf.h"
@@ -40,17 +43,24 @@ int editor_set_window_size()
 	if (editor.screen_rows != ws.ws_row - RESERVED_ROWS || editor.screen_cols != ws.ws_col)
 	{
 		editor.cursor.x = 0;
+		editor.sticky_col = 0;
 		editor.cursor.y = 0;
-
-		// Skip initialization
-		if (editor.screen_rows != 0 && editor.screen_cols != 0)
-			editor_set_status_msg("window resized!");
 	}
 
 	editor.screen_rows = ws.ws_row - RESERVED_ROWS;	// reserve space for status and prompt bar
 	editor.screen_cols = ws.ws_col;
 	
 	return 0;
+}
+
+void editor_handle_window_resize(int sig)
+{
+	(void)sig;
+	
+	if (editor_set_window_size() == -1) 
+		die("editor_set_window_size");
+
+	editor_refresh_screen();
 }
 
 void editor_open(char *filepath)
@@ -509,7 +519,9 @@ int editor_read_key()
 	
 	while ((nread = read(STDIN_FILENO, &c, 1)) != 1)
 	{
-		if (nread == -1 && errno != EAGAIN) 
+		if (nread == -1 
+			&& errno != EAGAIN 
+			&& errno != EINTR) 
 			die("read");
 	}
 	
@@ -1094,10 +1106,6 @@ void editor_process_keypress()
 	static int quit_times = QUIT_TIMES;
 	
 	int c = editor_read_key();
-	
-	// Refresh window dimensiones
-	if (editor_set_window_size() == -1) 
-		die("editor_set_window_size");
 
 	// On any keypress, just start a new chain
 	if (editor.buf_chain == NULL) 
@@ -1244,6 +1252,11 @@ void init_editor()
 	editor.filepath = NULL;
 	editor.status_msg[0] = '\0';
 	editor.status_msg_time = 0;
+
+	// Window resize
+	struct sigaction winch_act;
+	winch_act.sa_handler = editor_handle_window_resize;
+	sigaction(SIGWINCH, &winch_act, NULL);
 	
 	if (editor_set_window_size() == -1) 
 		die("editor_set_window_size");
