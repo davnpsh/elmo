@@ -425,6 +425,11 @@ void syntax_hl_update(BUFFER_CHAIN *buf_chain)
 		while (idx < current->rlen)
 		{
 			int token = tokenize(buf_chain->syntax, &(current->r)[idx], &len, &multiline_end, &last_token);
+
+			// TODO: Find out why len overflows!
+			if (idx + len > current->rlen)
+        		len = current->rlen - idx;
+			
 			memset(&(current->h)[idx], token, len);
 			idx += len;
 		}
