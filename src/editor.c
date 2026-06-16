@@ -708,7 +708,7 @@ void editor_move_cursor(int c)
 	}
 }
 
-void editor_move_word(int c)
+void editor_move_by_word(int c)
 {
 	BUFFER_NODE *current_line = CURRENT_LINE;
 	int pos = editor.cursor.x;
@@ -721,10 +721,9 @@ void editor_move_word(int c)
 			return;
 		}
 		
-		while (pos > 0 
-			&& (current_line->s[pos - 1] == ' ' || current_line->s[pos - 1] == '\t')) pos--;
-		while (pos > 0 
-			&& (current_line->s[pos - 1] != ' ' && current_line->s[pos - 1] != '\t')) pos--;
+		CHAR_TYPE initial_ctype = get_char_type(current_line->s[pos - 1]);
+		while (pos > 0
+			&& initial_ctype == get_char_type(current_line->s[pos - 1])) pos--;
 	}
 	else
 	{
@@ -734,10 +733,9 @@ void editor_move_word(int c)
 			return;
 		}
 
+		CHAR_TYPE initial_ctype = get_char_type(current_line->s[pos]);
 		while (pos < current_line->len 
-			&& (current_line->s[pos - 1] == ' ' || current_line->s[pos - 1] == '\t')) pos++;
-		while (pos < current_line->len 
-			&& (current_line->s[pos - 1] != ' ' && current_line->s[pos - 1] != '\t')) pos++;
+			&& initial_ctype == get_char_type(current_line->s[pos])) pos++;
 	}
 
 	editor.cursor.x = pos;
@@ -1203,7 +1201,7 @@ void editor_process_keypress()
 
 		case CTRL_LEFT:
 		case CTRL_RIGHT:
-			editor_move_word(c);
+			editor_move_by_word(c);
 			break;
 
 		case SHIFT_UP:

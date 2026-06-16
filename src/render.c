@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "render.h"
 #include "syntax.h"
@@ -115,6 +116,14 @@ int token_to_color(unsigned char token)
 		case TK_KEYWORD: return 33;
 		default: return 37;
 	}
+}
+
+CHAR_TYPE get_char_type(char c)
+{
+	if (isalpha(c) || c == '_') return WORD;
+	if (c == ' ' || c == '\t') return WHITESPACE;
+	
+	return PUNCTUATION;
 }
 
 int digit_count(int n)

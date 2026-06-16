@@ -115,7 +115,7 @@ void editor_draw_welcome(APPEND_BUFFER *ab);
 void editor_refresh_screen();
 int editor_read_key();
 void editor_move_cursor(int c);
-void editor_move_word(int c);
+void editor_move_by_word(int c);
 void editor_select(int c);
 void editor_insert(int c);
 void editor_jump(int shift);
