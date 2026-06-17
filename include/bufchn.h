@@ -14,15 +14,26 @@ typedef struct BUFFER_NODE
 	char *h;	// Highlight map
 	struct BUFFER_NODE *prev;
 	struct BUFFER_NODE *next;
+
+	// Render cache
+	int display_row_offset;
+	int display_wrap_rows;
 } BUFFER_NODE;
 
 typedef struct BUFFER_CHAIN
 {
 	BUFFER_NODE *head;
 	int lines_num;
-	BUFFER_NODE *cache_node;	// Cache
-	int cache_line_num;			// Cache
 	void *syntax;
+
+	// Node cache
+	BUFFER_NODE *cache_node;
+	int cache_line_num;
+
+	// Render cache
+	int total_display_rows;
+	Bool update_layout;
+	int editor_width_cache;
 } BUFFER_CHAIN;
 
 /**

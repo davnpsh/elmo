@@ -101,13 +101,11 @@ int editor_get_editable_area_width()
 
 void editor_scroll()
 {
-	int current_width = editor_get_editable_area_width();
-	
-	render_coords(&editor.cursor_render.x, &editor.cursor_render.y, editor.cursor.x, editor.cursor.y, editor.buf_chain, current_width);
+	render_coords(&editor.cursor_render.x, &editor.cursor_render.y, editor.cursor.x, editor.cursor.y, editor.buf_chain);
 
 	if (editor.sticky_col_update)
 	{
-		editor.sticky_col = editor.cursor_render.x % current_width;
+		editor.sticky_col = editor.cursor_render.x % editor_get_editable_area_width();
 		editor.sticky_col_update = FALSE;
 	}
 
@@ -119,7 +117,7 @@ void editor_scroll()
 	int below_visible_rows = 2;
 	
 	if ((editor.cursor_render.y >= editor.render_offset + editor.screen_rows - below_visible_rows)
-		&& (editor.render_offset + editor.screen_rows < get_total_display_rows(editor.buf_chain, current_width)))
+		&& (editor.render_offset + editor.screen_rows < editor.buf_chain->total_display_rows))
 	{
 		editor.render_offset = editor.cursor_render.y - editor.screen_rows + 1 + below_visible_rows;
 	}
@@ -180,7 +178,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 	
 	int row_offset, wrap_offset;
 
-	get_offset_coordinates(&row_offset, &wrap_offset, editor.render_offset, editor.buf_chain, current_width);
+	get_offset_coordinates(&row_offset, &wrap_offset, editor.render_offset, editor.buf_chain);
 	
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + row_offset, TRUE);
 
@@ -203,7 +201,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			reset_current_line_hl = FALSE;
 		}
 
-		if (y + editor.render_offset < get_total_display_rows(editor.buf_chain, current_width))
+		if (y + editor.render_offset < editor.buf_chain->total_display_rows)
 		{
 			// -- HIGHLIGHT CURRENT LINE --
 			if (!editor.text_selected 
@@ -222,8 +220,6 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 			// Calculate which segment of the logical part
 			// print in the display line
-			int line_display_rows = get_line_display_rows(current_line->rlen, current_width);
-
 			int start = current_width * inner_offset;
 
 			char *r = &current_line->r[start];
@@ -234,7 +230,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			if (len < 0) len = 0;
 			if (len > current_width) len = current_width;
 
-			if (inner_offset == line_display_rows - 1)
+			if (inner_offset == current_line->display_wrap_rows - 1)
 			{
 				current_line = current_line->next;
 				inner_offset = 0;
@@ -468,6 +464,8 @@ void editor_refresh_screen()
 	}
 	else
 	{
+		update_layout(editor.buf_chain, editor_get_editable_area_width());
+		
 		editor.line_num_gutter_width = 0;
 		if (editor.show_line_num_gutter)
 		{
@@ -621,7 +619,7 @@ void editor_move_cursor(int c)
 			int editable_area_width = editor_get_editable_area_width();
 			
 			int current_row_offset, current_wrap_offset;	
-			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_render.y, editor.buf_chain, editable_area_width);
+			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_render.y, editor.buf_chain);
 
 			// Moving up, but in the same logical line
 			if (current_wrap_offset > 0)
@@ -633,7 +631,7 @@ void editor_move_cursor(int c)
 			else if (editor.cursor.y != 0)
 			{
 				int prev_row_offset, prev_wrap_offset;
-				get_offset_coordinates(&prev_row_offset, &prev_wrap_offset, editor.cursor_render.y - 1, editor.buf_chain, editable_area_width);
+				get_offset_coordinates(&prev_row_offset, &prev_wrap_offset, editor.cursor_render.y - 1, editor.buf_chain);
 
 				editor.cursor.y--;
 
@@ -648,14 +646,16 @@ void editor_move_cursor(int c)
 		case DOWN:
 		{
 			int editable_area_width = editor_get_editable_area_width();
+
+			update_layout(editor.buf_chain, editable_area_width);
 			
-			if (editor.cursor_render.y > get_total_display_rows(editor.buf_chain, editable_area_width)) break;
+			if (editor.cursor_render.y > editor.buf_chain->total_display_rows) break;
 
 			int current_row_offset, current_wrap_offset;	
-			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_render.y, editor.buf_chain, editable_area_width);
+			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_render.y, editor.buf_chain);
 
 			int next_row_offset, next_wrap_offset;
-			get_offset_coordinates(&next_row_offset, &next_wrap_offset, editor.cursor_render.y + 1, editor.buf_chain, editable_area_width);
+			get_offset_coordinates(&next_row_offset, &next_wrap_offset, editor.cursor_render.y + 1, editor.buf_chain);
 
 			// Moving down, but in the same logical line
 			if (current_row_offset == next_row_offset)
@@ -794,11 +794,9 @@ void editor_select(int c)
 		start = editor.select_end;
 		end = editor.select_start;
 	}
-
-	int current_width = editor_get_editable_area_width();
-
-	render_coords(&editor.r_select_start.x, &editor.r_select_start.y, start.x, start.y, editor.buf_chain, current_width);
-	render_coords(&editor.r_select_end.x, &editor.r_select_end.y, end.x, end.y, editor.buf_chain, current_width);
+	
+	render_coords(&editor.r_select_start.x, &editor.r_select_start.y, start.x, start.y, editor.buf_chain);
+	render_coords(&editor.r_select_end.x, &editor.r_select_end.y, end.x, end.y, editor.buf_chain);
 }
 
 void editor_insert(int c)
@@ -813,6 +811,7 @@ void editor_insert(int c)
 	else editor.cursor.x++;
 	
 	editor.dirty = TRUE;
+	editor.buf_chain->update_layout = TRUE;
 }
 
 void editor_jump(int shift)
@@ -869,6 +868,7 @@ void editor_delete()
 	}
 	
 	editor.dirty = TRUE;
+	editor.buf_chain->update_layout = TRUE;
 }
 
 void editor_process_command(char* command)

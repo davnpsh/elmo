@@ -84,6 +84,9 @@ BUFFER_CHAIN *buf_parse_file(char *filepath)
 	buf_chain->cache_node = NULL;
 	buf_chain->cache_line_num = 0;
 	buf_chain->syntax = get_syntax_by_filematch(filepath);
+	buf_chain->total_display_rows = 0;
+	buf_chain->update_layout = FALSE;
+	buf_chain->editor_width_cache = 0;
 	
 	FILE *fp = fopen(filepath, "r");
 	if (!fp) die("fopen");
@@ -163,6 +166,10 @@ BUFFER_CHAIN *buf_new_chain()
 	buf_chain->syntax = NULL;
 
 	syntax_hl_update(buf_chain);
+
+	buf_chain->total_display_rows = 0;
+	buf_chain->update_layout = FALSE;
+	buf_chain->editor_width_cache = 0;
 	
 	return buf_chain;
 }

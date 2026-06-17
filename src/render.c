@@ -40,44 +40,44 @@ int cx_to_rx(char *s, int cursor_x)
 	return cursor_rx;
 }
 
-int get_line_display_rows(int line_len, int width)
+int get_line_wrap_rows(int line_len, int width)
 {
 	if (line_len == 0) return 1;
 	return (line_len + width - 1) / width;
 }
 
-int get_total_display_rows(BUFFER_CHAIN *buf_chain, int width)
+void update_layout(BUFFER_CHAIN *buf_chain, int width)
 {
+	if (buf_chain->editor_width_cache == width 
+		&& buf_chain->total_display_rows != 0
+		&& !buf_chain->update_layout)
+        return;
+
 	BUFFER_NODE *current = buf_chain->head;
-	int total = 0;
+    int total = 0;
 
-	while (current)
-	{
-		total += get_line_display_rows(current->rlen, width);
-		current = current->next;
-	}
+    while (current)
+    {
+    	current->display_row_offset = total;
+    	current->display_wrap_rows = get_line_wrap_rows(current->rlen, width);
+        total += current->display_wrap_rows;
+        current = current->next;
+    }
 
-	return total;
+    buf_chain->total_display_rows = total;
+    buf_chain->editor_width_cache = width;
 }
 
-void render_coords(int *rx, int *ry, int x, int y, BUFFER_CHAIN *buf_chain, int width)
+void render_coords(int *rx, int *ry, int x, int y, BUFFER_CHAIN *buf_chain)
 {
-	BUFFER_NODE *current_line = buf_chain->head;
-	int display_row = 0;
+	BUFFER_NODE *line = buf_get_line_at(buf_chain, y + 1, FALSE);
 
-	for (int i = 0; i < y && current_line; i++)
-	{
-		display_row += get_line_display_rows(current_line->rlen, width);
-		current_line = current_line->next;
-	}
-
-	int rx_pos = cx_to_rx(current_line->s, x);
-
-	*ry = display_row + rx_pos / width;
-	*rx = rx_pos % width;
+	int rx_pos = cx_to_rx(line->s, x);
+	*ry = line->display_row_offset + rx_pos / buf_chain->editor_width_cache;
+	*rx = rx_pos % buf_chain->editor_width_cache;
 }
 
-void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CHAIN *buf_chain, int width)
+void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CHAIN *buf_chain)
 {
 	int r_offset = 0;
 	int w_offset = 0;
@@ -86,7 +86,7 @@ void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CH
 
 	while (ry > 0)
 	{
-		int lines = get_line_display_rows(current_line->rlen, width);
+		int lines = current_line->display_wrap_rows;
 
 		if (lines > ry) 
 		{
