@@ -203,7 +203,9 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			reset_current_line_hl = FALSE;
 		}
 
-		if (y == 1 && editor.welcome && editor.screen_rows >= MIN_ROWS_FOR_WELCOME) break;
+		if (y == 1 && editor.welcome
+			&& editor.screen_rows >= MIN_ROWS_FOR_WELCOME
+			&& editor.screen_cols >= MIN_COLS_FOR_WELCOME) break;
 
 		if (y + editor.render_offset < editor.buf_chain->total_display_rows)
 		{
@@ -383,115 +385,65 @@ void editor_draw_message_bar(APPEND_BUFFER *ab)
 
 void editor_draw_welcome(APPEND_BUFFER *ab)
 {
-	// Draw Dorothy!!!!!!!!!!!
 	char *dorothy[] = {
-		"  )............(  ",
-		"/              \\",
-		"|                |",
-		"|          <><   |",
-		" \\              / ",
-		"  ')__________('  "
-	};
-	int dorothy_size = sizeof(dorothy) / sizeof(dorothy[0]);
+        "  )............(  ",
+        "/              \\",
+        "|                |",
+        "|          <><   |",
+        " \\              / ",
+        "  ')__________('  "
+    };
+    int dorothy_size = sizeof(dorothy) / sizeof(dorothy[0]);
 
-	int x_padding, y_padding;
-	int initial_padding = (editor.screen_rows - dorothy_size) / 2
-						-1		// Writing line
-	#ifdef DEBUG_BUILD
-    					-1		// Debug tag
-    #endif
-						;
+    char version_str[80];
+    snprintf(version_str, sizeof(version_str), "version %s", VERSION);
 
-	y_padding = initial_padding;
+    char *lines[16];
+    int line_count = 0;
 
-	while (y_padding--)
-	{
-		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
-		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
-	}
+    lines[line_count++] = NULL;            // writing line
 
-	for (int i = 0; i < 6; i++)
-	{
-		x_padding = (editor.screen_cols - strlen(dorothy[i])) / 2;
+    for (int i = 0; i < dorothy_size; i++)
+        lines[line_count++] = dorothy[i];
 
-		while (x_padding--) ab_append_string(ab, " ");
+    lines[line_count++] = NULL;            // blank line
+    lines[line_count++] = "welcome to elmo!";
+    lines[line_count++] = version_str;
 
-		ab_append_string(ab, dorothy[i]);
-		
-		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
-		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
-	}
+#ifdef DEBUG_BUILD
+    lines[line_count++] = "-DEBUG BUILD-";
+#endif
 
-	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
-	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
-	
-	// Welcome message
-	char *welcome = "welcome to elmo!";
-	
-	x_padding = (editor.screen_cols - strlen(welcome)) / 2;
+    lines[line_count++] = "by daru";
 
-	while (x_padding--) ab_append_string(ab, " ");
+    int y_padding = (editor.screen_rows - line_count) / 2;
 
-	ab_append_string(ab, welcome);
+    while (y_padding--)
+    {
+        ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+        ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+    }
 
-	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
-	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+    for (int i = 0; i < line_count; i++)
+    {
+        char *text = lines[i] ? lines[i] : "";
+        int x_padding = (editor.screen_cols - (int)strlen(text)) / 2;
 
-	// Version
-	char version_str[80];
-	int version_len = snprintf(version_str, sizeof(version_str), "version %s", VERSION);
+        while (x_padding-- > 0) ab_append_string(ab, " ");
 
-	x_padding = (editor.screen_cols - version_len) / 2;
+        ab_append_string(ab, text);
 
-	while (x_padding--) ab_append_string(ab, " ");
+        ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+        ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+    }
 
-	ab_append_string(ab, version_str);
+    y_padding = editor.screen_rows - ((editor.screen_rows - line_count) / 2) - line_count - 1;
 
-	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
-	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
-
-	// Debug
-	#ifdef DEBUG_BUILD
-	
-	char *debug = "-DEBUG BUILD-";
-
-	x_padding = (editor.screen_cols - strlen(debug)) / 2;
-
-	while (x_padding--) ab_append_string(ab, " ");
-
-	ab_append_string(ab, debug);
-
-	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
-	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
-
-	#endif
-	
-	// Author
-	char *author = "by daru";
-	
-	x_padding = (editor.screen_cols - strlen(author)) / 2;
-
-	while (x_padding--) ab_append_string(ab, " ");
-
-	ab_append_string(ab, author);
-
-	y_padding = editor.screen_rows 
-		- initial_padding
-		- 6				// dorothy
-		- 1				// space
-		- 1				// welcome
-		- 1				// version
-		#ifdef DEBUG_BUILD
-		- 1				// debug
-		#endif
-		- 1				// author
-		;
-
-	while (y_padding--)
-	{
-		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
-		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
-	}
+    while (y_padding--)
+    {
+        ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+        ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+    }
 }
 
 void editor_refresh_screen()
@@ -518,7 +470,9 @@ void editor_refresh_screen()
 	
 	editor_draw_buffer(&ab);
 
-	if (editor.welcome && editor.screen_rows >= MIN_ROWS_FOR_WELCOME)
+	if (editor.welcome 
+		&& editor.screen_rows >= MIN_ROWS_FOR_WELCOME 
+		&& editor.screen_cols >= MIN_COLS_FOR_WELCOME)
 		editor_draw_welcome(&ab);
 	
 	editor_draw_status_bar(&ab);
