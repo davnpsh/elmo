@@ -79,6 +79,49 @@ char *Python_keywords[] = {
 char *Markdown_extensions[] = { ".md", NULL };
 char *Markdown_keywords[] = { NULL };
 
+char *Assembly_extensions[] = { ".s", ".S", ".asm", NULL };
+char *Assembly_keywords[] = {
+	/* x86 common instructions */
+    "mov",      "movb",     "movw",     "movl",     "movq",
+    "push",     "pushq",    "pop",      "popq",
+    "lea",      "leaq",
+    "add",      "addl",     "addq",     "sub",      "subl",     "subq",
+    "mul",      "imul",     "div",      "idiv",
+    "inc",      "dec",
+    "and",      "or",       "xor",      "not",      "neg",
+    "shl",      "shr",      "sal",      "sar",
+    "cmp",      "test",
+    "jmp",      "je",       "jne",      "jz",       "jnz",
+    "jg",       "jge",      "jl",       "jle",
+    "ja",       "jae",      "jb",       "jbe",
+    "call",     "ret",      "leave",
+    "nop",      "hlt",
+    "int",      "syscall",
+
+    /* MIPS arithmetic / logical */
+    "add",      "addu",     "addi",     "addiu",
+    "sub",      "subu",
+    "mul",      "mult",     "multu",
+    "div",      "divu",		"paddub",
+    "and",      "andi",     "or",       "ori",
+    "xor",      "xori",     "nor",
+    "sll",      "srl",      "sra",
+    "sllv",     "srlv",     "srav",
+    "slt",      "slti",     "sltu",     "sltiu",
+    "lw",       "sw",       "lb",       "lbu",
+    "lq",		"sq",		"b",
+    "mtc1",		"dsll32",	"dsra32",
+    "lh",       "lhu",      "sb",       "sh",
+    "lui",      "la",       "li",
+    "beq",      "bne",      "bgt",      "bge",
+    "blt",      "ble",      "bgtz",     "bltz",
+    "j",        "jal",      "jr",       "jalr",
+    "mfhi",     "mflo",     "mthi",     "mtlo",
+    "move",
+    "syscall",  "nop",      "break",
+    NULL
+};
+
 SYNTAX syntax_db[] = {
 	{
 		"c",
@@ -115,6 +158,15 @@ SYNTAX syntax_db[] = {
 		NULL,
 		NULL,
 		0
+	},
+	{
+	    "assembly",
+	    Assembly_extensions,
+	    Assembly_keywords,
+	    ";",
+	    "/*",
+	    "*/",
+	    HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
 	}
 };
 
@@ -213,22 +265,44 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char *last
 		c++;
 		(*len)++;
 
+		Bool hex = FALSE;
+
 		if (*c && *c == 'x')
 		{
 			c++;
 			(*len)++;
-		}
-		
-		while (isdigit(*c) || *c == '.')
-		{
-			c++;
-			(*len)++;
+
+			hex = TRUE;
 		}
 
-		if (*c && *c == 'f')
+		if (hex)
 		{
-			c++;
-			(*len)++;
+			while (isdigit(*c) 
+				|| *c == 'A'
+				|| *c == 'B'
+				|| *c == 'C'
+				|| *c == 'D'
+				|| *c == 'E'
+				|| *c == 'F'
+			)
+			{
+				c++;
+				(*len)++;
+			}
+		}
+		else
+		{
+			while (isdigit(*c) || *c == '.')
+			{
+				c++;
+				(*len)++;
+			}
+
+			if (*c && *c == 'f')
+			{
+				c++;
+				(*len)++;
+			}
 		}
 
 		return TK_NUMBER;

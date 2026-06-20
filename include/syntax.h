@@ -1,3 +1,6 @@
+#ifndef SYNTAX_H
+#define SYNTAX_H
+
 typedef struct BUFFER_CHAIN BUFFER_CHAIN;
 typedef struct BUFFER_NODE BUFFER_NODE;
 
@@ -21,6 +24,10 @@ extern SYNTAX syntax_db[];
 
 #define SYNTAX_ENTRIES (sizeof(syntax_db) / sizeof(syntax_db[0]))
 
+typedef int Bool;
+#define TRUE 1
+#define FALSE 0
+
 enum TOKEN
 {
 	TK_NORMAL = 0,
@@ -37,3 +44,5 @@ SYNTAX *get_syntax_by_filematch(char *filepath);
 int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char *last_token);
 int syntax_hl_update_region(BUFFER_CHAIN *buf_chain, int line);
 void syntax_hl_update_buf(BUFFER_CHAIN *buf_chain);
+
+#endif /* SYNTAX_H */
