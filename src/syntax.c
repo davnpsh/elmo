@@ -180,14 +180,19 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char *last
 	c = s;
 	*len = 0;
 
+	int multiline_comment_start_len = strlen(syntax->multiline_comment_start);
+	int multiline_comment_end_len = strlen(syntax->multiline_comment_end);
+
 	// For multi-line comments and strings terminators
 	if (*multiline_end != NULL)
 	{
+		int multiline_end_len = strlen(*multiline_end);
+		
 		while (*c)
 		{
-			if (strncmp(c, *multiline_end, strlen(*multiline_end)) == 0)
+			if (strncmp(c, *multiline_end, multiline_end_len) == 0)
 			{
-				(*len) += strlen(*multiline_end);
+				(*len) += multiline_end_len;
 				*multiline_end = NULL;
 				return *last_token;
 			}
@@ -277,18 +282,18 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char *last
 	}
 	// Multi-line comments
 	else if (syntax->multiline_comment_start != NULL 
-		&& (strncmp(c, syntax->multiline_comment_start, strlen(syntax->multiline_comment_start)) == 0))
+		&& (strncmp(c, syntax->multiline_comment_start, multiline_comment_start_len) == 0))
 	{
 		// Skip opening
-		c += strlen(syntax->multiline_comment_start);
-		(*len) += strlen(syntax->multiline_comment_start);
+		c += multiline_comment_start_len;
+		(*len) += multiline_comment_start_len;
 		
 		while (*c)
 		{
 			// If it ends on the same line
-			if (strncmp(c, syntax->multiline_comment_end, strlen(syntax->multiline_comment_end)) == 0)
+			if (strncmp(c, syntax->multiline_comment_end, multiline_comment_end_len) == 0)
 			{
-				(*len) += strlen(syntax->multiline_comment_end);
+				(*len) += multiline_comment_end_len;
 				return TK_COMMENT;
 			}
 			
