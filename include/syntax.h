@@ -34,5 +34,6 @@ enum TOKEN
 
 SYNTAX *get_syntax_by_filetype(char *filepath);
 SYNTAX *get_syntax_by_filematch(char *filepath);
-int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token);
-void syntax_hl_update(BUFFER_CHAIN *buf_chain);
+int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char *last_token);
+int syntax_hl_update_region(BUFFER_CHAIN *buf_chain, int line);
+void syntax_hl_update_buf(BUFFER_CHAIN *buf_chain);

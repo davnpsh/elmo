@@ -72,6 +72,11 @@ BUFFER_NODE *buf_add_new_line(char *s, int len)
 	
 	buf_node->prev = NULL;
 	buf_node->next = NULL;
+
+	buf_node->display_row_offset = 0;
+	buf_node->display_wrap_rows = 0;
+	
+	buf_node->hl_multiline_state = -1;
 	
 	return buf_node;
 }
@@ -142,7 +147,7 @@ BUFFER_CHAIN *buf_parse_file(char *filepath)
 	fclose(fp);
 	free(s);
 
-	syntax_hl_update(buf_chain);
+	syntax_hl_update_buf(buf_chain);
 	
 	return buf_chain;
 }
@@ -165,7 +170,7 @@ BUFFER_CHAIN *buf_new_chain()
 
 	buf_chain->syntax = NULL;
 
-	syntax_hl_update(buf_chain);
+	syntax_hl_update_buf(buf_chain);
 
 	buf_chain->total_display_rows = 0;
 	buf_chain->update_layout = FALSE;
@@ -261,10 +266,12 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		buf_chain->lines_num++;
 
 		buf_invalidate_cache(buf_chain);
+
+		syntax_hl_update_region(buf_chain, line_num);
+		syntax_hl_update_region(buf_chain, line_num + 1);
 	}
 	else
 	{
-		// buf_node->s = realloc(buf_node->s, buf_node->len + 2);
 		char *tmp = realloc(buf_node->s, buf_node->len + 2);
 		if (tmp) buf_node->s = tmp;
 		
@@ -275,9 +282,9 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		buf_node->s[offset] = c;
 		
 		buf_render_line(buf_node);
-	}
 
-	syntax_hl_update(buf_chain);
+		syntax_hl_update_region(buf_chain, line_num);
+	}
 }
 
 void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
@@ -295,6 +302,8 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		buf_node->s[buf_node->len] = '\0';
 		
 		buf_render_line(buf_node);
+
+		syntax_hl_update_region(buf_chain, line_num);
 	}
 	else
 	{
@@ -320,9 +329,10 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 		buf_chain->lines_num--;
 
 		buf_invalidate_cache(buf_chain);
-	}
 
-	syntax_hl_update(buf_chain);
+		syntax_hl_update_region(buf_chain, line_num - 1);
+		syntax_hl_update_region(buf_chain, line_num);
+	}
 }
 
 char *buf_read(BUFFER_CHAIN *buf_chain, int *len)

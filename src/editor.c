@@ -923,7 +923,12 @@ void editor_process_command(char* command)
 	{
 		pch = strtok(NULL, " ");
 		
-		if (pch != NULL)
+		if (strcmp(pch, "off") == 0)
+		{
+			editor.buf_chain->syntax = NULL;
+			syntax_hl_update_buf(editor.buf_chain);
+		}
+		else if (pch != NULL)
 		{
 			SYNTAX *syntax = get_syntax_by_filetype(pch);
 
@@ -934,8 +939,7 @@ void editor_process_command(char* command)
 			}
 
 			editor.buf_chain->syntax = syntax;
-			// buf_update_syntax_hl(editor.buf_chain);
-			syntax_hl_update(editor.buf_chain);
+			syntax_hl_update_buf(editor.buf_chain);
 		}
 		else
 		{

@@ -3,6 +3,9 @@
  * for rendering text in the editor
  */
 
+#ifndef RENDER_H
+#define RENDER_H
+
 typedef struct BUFFER_CHAIN BUFFER_CHAIN;
 
 typedef enum CHAR_TYPE
@@ -11,6 +14,10 @@ typedef enum CHAR_TYPE
 	WORD,
 	PUNCTUATION
 } CHAR_TYPE;
+
+typedef int Bool;
+#define TRUE 1
+#define FALSE 0
 
 #define TAB_STOP 4
 
@@ -23,3 +30,5 @@ void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CH
 int token_to_color(unsigned char token);
 CHAR_TYPE get_char_type(char c);
 int digit_count(int n);
+
+#endif /* RENDER_H */

@@ -167,7 +167,7 @@ SYNTAX *get_syntax_by_filematch(char *filepath)
 	return NULL;
 }
 
-int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **last_token)
+int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char *last_token)
 {
 	if (syntax == NULL)
 	{
@@ -189,14 +189,14 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 			{
 				(*len) += strlen(*multiline_end);
 				*multiline_end = NULL;
-				return **last_token;
+				return *last_token;
 			}
 
 			c++;
 			(*len)++;
 		}
 
-		return **last_token;
+		return *last_token;
 	}
 
 	// Number
@@ -298,7 +298,7 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 
 		// If it is indeed, multi-line
 		*multiline_end = syntax->multiline_comment_end;
-		**last_token = TK_COMMENT;
+		*last_token = TK_COMMENT;
 
 		return TK_COMMENT;
 	}
@@ -375,15 +375,15 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 
 				if (*c == '(') 
 				{
-					**last_token = TK_NUMBER;
+					*last_token = TK_NUMBER;
 					return TK_NUMBER;
 				}
 			}
-			else if (**last_token == TK_NUMBER)
+			else if (*last_token == TK_NUMBER)
 			{
 				if (*c != '(')
 				{
-					**last_token = TK_NORMAL;
+					*last_token = TK_NORMAL;
 				}
 				else
 				{
@@ -409,33 +409,79 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char **las
 	}
 }
 
-void syntax_hl_update(BUFFER_CHAIN *buf_chain)
+// Region = Normal line OR comment/string block
+int syntax_hl_update_region(BUFFER_CHAIN *buf_chain, int line)
 {
-	BUFFER_NODE *current = buf_chain->head;
+	BUFFER_NODE *current = buf_get_line_at(buf_chain, line, TRUE);
+	int current_line = line;
 
 	char *multiline_end = NULL;
-	char *last_token = malloc(sizeof(char));
-	
+	char last_token = -1;
+
+	// Start highlight from the start of the comment/string block
+	while (current && current->prev
+		&& (current->prev->hl_multiline_state == TK_COMMENT || current->prev->hl_multiline_state == TK_STRING))
+	{
+		current = current->prev;
+	}
+
 	while (current)
 	{
 		current->h = realloc(current->h, current->rlen);
 		
 		int len, idx = 0;
+	
+		while (idx < current->rlen)
+		{
+			int token = tokenize(buf_chain->syntax, &(current->r)[idx], &len, &multiline_end, &last_token);
+	
+			// TODO: Find out why len overflows!
+			if (idx + len > current->rlen)
+	      		len = current->rlen - idx;
+				
+			memset(&(current->h)[idx], token, len);
+			idx += len;
+		}
 
-		// while (idx < current->rlen)
-		// {
-		// 	int token = tokenize(buf_chain->syntax, &(current->r)[idx], &len, &multiline_end, &last_token);
-
-		// 	// TODO: Find out why len overflows!
-		// 	if (idx + len > current->rlen)
-  //       		len = current->rlen - idx;
+		// Stop highlight after 1 normal line or end of comment/string block
+		if (multiline_end == NULL 
+			&& current->hl_multiline_state != TK_COMMENT
+			&& current->hl_multiline_state != TK_STRING)
+		{
+			current->hl_multiline_state = -1;
+			break;
+		}
+		// Continue comment/string block
+		else {
+			current->hl_multiline_state = last_token;
 			
-		// 	memset(&(current->h)[idx], token, len);
-		// 	idx += len;
-		// }
-		
-		current = current->next;
+			current = current->next;
+			current_line++;
+		}
 	}
 
-	free(last_token);
+	return current_line;
+}
+
+// Update entire buffer
+void syntax_hl_update_buf(BUFFER_CHAIN *buf_chain)
+{
+	BUFFER_NODE *current = buf_chain->head;
+	int current_line = 1;
+	
+	while (current)
+	{
+		int end = syntax_hl_update_region(buf_chain, current_line);
+
+		if (end == current_line) 
+		{
+			current = current->next;
+			current_line++;
+		}
+		else
+		{
+			current = buf_get_line_at(buf_chain, end + 1, TRUE);
+			current_line = end + 1;
+		}
+	}
 }

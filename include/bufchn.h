@@ -18,6 +18,10 @@ typedef struct BUFFER_NODE
 	// Render cache
 	int display_row_offset;
 	int display_wrap_rows;
+
+	// Highlight multiline state
+	// (comment/string)
+	char hl_multiline_state;
 } BUFFER_NODE;
 
 typedef struct BUFFER_CHAIN
