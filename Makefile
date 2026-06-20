@@ -10,7 +10,7 @@ $(PROGRAM_NAME): clean $(OBJ)
 build/%.o: src/%.c | build
 	$(CC) $(CFLAGS) -O2 -c $< -o $@
 
-debug: CFLAGS += -O0 -g -fsanitize=address,undefined
+debug: CFLAGS += -O0 -g -fsanitize=address,undefined -DDEBUG_BUILD
 debug: clean $(OBJ)
 	$(CC) $(OBJ) -fsanitize=address,undefined -o $(PROGRAM_NAME)
 

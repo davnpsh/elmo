@@ -386,7 +386,7 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 	// Draw Dorothy!!!!!!!!!!!
 	char *dorothy[] = {
 		"  )............(  ",
-		" /              \\",
+		"/              \\",
 		"|                |",
 		"|          <><   |",
 		" \\              / ",
@@ -396,7 +396,10 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 
 	int x_padding, y_padding;
 	int initial_padding = (editor.screen_rows - dorothy_size) / 2
-						- 1		// Writing line
+						-1		// Writing line
+	#ifdef DEBUG_BUILD
+    					-1		// Debug tag
+    #endif
 						;
 
 	y_padding = initial_padding;
@@ -446,6 +449,22 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 
 	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
 	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+
+	// Debug
+	#ifdef DEBUG_BUILD
+	
+	char *debug = "-DEBUG BUILD-";
+
+	x_padding = (editor.screen_cols - strlen(debug)) / 2;
+
+	while (x_padding--) ab_append_string(ab, " ");
+
+	ab_append_string(ab, debug);
+
+	ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+	ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+
+	#endif
 	
 	// Author
 	char *author = "by daru";
@@ -462,6 +481,9 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 		- 1				// space
 		- 1				// welcome
 		- 1				// version
+		#ifdef DEBUG_BUILD
+		- 1				// debug
+		#endif
 		- 1				// author
 		;
 
