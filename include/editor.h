@@ -79,6 +79,7 @@ typedef struct EDITOR
 	POSITION r_select_start;	// render
 	POSITION r_select_end;		// render
 
+	Bool welcome;
 	int screen_rows;
 	int screen_cols;
 	Bool dirty;
@@ -97,6 +98,7 @@ typedef struct EDITOR
 #define CTRL_KEY(k) ((k) & 0x1f)
 #define QUIT_TIMES 2
 #define RESERVED_ROWS 2
+#define MIN_ROWS_FOR_WELCOME 20
 
 #define VERSION "1.0.0"
 

@@ -70,6 +70,7 @@ void editor_open(char *filepath)
 	strcpy(editor.filepath, filepath);
 	
 	editor.buf_chain = buf_parse_file(filepath);
+	editor.welcome = FALSE;
 }
 
 void editor_save()
@@ -201,6 +202,8 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 			ab_append_esc_seq(ab, ESC_RESET_BG);
 			reset_current_line_hl = FALSE;
 		}
+
+		if (y == 1 && editor.welcome && editor.screen_rows >= MIN_ROWS_FOR_WELCOME) break;
 
 		if (y + editor.render_offset < editor.buf_chain->total_display_rows)
 		{
@@ -392,8 +395,11 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 	int dorothy_size = sizeof(dorothy) / sizeof(dorothy[0]);
 
 	int x_padding, y_padding;
+	int initial_padding = (editor.screen_rows - dorothy_size) / 2
+						- 1		// Writing line
+						;
 
-	y_padding = (editor.screen_rows - dorothy_size) / 2;
+	y_padding = initial_padding;
 
 	while (y_padding--)
 	{
@@ -449,63 +455,71 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 	while (x_padding--) ab_append_string(ab, " ");
 
 	ab_append_string(ab, author);
+
+	y_padding = editor.screen_rows 
+		- initial_padding
+		- 6				// dorothy
+		- 1				// space
+		- 1				// welcome
+		- 1				// version
+		- 1				// author
+		;
+
+	while (y_padding--)
+	{
+		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+	}
 }
 
 void editor_refresh_screen()
 {
 	APPEND_BUFFER ab = AB_INIT;
+		
+	update_layout(editor.buf_chain, editor_get_editable_area_width());
 	
-	if (editor.buf_chain == NULL)
+	editor.line_num_gutter_width = 0;
+	if (editor.show_line_num_gutter)
 	{
-		ab_append_esc_seq(&ab, ESC_HIDE_CURSOR);
-		ab_append_esc_seq(&ab, ESC_CLEAR_SCREEN);
-		ab_append_esc_seq(&ab, ESC_CURSOR_HOME);
+		editor.line_num_gutter_width = digit_count(editor.buf_chain->lines_num) 
+			// Padding left or right
+			+ 1
+			// Space separator
+			+ 1;
+	}
+	
+	editor_scroll();
+	
+	ab_append_esc_seq(&ab, ESC_HIDE_CURSOR);
+	ab_append_esc_seq(&ab, ESC_CLEAR_SCREEN);
+	ab_append_esc_seq(&ab, ESC_CURSOR_HOME);
+	
+	editor_draw_buffer(&ab);
 
+	if (editor.welcome && editor.screen_rows >= MIN_ROWS_FOR_WELCOME)
 		editor_draw_welcome(&ab);
+	
+	editor_draw_status_bar(&ab);
+	editor_draw_message_bar(&ab);
+	
+	char buf[32];
+	int x, y;
+	
+	if (editor.in_prompt)
+	{
+		x = editor.cursor_px + 1;
+		y = editor.screen_rows + 2;
 	}
 	else
 	{
-		update_layout(editor.buf_chain, editor_get_editable_area_width());
-		
-		editor.line_num_gutter_width = 0;
-		if (editor.show_line_num_gutter)
-		{
-			editor.line_num_gutter_width = digit_count(editor.buf_chain->lines_num) 
-				// Padding left or right
-				+ 1
-				// Space separator
-				+ 1;
-		}
-		
-		editor_scroll();
-		
-		ab_append_esc_seq(&ab, ESC_HIDE_CURSOR);
-		ab_append_esc_seq(&ab, ESC_CLEAR_SCREEN);
-		ab_append_esc_seq(&ab, ESC_CURSOR_HOME);
-		
-		editor_draw_buffer(&ab);
-		editor_draw_status_bar(&ab);
-		editor_draw_message_bar(&ab);
-		
-		char buf[32];
-		int x, y;
-		
-		if (editor.in_prompt)
-		{
-			x = editor.cursor_px + 1;
-			y = editor.screen_rows + 2;
-		}
-		else
-		{
-			x = editor.cursor_render.x + 1 + editor.line_num_gutter_width;
-			y = editor.cursor_render.y - editor.render_offset + 1;
-		}
-		
-		snprintf(buf, sizeof(buf), "\x1b[%d;%dH", y, x);
-			
-		ab_append_esc_seq(&ab, buf);
-		ab_append_esc_seq(&ab, ESC_SHOW_CURSOR);
+		x = editor.cursor_render.x + 1 + editor.line_num_gutter_width;
+		y = editor.cursor_render.y - editor.render_offset + 1;
 	}
+	
+	snprintf(buf, sizeof(buf), "\x1b[%d;%dH", y, x);
+		
+	ab_append_esc_seq(&ab, buf);
+	ab_append_esc_seq(&ab, ESC_SHOW_CURSOR);
 	
 	write(STDOUT_FILENO, ab.b, ab.len);
 	ab_free(&ab);
@@ -1000,11 +1014,9 @@ void editor_process_keypress()
 	
 	int c = editor_read_key();
 
-	// On any keypress, just start a new chain
-	if (editor.buf_chain == NULL) 
-	{
-		editor.buf_chain = buf_new_chain();
-	}
+	// On any keypress, disable welcome message
+	if (editor.welcome) 
+		editor.welcome = FALSE;
 	
 	switch (c)
 	{
@@ -1136,12 +1148,13 @@ void init_editor()
 	editor.sticky_col_update = FALSE;
 	editor.text_selected = FALSE;
 	editor.dirty = FALSE;
+	editor.welcome = TRUE;
 	editor.highlight_current_line = TRUE;
 	editor.show_line_num_gutter = TRUE;
 	editor.line_num_mode = ABSOLUTE;
 	editor.line_num_gutter_width = 0;
 	editor.mode = SAFE;
-	editor.buf_chain = NULL;
+	editor.buf_chain = buf_new_chain();
 	editor.filepath = NULL;
 	editor.status_msg[0] = '\0';
 	editor.status_msg_time = 0;
