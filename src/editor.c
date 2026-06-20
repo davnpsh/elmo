@@ -1031,8 +1031,9 @@ void editor_prompt(char *command)
 					editor.cursor_px++;
 				}
 				
-				if (buf_len - 1 == 0)
+				if (buf_len == 1)
 				{
+					editor.in_prompt = FALSE;
 					editor_set_status_msg("");
 					free(buf);
 					return;
