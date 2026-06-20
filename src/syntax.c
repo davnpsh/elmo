@@ -180,8 +180,10 @@ int tokenize(SYNTAX *syntax, char *s, int *len, char **multiline_end, char *last
 	c = s;
 	*len = 0;
 
-	int multiline_comment_start_len = strlen(syntax->multiline_comment_start);
-	int multiline_comment_end_len = strlen(syntax->multiline_comment_end);
+	int multiline_comment_start_len = syntax->multiline_comment_start ? 
+		strlen(syntax->multiline_comment_start) : 0;
+	int multiline_comment_end_len = syntax->multiline_comment_end ? 
+		strlen(syntax->multiline_comment_end) : 0;
 
 	// For multi-line comments and strings terminators
 	if (*multiline_end != NULL)

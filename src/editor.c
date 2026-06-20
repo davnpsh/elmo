@@ -16,6 +16,7 @@
 #include "syntax.h"
 #include "bufchn.h"
 #include "render.h"
+#include "command.h"
 #include "util.h"
 
 #define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor.y + 1, FALSE)
@@ -871,117 +872,6 @@ void editor_delete()
 	editor.buf_chain->update_layout = TRUE;
 }
 
-void editor_process_command(char* command)
-{
-	// Parsing the command
-	command++; //	delete '/'
-	
-	char *pch;
-	pch = strtok(command, " ");
-
-	// Save
-	if (strcmp(pch, "save") == 0)
-	{
-		pch = strtok(NULL, " ");
-		
-		if (pch != NULL)
-		{
-			free(editor.filepath);
-			editor.filepath = malloc(strlen(pch) + 1);
-			strcpy(editor.filepath, pch);
-			editor_save();
-		}
-		else
-		{
-			editor_save();
-		}
-	}
-	// Toggle line number gutter
-	else if (strcmp(pch, "linenumbers") == 0
-	 	  || strcmp(pch, "nums") == 0)
-	{
-		pch = strtok(NULL, " ");
-
-		if (pch == NULL)
-		{
-			editor.show_line_num_gutter = !editor.show_line_num_gutter;
-		}
-		else if (strcmp(pch, "rel") == 0)
-		{
-			editor.line_num_mode = RELATIVE;
-		}
-		else if (strcmp(pch, "abs") == 0)
-		{
-			editor.line_num_mode = ABSOLUTE;
-		}
-		else
-		{
-			editor_set_status_msg("what?");
-		}
-	}
-	else if (strcmp(pch, "syntax") == 0)
-	{
-		pch = strtok(NULL, " ");
-		
-		if (strcmp(pch, "off") == 0)
-		{
-			editor.buf_chain->syntax = NULL;
-			syntax_hl_update_buf(editor.buf_chain);
-		}
-		else if (pch != NULL)
-		{
-			SYNTAX *syntax = get_syntax_by_filetype(pch);
-
-			if (syntax == NULL) 
-			{
-				editor_set_status_msg("invalid filetype!");
-				return;
-			}
-
-			editor.buf_chain->syntax = syntax;
-			syntax_hl_update_buf(editor.buf_chain);
-		}
-		else
-		{
-			editor_set_status_msg("what?");
-		}
-	}
-	else if (strcmp(pch, "quit") == 0 
-		|| strcmp(pch, "q") == 0
-		|| strcmp(pch, "quit!") == 0
-		|| strcmp(pch, "q!") == 0)
-	{
-		if (editor.dirty && (strcmp(pch, "quit") == 0 || strcmp(pch, "q") == 0))
-		{
-			editor_set_status_msg("use /quit! to exit without saving.");
-		}
-		else
-		{
-			write(STDOUT_FILENO, "\x1b[2J", 4);
-			write(STDOUT_FILENO, "\x1b[H", 3);
-			exit(0);
-		}
-	}
-	else if (strcmp(pch, "jump") == 0
-		|| strcmp(pch, "j") == 0)
-	{
-		pch = strtok(NULL, " ");
-		
-		if (pch != NULL)
-		{
-			editor_jump(atoi(pch));
-		}
-		else
-		{
-			editor_set_status_msg("what?");
-		}
-	}
-	else
-	{
-		editor_set_status_msg("invalid command!");
-	}
-}
-
 void editor_prompt(char *command)
 {
 	size_t buf_size = 128;
@@ -1075,7 +965,7 @@ void editor_prompt(char *command)
 				{
 					editor.in_prompt = FALSE;
 					editor_set_status_msg("");
-					editor_process_command(buf);
+					process_command(buf);
 					free(buf);
 					return;
 				}

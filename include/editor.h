@@ -100,6 +100,8 @@ typedef struct EDITOR
 
 #define VERSION "1.0.0"
 
+extern EDITOR editor;
+
 void editor_set_status_msg(char *fmt, ...);
 int editor_set_window_size();
 void editor_handle_window_resize(int sig);
@@ -120,9 +122,8 @@ void editor_select(int c);
 void editor_insert(int c);
 void editor_jump(int shift);
 void editor_delete();
-void editor_process_command(char *command);
 void editor_prompt(char *command);
 void editor_process_keypress();
 void init_editor();
 
-#endif
+#endif	/* EDITOR_H */
