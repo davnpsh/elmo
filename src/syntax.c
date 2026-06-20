@@ -122,6 +122,37 @@ char *Assembly_keywords[] = {
     NULL
 };
 
+char *Rust_extensions[] = { ".rs", NULL };
+char *Rust_keywords[] = {
+    /* strict keywords */
+    "as",        "async",     "await",     "break",
+    "const",     "continue",  "crate",     "dyn",
+    "else",      "enum",      "extern",    "false",
+    "fn",        "for",       "if",        "impl",
+    "in",        "let",       "loop",      "match",
+    "mod",       "move",      "mut",       "pub",
+    "ref",       "return",    "self",      "Self",
+    "static",    "struct",    "super",     "trait",
+    "true",      "type",      "unsafe",    "use",
+    "where",     "while",
+
+    /* reserved for future use */
+    "abstract",  "become",    "box",       "do",
+    "final",     "gen",       "macro",     "override",
+    "priv",      "try",       "typeof",    "unsized",
+    "virtual",   "yield",
+
+    /* weak keywords */
+    "union",     "dyn",       "raw",
+
+    /* primitive types (technically not keywords, but conventionally highlighted) */
+    "i8",  "i16", "i32", "i64", "i128", "isize",
+    "u8",  "u16", "u32", "u64", "u128", "usize",
+    "f32", "f64", "bool", "char", "str",
+
+    NULL
+};
+
 SYNTAX syntax_db[] = {
 	{
 		"c",
@@ -164,6 +195,15 @@ SYNTAX syntax_db[] = {
 	    Assembly_extensions,
 	    Assembly_keywords,
 	    ";",
+	    "/*",
+	    "*/",
+	    HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
+	},
+	{
+	    "rust",
+	    Rust_extensions,
+	    Rust_keywords,
+	    "//",
 	    "/*",
 	    "*/",
 	    HL_HIGHLIGHT_NUMBERS | HL_HIGHLIGHT_STRINGS
