@@ -23,6 +23,12 @@
 
 EDITOR editor;
 
+void editor_cleanup()
+{
+	buf_free_chain(editor.buf_chain);
+    free(editor.filepath);
+}
+
 void editor_set_status_msg(char *fmt, ...) 
 {
 	va_list ap;
@@ -68,6 +74,8 @@ void editor_open(char *filepath)
 {
 	editor.filepath = malloc(strlen(filepath) + 1);
 	strcpy(editor.filepath, filepath);
+
+	buf_free_chain(editor.buf_chain);
 	
 	editor.buf_chain = buf_parse_file(filepath);
 	editor.welcome = FALSE;
@@ -982,7 +990,7 @@ void editor_prompt(char *command)
 
 void editor_process_keypress()
 {
-	static int quit_times = QUIT_TIMES;
+	// static int quit_times = QUIT_TIMES;
 	
 	int c = editor_read_key();
 
@@ -992,18 +1000,18 @@ void editor_process_keypress()
 	
 	switch (c)
 	{
-		case CTRL_KEY('q'):
-			if (editor.dirty && quit_times > 0)
-			{
-				editor_set_status_msg("unsaved buffer! press ^q %d more time(s) to quit", quit_times);
-				quit_times--;
-				return;
-			}
+		// case CTRL_KEY('q'):
+		// 	if (editor.dirty && quit_times > 0)
+		// 	{
+		// 		editor_set_status_msg("unsaved buffer! press ^q %d more time(s) to quit", quit_times);
+		// 		quit_times--;
+		// 		return;
+		// 	}
 			
-			write(STDOUT_FILENO, "\x1b[2J", 4);
-			write(STDOUT_FILENO, "\x1b[H", 3);
-			exit(0);
-			break;
+		// 	write(STDOUT_FILENO, "\x1b[2J", 4);
+		// 	write(STDOUT_FILENO, "\x1b[H", 3);
+		// 	exit(0);
+		// 	break;
 			
 		case CTRL_KEY('s'):
       		editor_save();
@@ -1106,7 +1114,7 @@ void editor_process_keypress()
 			break;
 	}
 	
-	quit_times = QUIT_TIMES;
+	// quit_times = QUIT_TIMES;
 }
 
 void init_editor() 

@@ -47,6 +47,12 @@ typedef struct BUFFER_CHAIN
 void buf_free_node(BUFFER_NODE *buf_node);
 
 /**
+ * Deallocates a Buffer Chain from memory.
+ * @param BUFFER_CHAIN *buf_chain
+ */
+void buf_free_chain(BUFFER_CHAIN *buf_chain);
+
+/**
  * Renders the characters of the buffer to something fancy.
  * @param BUFFER_NODE *buf_node
  */

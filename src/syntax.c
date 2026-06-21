@@ -548,7 +548,9 @@ int syntax_hl_update_region(BUFFER_CHAIN *buf_chain, int line)
 
 	while (current)
 	{
-		current->h = realloc(current->h, current->rlen);
+		// current->h = realloc(current->h, current->rlen);
+		free(current->h);
+		current->h = malloc(sizeof(char) * current->rlen);
 		
 		int len, idx = 0;
 	

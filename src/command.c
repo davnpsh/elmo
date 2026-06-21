@@ -22,6 +22,8 @@ void cmd_save(char* args)
 void cmd_quit(char* args)
 {
 	(void)args;
+
+	editor_cleanup();
 	
 	write(STDOUT_FILENO, "\x1b[2J", 4);
 	write(STDOUT_FILENO, "\x1b[H", 3);

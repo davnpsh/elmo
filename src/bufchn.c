@@ -27,6 +27,22 @@ void buf_free_node(BUFFER_NODE *buf_node)
 	free(buf_node);
 }
 
+void buf_free_chain(BUFFER_CHAIN *buf_chain)
+{
+	if (buf_chain == NULL) return;
+
+	BUFFER_NODE *current = buf_chain->head;
+	
+    while (current)
+    {
+    	BUFFER_NODE *next = current->next;
+        buf_free_node(current);
+        current = next;
+    }
+
+    free(buf_chain);
+}
+
 void buf_render_line(BUFFER_NODE *buf_node)
 {
 	// Allocation for special chars rendering
