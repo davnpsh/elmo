@@ -7,6 +7,7 @@
 #include "render.h"
 #include "syntax.h"
 #include "bufchn.h"
+#include "editor.h"
 
 int rx_to_cx(char *s, int len, int cursor_rx)
 {
@@ -68,13 +69,13 @@ void update_layout(BUFFER_CHAIN *buf_chain, int width)
     buf_chain->editor_width_cache = width;
 }
 
-void render_coords(int *rx, int *ry, int x, int y, BUFFER_CHAIN *buf_chain)
+void render_coords(POSITION *cursor_render, POSITION cursor, BUFFER_CHAIN *buf_chain)
 {
-	BUFFER_NODE *line = buf_get_line_at(buf_chain, y + 1, FALSE);
+	BUFFER_NODE *line = buf_get_line_at(buf_chain, cursor.y + 1, FALSE);
 
-	int rx_pos = cx_to_rx(line->s, x);
-	*ry = line->display_row_offset + rx_pos / buf_chain->editor_width_cache;
-	*rx = rx_pos % buf_chain->editor_width_cache;
+	int rx_pos = cx_to_rx(line->s, cursor.x);
+	cursor_render->y = line->display_row_offset + rx_pos / buf_chain->editor_width_cache;
+	cursor_render->x = rx_pos % buf_chain->editor_width_cache;
 }
 
 void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CHAIN *buf_chain)

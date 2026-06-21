@@ -103,7 +103,7 @@ int editor_get_editable_area_width()
 
 void editor_scroll()
 {
-	render_coords(&editor.cursor_render.x, &editor.cursor_render.y, editor.cursor.x, editor.cursor.y, editor.buf_chain);
+	render_coords(&editor.cursor_render, editor.cursor, editor.buf_chain);
 
 	if (editor.sticky_col_update)
 	{
@@ -245,8 +245,6 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				inner_offset++;
 
 			// -- PRINT LINE --
-			int current_color = -1;	// default
-
 			if (highlighting_selected_text)
 			{
 				ab_append_esc_seq(ab, ESC_BG_SELECT);
@@ -277,6 +275,8 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					highlighting_selected_text = FALSE;
 				}
 			}
+
+			int current_color = -1;	// default
 
 			for (int j = 0; j < len; j++)
 			{
@@ -782,8 +782,8 @@ void editor_select(int c)
 		end = editor.select_start;
 	}
 	
-	render_coords(&editor.r_select_start.x, &editor.r_select_start.y, start.x, start.y, editor.buf_chain);
-	render_coords(&editor.r_select_end.x, &editor.r_select_end.y, end.x, end.y, editor.buf_chain);
+	render_coords(&editor.r_select_start, start, editor.buf_chain);
+	render_coords(&editor.r_select_end, end, editor.buf_chain);
 }
 
 void editor_insert(int c)
