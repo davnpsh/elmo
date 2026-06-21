@@ -253,6 +253,8 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				inner_offset++;
 
 			// -- PRINT LINE --
+			
+			// For highlightning in-between selected lines
 			if (highlighting_selected_text)
 			{
 				ab_append_esc_seq(ab, ESC_BG_SELECT);
@@ -264,29 +266,10 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				}
 			}
 
-			if (editor.text_selected && len == 0)
-			{
-				// Start of the selected text
-				if (editor.render_offset + y == editor.r_select_start.y)
-				{
-					ab_append_esc_seq(ab, ESC_BG_SELECT);
-					ab_append_string(ab, " ");
-					ab_append_esc_seq(ab, ESC_RESET);
-					highlighting_selected_text = TRUE;
-				}
-
-				// End of the selected text
-				if (editor.render_offset + y == editor.r_select_end.y)
-				{
-					ab_append_string(ab, " ");
-					ab_append_esc_seq(ab, ESC_RESET);
-					highlighting_selected_text = FALSE;
-				}
-			}
-
 			int current_color = -1;	// default
-
-			for (int j = 0; j < len; j++)
+			int j;
+			
+			for (j = 0; j < len; j++)
 			{
 				// Highlight selected text
 				if (editor.text_selected)
@@ -339,6 +322,27 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 
 				if (highlighting_selected_text && j == len - 1)
 					ab_append_esc_seq(ab, ESC_RESET);
+			}
+
+			// Highlight selected text
+			if (editor.text_selected)
+			{
+				// Start of the selected text
+				if (editor.render_offset + y == editor.r_select_start.y)
+				{
+					if (j == editor.r_select_start.x % current_width)
+					{
+						ab_append_esc_seq(ab, ESC_BG_SELECT);
+						ab_append_string(ab, " ");
+						ab_append_esc_seq(ab, ESC_RESET);
+					}
+					
+					highlighting_selected_text = TRUE;
+				}
+
+				// End of the selected text
+				if (editor.render_offset + y == editor.r_select_end.y)
+					highlighting_selected_text = FALSE;
 			}
 			
 			ab_append_esc_seq(ab, ESC_RESET_FG);
