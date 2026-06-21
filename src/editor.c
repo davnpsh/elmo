@@ -387,10 +387,10 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
 {
 	char *dorothy[] = {
         "  )............(  ",
-        "/              \\",
-        "|                |",
-        "|          <><   |",
-        " \\              / ",
+        "/        o     \\",
+        "|       O        |",
+        "|        o       |",
+        " \\         <><  / ",
         "  ')__________('  "
     };
     int dorothy_size = sizeof(dorothy) / sizeof(dorothy[0]);
@@ -409,10 +409,6 @@ void editor_draw_welcome(APPEND_BUFFER *ab)
     lines[line_count++] = NULL;            // blank line
     lines[line_count++] = "welcome to elmo!";
     lines[line_count++] = version_str;
-
-#ifdef DEBUG_BUILD
-    lines[line_count++] = "-DEBUG BUILD-";
-#endif
 
     lines[line_count++] = "by daru";
 

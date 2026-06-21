@@ -1,6 +1,7 @@
 PROGRAM_NAME = elmo
 CC = gcc
-CFLAGS = -Iinclude -Wall -Wextra -std=c99
+VERSION := $(shell git describe --tags --always --dirty)
+CFLAGS = -Iinclude -Wall -Wextra -std=c99 -DVERSION=\"$(VERSION)\"
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c, build/%.o, $(SRC))
 
@@ -10,7 +11,8 @@ $(PROGRAM_NAME): clean $(OBJ)
 build/%.o: src/%.c | build
 	$(CC) $(CFLAGS) -O2 -c $< -o $@
 
-debug: CFLAGS += -O0 -g -fsanitize=address,undefined -DDEBUG_BUILD
+debug: VERSION := $(VERSION)-debug
+debug: CFLAGS += -O0 -g -fsanitize=address,undefined
 debug: clean $(OBJ)
 	$(CC) $(OBJ) -fsanitize=address,undefined -o $(PROGRAM_NAME)
 

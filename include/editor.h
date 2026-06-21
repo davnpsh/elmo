@@ -101,8 +101,6 @@ typedef struct EDITOR
 #define MIN_ROWS_FOR_WELCOME 20
 #define MIN_COLS_FOR_WELCOME 50
 
-#define VERSION "1.0.0"
-
 extern EDITOR editor;
 
 void editor_set_status_msg(char *fmt, ...);
