@@ -406,3 +406,32 @@ int buf_save(BUFFER_CHAIN *buf_chain, char *filepath)
 	
 	return errno;
 }
+
+void buf_toggle_comment_line(BUFFER_CHAIN *buf_chain, int line_num)
+{
+	if (buf_chain == NULL) return;
+
+	if (buf_chain->syntax == NULL) return;
+
+	BUFFER_NODE *line = buf_get_line_at(buf_chain, line_num, FALSE);
+	char *comment_pattern = ((SYNTAX *)buf_chain->syntax)->singleline_comment;
+	size_t comment_pattern_len = strlen(comment_pattern);
+	
+	if (strncmp(line->s, comment_pattern, comment_pattern_len) == 0)
+	{
+		for (unsigned int i = 0; i < comment_pattern_len; i++)
+			buf_delete(buf_chain, line_num, 1);
+
+		if (strncmp(line->s, " ", 1) == 0)
+			buf_delete(buf_chain, line_num, 1);
+	}
+	else
+	{
+		unsigned int i;
+		
+		for (i = 0; i < comment_pattern_len; i++)
+			buf_insert(buf_chain, line_num, i, comment_pattern[i]);
+
+		buf_insert(buf_chain, line_num, i, ' ');
+	}
+}

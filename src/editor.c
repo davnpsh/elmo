@@ -813,6 +813,34 @@ void editor_insert(int c)
 	editor.buf_chain->update_layout = TRUE;
 }
 
+void editor_delete()
+{
+	if (editor.cursor.x == 0 && editor.cursor.y == 0) return;
+	
+	int len = 0;
+	
+	if (editor.cursor.y > 0)
+	{
+		BUFFER_NODE *prev_line = buf_get_line_at(editor.buf_chain, editor.cursor.y, FALSE);
+		len = prev_line->len;
+	}
+	
+	buf_delete(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x);
+	
+	if (editor.cursor.x > 0)
+	{
+		editor.cursor.x--;
+	}
+	else if (editor.cursor.y > 0)
+	{	
+		editor.cursor.y--;
+		editor.cursor.x = len;
+	}
+	
+	editor.dirty = TRUE;
+	editor.buf_chain->update_layout = TRUE;
+}
+
 void editor_jump(int shift)
 {
 	int target;
@@ -842,32 +870,18 @@ void editor_jump(int shift)
 	editor.cursor.y = target;
 }
 
-void editor_delete()
+void editor_toggle_comment()
 {
-	if (editor.cursor.x == 0 && editor.cursor.y == 0) return;
-	
-	int len = 0;
-	
-	if (editor.cursor.y > 0)
+	// Comment block
+	if (editor.text_selected)
 	{
-		BUFFER_NODE *prev_line = buf_get_line_at(editor.buf_chain, editor.cursor.y, FALSE);
-		len = prev_line->len;
+		// TODO
 	}
-	
-	buf_delete(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x);
-	
-	if (editor.cursor.x > 0)
+	// Comment line
+	else
 	{
-		editor.cursor.x--;
+		buf_toggle_comment_line(editor.buf_chain, editor.cursor.y + 1);
 	}
-	else if (editor.cursor.y > 0)
-	{	
-		editor.cursor.y--;
-		editor.cursor.x = len;
-	}
-	
-	editor.dirty = TRUE;
-	editor.buf_chain->update_layout = TRUE;
 }
 
 void editor_prompt(char *command)
@@ -1009,6 +1023,10 @@ void editor_process_keypress()
         case CTRL_KEY('e'):
          	editor.mode = (editor.mode == SAFE) ? EDIT : SAFE;
            	break;
+
+        case /* CTRL+/ */ 31:
+        	editor_toggle_comment();
+        	break;
 			
 		case UP:
 		case DOWN:

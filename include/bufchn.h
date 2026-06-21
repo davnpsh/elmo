@@ -120,4 +120,11 @@ char *buf_read(BUFFER_CHAIN *buf_chain, int *len);
  */
 int buf_save(BUFFER_CHAIN *buf_chain, char *filepath);
 
+/**
+ * Toggles a line comment.
+ * @param BUFFER_CHAIN *buf_chain
+ * @param int line_num The number of the line
+ */
+void buf_toggle_comment_line(BUFFER_CHAIN *buf_chain, int line_num);
+
 #endif /* BUFCHN_H */
