@@ -124,7 +124,9 @@ int buf_save(BUFFER_CHAIN *buf_chain, char *filepath);
  * Toggles a line comment.
  * @param BUFFER_CHAIN *buf_chain
  * @param int line_num The number of the line
+ * @param int *shift Shift of the cursor
+ * @return 0 on comment, 1 on uncomment, -1 on failure
  */
-void buf_toggle_comment_line(BUFFER_CHAIN *buf_chain, int line_num);
+int buf_toggle_comment_line(BUFFER_CHAIN *buf_chain, int line_num, int *shift);
 
 #endif /* BUFCHN_H */

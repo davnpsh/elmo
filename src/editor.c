@@ -880,7 +880,21 @@ void editor_toggle_comment()
 	// Comment line
 	else
 	{
-		buf_toggle_comment_line(editor.buf_chain, editor.cursor.y + 1);
+		int shift, result;
+
+		result = buf_toggle_comment_line(editor.buf_chain, editor.cursor.y + 1, &shift);
+
+		if (result == -1) return;
+
+		if (result == 1)
+		{
+			if (editor.cursor.x - shift >= 0)
+				editor.cursor.x -= shift;
+		}
+		else editor.cursor.x += shift;
+		
+    	editor.sticky_col_update = TRUE;
+     	editor.dirty = TRUE;
 	}
 }
 
@@ -1025,9 +1039,12 @@ void editor_process_keypress()
            	break;
 
         case /* CTRL+/ */ 31:
-        	editor_toggle_comment();
-        	break;
-			
+        	if (editor.mode == SAFE)
+				editor_set_status_msg("you are on safe mode!");
+			else
+				editor_toggle_comment();
+			break;
+         
 		case UP:
 		case DOWN:
 		case LEFT:
