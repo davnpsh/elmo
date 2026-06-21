@@ -96,7 +96,6 @@ typedef struct EDITOR
 } EDITOR;
 
 #define CTRL_KEY(k) ((k) & 0x1f)
-// #define QUIT_TIMES 2
 #define RESERVED_ROWS 2
 #define MIN_ROWS_FOR_WELCOME 20
 #define MIN_COLS_FOR_WELCOME 50

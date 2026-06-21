@@ -1,6 +1,6 @@
 PROGRAM_NAME = elmo
 CC = gcc
-VERSION := $(shell git describe --tags --always --dirty)
+VERSION := $(shell git describe --tags --always)
 CFLAGS = -Iinclude -Wall -Wextra -std=c99 -DVERSION=\"$(VERSION)\"
 SRC = $(wildcard src/*.c)
 OBJ = $(patsubst src/%.c, build/%.o, $(SRC))

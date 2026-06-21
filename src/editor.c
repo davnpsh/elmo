@@ -990,8 +990,6 @@ void editor_prompt(char *command)
 
 void editor_process_keypress()
 {
-	// static int quit_times = QUIT_TIMES;
-	
 	int c = editor_read_key();
 
 	// On any keypress, disable welcome message
@@ -999,20 +997,7 @@ void editor_process_keypress()
 		editor.welcome = FALSE;
 	
 	switch (c)
-	{
-		// case CTRL_KEY('q'):
-		// 	if (editor.dirty && quit_times > 0)
-		// 	{
-		// 		editor_set_status_msg("unsaved buffer! press ^q %d more time(s) to quit", quit_times);
-		// 		quit_times--;
-		// 		return;
-		// 	}
-			
-		// 	write(STDOUT_FILENO, "\x1b[2J", 4);
-		// 	write(STDOUT_FILENO, "\x1b[H", 3);
-		// 	exit(0);
-		// 	break;
-			
+	{	
 		case CTRL_KEY('s'):
       		editor_save();
         	break;
@@ -1113,8 +1098,6 @@ void editor_process_keypress()
 				editor_insert(c);
 			break;
 	}
-	
-	// quit_times = QUIT_TIMES;
 }
 
 void init_editor() 
