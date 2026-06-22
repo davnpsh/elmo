@@ -263,7 +263,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				if (len == 0)
 				{
 					ab_append_string(ab, " ");
-					ab_append_esc_seq(ab, ESC_RESET);
+					ab_append_esc_seq(ab, ESC_RESET_BG);
 				}
 			}
 
@@ -290,7 +290,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					{
 						if (j == editor.r_select_end.x % current_width)
 						{
-							ab_append_esc_seq(ab, ESC_RESET);
+							ab_append_esc_seq(ab, ESC_RESET_BG);
 							highlighting_selected_text = FALSE;
 						}
 					}
@@ -322,7 +322,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 				ab_append_char(ab, r[j]);
 
 				if (highlighting_selected_text && j == len - 1)
-					ab_append_esc_seq(ab, ESC_RESET);
+					ab_append_esc_seq(ab, ESC_RESET_BG);
 			}
 
 			// Highlight selected text
@@ -335,7 +335,7 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 					{
 						ab_append_esc_seq(ab, ESC_BG_SELECT);
 						ab_append_string(ab, " ");
-						ab_append_esc_seq(ab, ESC_RESET);
+						ab_append_esc_seq(ab, ESC_RESET_BG);
 					}
 					
 					highlighting_selected_text = TRUE;
