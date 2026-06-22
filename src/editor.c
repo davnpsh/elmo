@@ -111,7 +111,7 @@ int editor_get_editable_area_width()
 
 void editor_scroll()
 {
-	render_coords(&editor.cursor_render, editor.cursor, editor.buf_chain);
+	render_coords(editor.buf_chain, editor.cursor, &editor.cursor_render);
 
 	if (editor.sticky_col_update)
 	{
@@ -746,56 +746,41 @@ void editor_select(int c)
 	if (editor.text_selected == FALSE)
 	{
 		editor.text_selected = TRUE;
-		editor.select_start = (POSITION){ editor.cursor.x, editor.cursor.y };
+		editor.select_anchor = (POSITION){ editor.cursor.x, editor.cursor.y };
 	}
 	
 	switch (c)
 	{
-		case SHIFT_UP:
-			editor_move_cursor(UP);
-			break;
-			
-		case SHIFT_DOWN:
-			editor_move_cursor(DOWN);
-			break;
-
-		case SHIFT_LEFT:
-			editor_move_cursor(LEFT);
-			break;
-			
-		case SHIFT_RIGHT:
-			editor_move_cursor(RIGHT);
-			break;
+		case SHIFT_UP: editor_move_cursor(UP); break;
+		case SHIFT_DOWN: editor_move_cursor(DOWN); break;
+		case SHIFT_LEFT: editor_move_cursor(LEFT); break;
+		case SHIFT_RIGHT: editor_move_cursor(RIGHT); break;
 	}
 
-	if ((editor.select_start.x == editor.cursor.x) 
-		&& (editor.select_start.y == editor.cursor.y)) 
+	if ((editor.select_anchor.x == editor.cursor.x) 
+		&& (editor.select_anchor.y == editor.cursor.y)) 
 	{
 		editor.text_selected = FALSE;
 		return;
 	}
 
-	editor.select_end = (POSITION){ editor.cursor.x, editor.cursor.y };
+	Bool is_cursor_after = (editor.cursor.y > editor.select_anchor.y)
+        || (editor.cursor.y == editor.select_anchor.y
+            && editor.cursor.x > editor.select_anchor.x);
 
-	POSITION start, end;
-
-	if (
-		(editor.select_start.y < editor.cursor.y)
-		|| ((editor.select_start.y == editor.cursor.y) 
-			&& (editor.select_start.x < editor.cursor.x))
-	)
+	if (is_cursor_after)
 	{
-		start = editor.select_start;
-		end = editor.select_end;
+		editor.select_start = editor.select_anchor;
+        editor.select_end = (POSITION){ editor.cursor.x, editor.cursor.y };
 	}
 	else
 	{
-		start = editor.select_end;
-		end = editor.select_start;
+		editor.select_start = (POSITION){ editor.cursor.x, editor.cursor.y };
+        editor.select_end = editor.select_anchor;
 	}
 	
-	render_coords(&editor.r_select_start, start, editor.buf_chain);
-	render_coords(&editor.r_select_end, end, editor.buf_chain);
+	render_coords(editor.buf_chain, editor.select_start, &editor.r_select_start);
+	render_coords(editor.buf_chain, editor.select_end, &editor.r_select_end);
 }
 
 void editor_insert(int c)

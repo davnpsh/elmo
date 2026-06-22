@@ -69,7 +69,7 @@ void update_layout(BUFFER_CHAIN *buf_chain, int width)
     buf_chain->editor_width_cache = width;
 }
 
-void render_coords(POSITION *cursor_render, POSITION cursor, BUFFER_CHAIN *buf_chain)
+void render_coords(BUFFER_CHAIN *buf_chain, POSITION cursor, POSITION *cursor_render)
 {
 	BUFFER_NODE *line = buf_get_line_at(buf_chain, cursor.y + 1, FALSE);
 

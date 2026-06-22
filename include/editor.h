@@ -74,6 +74,7 @@ typedef struct EDITOR
 
 	// Select text
 	Bool text_selected;
+	POSITION select_anchor;
 	POSITION select_start;
 	POSITION select_end;
 	POSITION r_select_start;	// render
