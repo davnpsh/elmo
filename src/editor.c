@@ -1078,7 +1078,18 @@ void editor_process_keypress()
 			
 		case HOME_KEY:
 			editor.text_selected = FALSE;
-			editor.cursor.x = 0;
+
+			BUFFER_NODE *buf_node = CURRENT_LINE;
+
+			int offset = 0;
+			while (offset < buf_node->len && (buf_node->s[offset] == '\t' || buf_node->s[offset] == ' '))
+				offset++;
+
+			if (offset > 0 && editor.cursor.x == offset)
+				editor.cursor.x = 0;
+			else
+				editor.cursor.x = offset;
+			
 			editor.sticky_col_update = TRUE;
 			break;
 			

@@ -9,17 +9,18 @@
 - [x] ~~Navigate words with CTRL~~
 - [x] ~~Syntax highlight~~
 - [x] ~~Wrap lines~~
+- [x] ~~Toggle comments~~
 - [ ] Select text
+- [ ] Copy/paste
 - [ ] Auto indent
 - [ ] Auto pairs ((); {})
 - [ ] Git integration
-- [ ] Search
-- [ ] Search files
+- [ ] Search words
+- [ ] File explorer
 - [ ] Tasks
 - [ ] New empty buffer
 - [ ] Open file (switch buffer)
 - [ ] Undo/redo actions
 - [ ] Dropup menu (for selecting tasks/opening files)
-- [ ] Toggle comments
 - [ ] Manual page
 - [ ] Make install command
