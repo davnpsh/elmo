@@ -19,6 +19,7 @@
 #include "command.h"
 #include "util.h"
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define CURRENT_LINE buf_get_line_at(editor.buf_chain, editor.cursor.y + 1, FALSE)
 
 EDITOR editor;
@@ -861,67 +862,49 @@ void editor_toggle_comment()
 	if (editor.text_selected)
 	{
 		int shift_first_line, shift_last_line;
-		int result;
 
-		result = buf_toggle_comment_block(editor.buf_chain, editor.select_start.y + 1, editor.select_end.y + 1, &shift_first_line, &shift_last_line);
+		int result = buf_toggle_comment_block(editor.buf_chain, 
+			editor.select_start.y + 1, 
+			editor.select_end.y + 1, 
+			&shift_first_line, 
+			&shift_last_line);
 
 		if (result == -1) return;
 
-		if (result == 1)
-		{
-			if (editor.cursor.y == editor.select_start.y)
-			{
-				if (editor.cursor.x - shift_first_line >= 0)
-					editor.cursor.x -= shift_first_line;
-			}
-			else if (editor.cursor.y == editor.select_end.y)
-			{
-				if (editor.cursor.x - shift_last_line >= 0)
-					editor.cursor.x -= shift_last_line;
-			}
+		int direction = (result == 1) ? -1 : 1;
 
-			if (editor.select_start.x - shift_first_line >= 0)
-				editor.select_start.x -= shift_first_line;
+		if (editor.cursor.y == editor.select_start.y)
+            editor.cursor.x = MAX(0, editor.cursor.x + direction * shift_first_line);
+        else
+            editor.cursor.x = MAX(0, editor.cursor.x + direction * shift_last_line);
 
-			if (editor.select_end.x - shift_last_line >= 0)
-				editor.select_end.x -= shift_last_line;
-		}
-		else
-		{
-		 	if (editor.cursor.y == editor.select_start.y)
-				editor.cursor.x += shift_first_line;
-			else if (editor.cursor.y == editor.select_end.y)
-				editor.cursor.x += shift_last_line;
+		editor.select_start.x = MAX(0, editor.select_start.x + direction * shift_first_line);
+        editor.select_end.x = MAX(0, editor.select_end.x   + direction * shift_last_line);
 
-			editor.select_start.x += shift_first_line;
-			editor.select_end.x += shift_last_line;
-		}
+        if (editor.select_anchor.y == editor.select_start.y)
+            editor.select_anchor.x = editor.select_start.x;
+        else
+            editor.select_anchor.x = editor.select_end.x;
 
 		render_coords(editor.buf_chain, editor.select_start, &editor.r_select_start);
 		render_coords(editor.buf_chain, editor.select_end, &editor.r_select_end);
-		
-    	editor.sticky_col_update = TRUE;
-     	editor.dirty = TRUE;
 	}
 	// Comment line
 	else
 	{
-		int shift, result;
+		int shift;
 
-		result = buf_toggle_comment_line(editor.buf_chain, editor.cursor.y + 1, &shift);
+		int result = buf_toggle_comment_line(editor.buf_chain, editor.cursor.y + 1, &shift);
 
 		if (result == -1) return;
 
-		if (result == 1)
-		{
-			if (editor.cursor.x - shift >= 0)
-				editor.cursor.x -= shift;
-		}
-		else editor.cursor.x += shift;
+		int direction = (result == 1) ? -1 : 1;
 		
-    	editor.sticky_col_update = TRUE;
-     	editor.dirty = TRUE;
+        editor.cursor.x = MAX(0, editor.cursor.x + direction * shift);
 	}
+
+	editor.sticky_col_update = TRUE;
+   	editor.dirty = TRUE;
 }
 
 void editor_prompt(char *command)
