@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <ctype.h>
+#include <limits.h>
 
 #include "bufchn.h"
 #include "render.h"
@@ -449,5 +450,78 @@ int buf_toggle_comment_line(BUFFER_CHAIN *buf_chain, int line_num, int *shift)
 		buf_insert(buf_chain, line_num, k + offset, ' ');
 
 		return 0;
+	}
+}
+
+int buf_toggle_comment_block(BUFFER_CHAIN *buf_chain, int line_num_start, int line_num_end, int *shift_first_line, int *shift_last_line)
+{
+	if (buf_chain == NULL || buf_chain->syntax == NULL) return -1;
+
+	char *comment_pattern = ((SYNTAX *)buf_chain->syntax)->singleline_comment;
+	if (comment_pattern == NULL) return -1;
+
+	size_t comment_pattern_len = strlen(comment_pattern);
+	*shift_first_line = comment_pattern_len + 1;
+	*shift_last_line = comment_pattern_len + 1;
+
+	Bool comment_all = FALSE;
+	int diff = line_num_end - line_num_start;
+
+	// Put the comments vertically aligned at the right-most position
+	int comment_begin = INT_MAX;
+
+	// Check if all lines are commented/uncommented
+	for (int i = 0; i <= diff; i++)
+	{
+		BUFFER_NODE *line = buf_get_line_at(buf_chain, line_num_start + i, FALSE);
+		
+		int offset = 0;
+		while (offset < line->len && (line->s[offset] == '\t' || line->s[offset] == ' '))
+			offset++;
+
+		if (offset < comment_begin)
+			comment_begin = offset;
+		
+		Bool is_commented = strncmp(&line->s[offset], comment_pattern, comment_pattern_len) == 0;
+
+		if (!is_commented) comment_all = TRUE;
+	}
+
+	if (comment_all)
+	{
+		for (int i = 0; i <= diff; i++)
+		{
+			size_t k;
+			for (k = 0; k < comment_pattern_len; k++)
+				buf_insert(buf_chain, line_num_start + i, k + comment_begin, comment_pattern[k]);
+
+			buf_insert(buf_chain, line_num_start + i, k + comment_begin, ' ');
+		}
+
+		return 0;
+	}
+	else
+	{
+		for (int i = 0; i <= diff; i++)
+		{
+			BUFFER_NODE *line = buf_get_line_at(buf_chain, line_num_start + i, FALSE);
+
+			int offset = 0;
+			while (offset < line->len && (line->s[offset] == '\t' || line->s[offset] == ' '))
+				offset++;
+
+			size_t k;
+			for (k = 0; k < comment_pattern_len; k++)
+				buf_delete(buf_chain, line_num_start + i, 1 + offset);
+
+			if (line->s[offset] == ' ')
+				buf_delete(buf_chain, line_num_start + i, 1 + offset);
+			else if (i == 0)
+				(*shift_first_line)--;
+			else if (i == diff)
+				(*shift_last_line)--;
+		}
+
+		return 1;
 	}
 }

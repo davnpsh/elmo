@@ -129,4 +129,6 @@ int buf_save(BUFFER_CHAIN *buf_chain, char *filepath);
  */
 int buf_toggle_comment_line(BUFFER_CHAIN *buf_chain, int line_num, int *shift);
 
+int buf_toggle_comment_block(BUFFER_CHAIN *buf_chain, int line_num_start, int line_num_end, int *shift_first_line, int *shift_last_line);
+
 #endif /* BUFCHN_H */

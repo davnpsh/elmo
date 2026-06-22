@@ -860,7 +860,48 @@ void editor_toggle_comment()
 	// Comment block
 	if (editor.text_selected)
 	{
-		// TODO
+		int shift_first_line, shift_last_line;
+		int result;
+
+		result = buf_toggle_comment_block(editor.buf_chain, editor.select_start.y + 1, editor.select_end.y + 1, &shift_first_line, &shift_last_line);
+
+		if (result == -1) return;
+
+		if (result == 1)
+		{
+			if (editor.cursor.y == editor.select_start.y)
+			{
+				if (editor.cursor.x - shift_first_line >= 0)
+					editor.cursor.x -= shift_first_line;
+			}
+			else if (editor.cursor.y == editor.select_end.y)
+			{
+				if (editor.cursor.x - shift_last_line >= 0)
+					editor.cursor.x -= shift_last_line;
+			}
+
+			if (editor.select_start.x - shift_first_line >= 0)
+				editor.select_start.x -= shift_first_line;
+
+			if (editor.select_end.x - shift_last_line >= 0)
+				editor.select_end.x -= shift_last_line;
+		}
+		else
+		{
+		 	if (editor.cursor.y == editor.select_start.y)
+				editor.cursor.x += shift_first_line;
+			else if (editor.cursor.y == editor.select_end.y)
+				editor.cursor.x += shift_last_line;
+
+			editor.select_start.x += shift_first_line;
+			editor.select_end.x += shift_last_line;
+		}
+
+		render_coords(editor.buf_chain, editor.select_start, &editor.r_select_start);
+		render_coords(editor.buf_chain, editor.select_end, &editor.r_select_end);
+		
+    	editor.sticky_col_update = TRUE;
+     	editor.dirty = TRUE;
 	}
 	// Comment line
 	else
