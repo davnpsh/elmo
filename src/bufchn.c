@@ -310,48 +310,46 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 	if (offset == 0 && line_num == 1) return;
 	
 	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num, FALSE);
-	
+
+	// Delete a character anywhere on the same line
 	if (offset > 0)
 	{
-		memmove(&buf_node->s[offset - 1], &buf_node->s[offset], buf_node->len - offset);
+		memmove(&buf_node->s[offset - 1], 
+			&buf_node->s[offset], 
+			buf_node->len - offset);
 		
 		buf_node->len--;
-		
 		buf_node->s[buf_node->len] = '\0';
-		
 		buf_render_line(buf_node);
-
 		syntax_hl_update_region(buf_chain, line_num);
 	}
+	// Merging 2 lines
 	else
 	{
 		BUFFER_NODE *prev_node = buf_node->prev;
 		
-		prev_node->s = realloc(prev_node->s, prev_node->len + buf_node->len + 1);
+		char *tmp = realloc(prev_node->s, prev_node->len + buf_node->len + 1);
+		if (tmp) prev_node->s = tmp;
 		
-		memcpy(&prev_node->s[prev_node->len], buf_node->s, buf_node->len);
+		memcpy(&prev_node->s[prev_node->len], 
+			buf_node->s, 
+			buf_node->len);
 		
 		prev_node->len += buf_node->len;
-		
 		prev_node->s[prev_node->len] = '\0';
-		
-		buf_render_line(prev_node);
-		
+
+		// Fix relations
 		prev_node->next = buf_node->next;
-		
 		if (buf_node->next)
 			buf_node->next->prev = prev_node;
 		
 		buf_free_node(buf_node);
-		
+
+		buf_render_line(prev_node);
 		buf_chain->lines_num--;
-
 		buf_invalidate_cache(buf_chain);
-
 		buf_chain->update_layout = TRUE;
-
 		syntax_hl_update_region(buf_chain, line_num - 1);
-		syntax_hl_update_region(buf_chain, line_num);
 	}
 }
 
@@ -377,7 +375,8 @@ void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION s
 	
 	if (diff != 0)
 	{
-		first->s = realloc(first->s, new_len + 1);
+		char *tmp = realloc(first->s, new_len + 1);
+		if (tmp) first->s = tmp;
 	
 		memcpy(&first->s[select_start.x], 
 			&last->s[select_end.x], 
@@ -390,7 +389,8 @@ void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION s
 			&first->s[select_end.x], 
 			first->len - select_end.x);
 
-		first->s = realloc(first->s, new_len + 1);
+		char *tmp = realloc(first->s, new_len + 1);
+		if (tmp) first->s = tmp;
 	}
 	
 	first->len = new_len;
