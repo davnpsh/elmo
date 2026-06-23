@@ -10,6 +10,7 @@
 #include <limits.h>
 
 #include "bufchn.h"
+#include "editor.h"
 #include "render.h"
 #include "syntax.h"
 #include "util.h"
@@ -347,9 +348,69 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 
 		buf_invalidate_cache(buf_chain);
 
+		buf_chain->update_layout = TRUE;
+
 		syntax_hl_update_region(buf_chain, line_num - 1);
 		syntax_hl_update_region(buf_chain, line_num);
 	}
+}
+
+void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end)
+{
+	int diff = select_end.y - select_start.y;
+
+	BUFFER_NODE *first = buf_get_line_at(buf_chain, select_start.y + 1, FALSE);
+	BUFFER_NODE *last = buf_get_line_at(buf_chain, select_end.y + 1, FALSE);
+
+	if (first == NULL || last == NULL) return;
+
+	// Delete middle nodes
+	BUFFER_NODE *current = first->next;
+	for (int i = 0; i <= diff - 2; i++)
+	{
+		BUFFER_NODE *next = current->next;
+		buf_free_node(current);
+		current = next;
+	}
+
+	int new_len = select_start.x + (last->len - select_end.x);
+	
+	if (diff != 0)
+	{
+		first->s = realloc(first->s, new_len + 1);
+	
+		memcpy(&first->s[select_start.x], 
+			&last->s[select_end.x], 
+			last->len - select_end.x);
+	}
+	else
+	{
+		// 'last' is garbage now :(
+		memmove(&first->s[select_start.x], 
+			&first->s[select_end.x], 
+			first->len - select_end.x);
+
+		first->s = realloc(first->s, new_len + 1);
+	}
+	
+	first->len = new_len;
+	first->s[new_len] = '\0';
+
+	// Fix relations
+	if (diff != 0)
+	{
+		first->next = last->next;
+		if (last->next != NULL)
+			last->next->prev = first;
+
+		buf_free_node(last);
+	}
+	
+	buf_render_line(first);
+	buf_chain->lines_num -= diff; // Remove: middle lines + last one = diff - 1 + 1 = diff
+	buf_invalidate_cache(buf_chain);
+	buf_chain->update_layout = TRUE;
+	syntax_hl_update_region(buf_chain, select_start.y + 1);
 }
 
 char *buf_read(BUFFER_CHAIN *buf_chain, int *len)

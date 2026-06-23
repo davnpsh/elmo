@@ -810,30 +810,39 @@ void editor_insert(int c)
 
 void editor_delete()
 {
-	if (editor.cursor.x == 0 && editor.cursor.y == 0) return;
-	
-	int len = 0;
-	
-	if (editor.cursor.y > 0)
+	if (editor.text_selected)
 	{
-		BUFFER_NODE *prev_line = buf_get_line_at(editor.buf_chain, editor.cursor.y, FALSE);
-		len = prev_line->len;
+		buf_delete_block(editor.buf_chain, editor.select_start, editor.select_end);
+		
+		editor.cursor = editor.select_start;
+		editor.text_selected = FALSE;
 	}
-	
-	buf_delete(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x);
-	
-	if (editor.cursor.x > 0)
+	else
 	{
-		editor.cursor.x--;
-	}
-	else if (editor.cursor.y > 0)
-	{	
-		editor.cursor.y--;
-		editor.cursor.x = len;
+		if (editor.cursor.x == 0 && editor.cursor.y == 0) return;
+		
+		int len = 0;
+		
+		if (editor.cursor.y > 0)
+		{
+			BUFFER_NODE *prev_line = buf_get_line_at(editor.buf_chain, editor.cursor.y, FALSE);
+			len = prev_line->len;
+		}
+		
+		buf_delete(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x);
+		
+		if (editor.cursor.x > 0)
+		{
+			editor.cursor.x--;
+		}
+		else if (editor.cursor.y > 0)
+		{	
+			editor.cursor.y--;
+			editor.cursor.x = len;
+		}
 	}
 	
 	editor.dirty = TRUE;
-	editor.buf_chain->update_layout = TRUE;
 }
 
 void editor_jump(int shift)

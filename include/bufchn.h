@@ -1,6 +1,8 @@
 #ifndef BUFCHN_H
 #define BUFCHN_H
 
+typedef struct POSITION POSITION;
+
 typedef int Bool;
 #define TRUE 1
 #define FALSE 0
@@ -103,6 +105,8 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c);
  * @param int offset Index to start the delete operation from
  */
 void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset);
+
+void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end);
 
 /**
  * Produces a single string ready to be written into a file.
