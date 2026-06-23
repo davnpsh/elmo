@@ -188,167 +188,171 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 	int current_width = editor_get_editable_area_width();
 	
 	int row_offset, wrap_offset;
-
-	get_offset_coordinates(&row_offset, &wrap_offset, editor.render_offset, editor.buf_chain);
+	get_offset_coordinates(editor.buf_chain, 
+						editor.render_offset, 
+						&row_offset, 
+						&wrap_offset);
 	
 	BUFFER_NODE *current_line = buf_get_line_at(editor.buf_chain, 1 + row_offset, TRUE);
-
-	int inner_offset = wrap_offset;
-	int displayed_line_number = row_offset + 1;
+	int line_num = row_offset + 1;
+	Bool line_hl_active = FALSE;
 	
-	Bool reset_current_line_hl = FALSE;
-	Bool highlighting_selected_text = FALSE;
-
-	if (inner_offset > 0) displayed_line_number++;
-
-	if (editor.text_selected && editor.render_offset > editor.r_select_start.y)
-		highlighting_selected_text = TRUE;
+	if (wrap_offset > 0) line_num++;
 	
 	for (int y = 0; y < editor.screen_rows; y++)
 	{
-		if (reset_current_line_hl)
-		{
-			ab_append_esc_seq(ab, ESC_RESET_BG);
-			reset_current_line_hl = FALSE;
-		}
+		int display_row = editor.render_offset + y;
+		Bool in_selection = is_row_in_selection(editor.text_selected, 
+												editor.r_select_start, 
+												editor.r_select_end, 
+												display_row);
+		
+		// Reset user line highlight
+  		if (line_hl_active)
+        {
+            ab_append_esc_seq(ab, ESC_RESET_BG);
+            line_hl_active = FALSE;
+        }
 
-		if (y == 1 && editor.welcome
+    	// -- WELCOME SCREEN --
+    	// On fresh start, welcome screen takes over after the first row
+		if (y == 1 
+			&& editor.welcome
 			&& editor.screen_rows >= MIN_ROWS_FOR_WELCOME
 			&& editor.screen_cols >= MIN_COLS_FOR_WELCOME) break;
 
-		if (y + editor.render_offset < editor.buf_chain->total_display_rows)
+		if (display_row >= editor.buf_chain->total_display_rows)
+        {
+            ab_append_esc_seq(ab, ESC_CLEAR_LINE);
+            ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
+            continue;
+        }
+
+		// -- HIGHLIGHT CURRENT LINE --
+		if (!editor.text_selected 
+			&& !editor.in_prompt
+			&& editor.highlight_current_line
+			&& editor.cursor_render.y == display_row)
 		{
-			// -- HIGHLIGHT CURRENT LINE --
-			if (!editor.text_selected 
-				&& !editor.in_prompt
-				&& editor.highlight_current_line 
-				&& editor.cursor_render.y == editor.render_offset + y)
-			{
-				ab_append_esc_seq(ab, ESC_BG_HL);
-				reset_current_line_hl = TRUE;
-			}
-			
-			// -- LINE NUMBER --
-			editor_draw_line_number(ab, &displayed_line_number, inner_offset);
-
-			// -- PRE-CALCS --
-
-			// Calculate which segment of the logical part
-			// print in the display line
-			int start = current_width * inner_offset;
-
-			char *r = &current_line->r[start];
-			char *h = &current_line->h[start];
-
-			int len = current_line->rlen - start;
-
-			if (len < 0) len = 0;
-			if (len > current_width) len = current_width;
-
-			if (inner_offset == current_line->display_wrap_rows - 1)
-			{
-				current_line = current_line->next;
-				inner_offset = 0;
-			}
-			else
-				inner_offset++;
-
-			// -- PRINT LINE --
-			
-			// For highlightning in-between selected lines
-			if (highlighting_selected_text)
-			{
-				ab_append_esc_seq(ab, ESC_BG_SELECT);
-				
-				if (len == 0)
-				{
-					ab_append_string(ab, " ");
-					ab_append_esc_seq(ab, ESC_RESET_BG);
-				}
-			}
-
-			int current_color = -1;	// default
-			int j;
-			
-			for (j = 0; j < len; j++)
-			{
-				// Highlight selected text
-				if (editor.text_selected)
-				{
-					// Start of the selected text
-					if (editor.render_offset + y == editor.r_select_start.y)
-					{
-						if (j == editor.r_select_start.x % current_width)
-						{
-							ab_append_esc_seq(ab, ESC_BG_SELECT);
-							highlighting_selected_text = TRUE;
-						}
-					}
-
-					// End of the selected text
-					if (editor.render_offset + y == editor.r_select_end.y)
-					{
-						if (j == editor.r_select_end.x % current_width)
-						{
-							ab_append_esc_seq(ab, ESC_RESET_BG);
-							highlighting_selected_text = FALSE;
-						}
-					}
-				}
-				
-				// Adjust color for text
-				if (h[j] == TK_NORMAL) 
-				{
-					if (current_color != -1)
-					{
-						ab_append_esc_seq(ab, ESC_RESET_FG);
-						current_color = -1;
-					}
-				}
-				else
-				{
-					int color = token_to_color(h[j]);
-
-					if (color != current_color)
-					{
-						current_color = color;
-						char buf[16];
-						snprintf(buf, sizeof(buf), "\x1b[%dm", color);
-						ab_append_esc_seq(ab, buf);
-					}
-				}
-
-				// Print character
-				ab_append_char(ab, r[j]);
-
-				if (highlighting_selected_text && j == len - 1)
-					ab_append_esc_seq(ab, ESC_RESET_BG);
-			}
-
-			// Highlight selected text
-			if (editor.text_selected)
-			{
-				// Start of the selected text
-				if (editor.render_offset + y == editor.r_select_start.y)
-				{
-					if (j == editor.r_select_start.x % current_width)
-					{
-						ab_append_esc_seq(ab, ESC_BG_SELECT);
-						ab_append_string(ab, " ");
-						ab_append_esc_seq(ab, ESC_RESET_BG);
-					}
-					
-					highlighting_selected_text = TRUE;
-				}
-
-				// End of the selected text
-				if (editor.render_offset + y == editor.r_select_end.y)
-					highlighting_selected_text = FALSE;
-			}
-			
-			ab_append_esc_seq(ab, ESC_RESET_FG);
+			ab_append_esc_seq(ab, ESC_BG_HL);
+			line_hl_active = TRUE;
 		}
 		
+		// -- LINE NUMBER --
+		editor_draw_line_number(ab, &line_num, wrap_offset);
+
+		// -- PRE-COMPUTATION OF VISIBLE SEGMENT OF LINE --
+		int render_start = current_width * wrap_offset;
+        char *render_ptr = &current_line->r[render_start];
+        char *hl_ptr = &current_line->h[render_start];
+        int visible_len = current_line->rlen - render_start;
+ 
+        if (visible_len < 0) visible_len = 0;
+        if (visible_len > current_width) visible_len = current_width;
+ 
+        if (wrap_offset == current_line->display_wrap_rows - 1)
+        {
+            current_line = current_line->next;
+            wrap_offset = 0;
+        }
+        else
+            wrap_offset++;
+		
+		int current_color = -1;
+
+		if (in_selection)
+            ab_append_esc_seq(ab, ESC_BG_SELECT);
+
+		// -- EMPTY LINE MARKER --
+		// (Visual cue of selection of empty lines)
+		if (visible_len == 0)
+		{
+   			SELECTION_STATE sel = get_selection_state(editor.text_selected, 
+      												editor.r_select_start, 
+                    								editor.r_select_end, 
+                              						display_row, 
+                                      				0, 
+                                          			in_selection,
+                                            		current_width);
+ 
+            if (sel == SEL_START || sel == SEL_INSIDE)
+            {
+                ab_append_esc_seq(ab, ESC_BG_SELECT);
+                ab_append_string(ab, " ");
+                ab_append_esc_seq(ab, ESC_RESET_BG);
+                in_selection = (sel != SEL_END);
+            }
+            else if (sel == SEL_END)
+            {
+                ab_append_string(ab, " ");
+                ab_append_esc_seq(ab, ESC_RESET_BG);
+                in_selection = FALSE;
+            }
+            else if (in_selection)
+            {
+                ab_append_string(ab, " ");
+                ab_append_esc_seq(ab, ESC_RESET_BG);
+            }
+		}
+		else
+		{
+   			for (int j = 0; j < visible_len; j++)
+            {
+                SELECTION_STATE sel = get_selection_state(editor.text_selected, 
+                										editor.r_select_start, 
+                              							editor.r_select_end, 
+                                        				display_row, 
+                                            			j, 
+                                                		in_selection,
+                                                    	current_width);
+                
+                switch (sel)
+                {
+                    case SEL_START:
+                        ab_append_esc_seq(ab, ESC_BG_SELECT);
+                        in_selection = TRUE;
+                        break;
+                        
+                    case SEL_END:
+                        ab_append_esc_seq(ab, ESC_RESET_BG);
+                        in_selection = FALSE;
+                        break;
+                        
+                    case SEL_INSIDE:
+                    case SEL_NONE:
+                        break;
+                }
+
+                // Syntax color
+                if (hl_ptr[j] == TK_NORMAL)
+                {
+                    if (current_color != -1)
+                    {
+                        ab_append_esc_seq(ab, ESC_RESET_FG);
+                        current_color = -1;
+                    }
+                }
+                else
+                {
+                    int color = token_to_color(hl_ptr[j]);
+                    if (color != current_color)
+                    {
+                        current_color = color;
+                        char buf[16];
+                        snprintf(buf, sizeof(buf), "\x1b[%dm", color);
+                        ab_append_esc_seq(ab, buf);
+                    }
+                }
+
+                // Print character
+                ab_append_char(ab, render_ptr[j]);
+            }
+ 
+            if (in_selection)
+                ab_append_esc_seq(ab, ESC_RESET_BG);
+		}
+		
+		ab_append_esc_seq(ab, ESC_RESET_FG);
 		ab_append_esc_seq(ab, ESC_CLEAR_LINE);
 		ab_append_esc_seq(ab, ESC_CARRIAGE_RETURN);
 	}
@@ -619,7 +623,7 @@ void editor_move_cursor(int c)
 			int editable_area_width = editor_get_editable_area_width();
 			
 			int current_row_offset, current_wrap_offset;	
-			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_render.y, editor.buf_chain);
+			get_offset_coordinates(editor.buf_chain, editor.cursor_render.y, &current_row_offset, &current_wrap_offset);
 
 			// Moving up, but in the same logical line
 			if (current_wrap_offset > 0)
@@ -631,7 +635,7 @@ void editor_move_cursor(int c)
 			else if (editor.cursor.y != 0)
 			{
 				int prev_row_offset, prev_wrap_offset;
-				get_offset_coordinates(&prev_row_offset, &prev_wrap_offset, editor.cursor_render.y - 1, editor.buf_chain);
+				get_offset_coordinates(editor.buf_chain, editor.cursor_render.y - 1, &prev_row_offset, &prev_wrap_offset);
 
 				editor.cursor.y--;
 
@@ -652,10 +656,10 @@ void editor_move_cursor(int c)
 			if (editor.cursor_render.y > editor.buf_chain->total_display_rows) break;
 
 			int current_row_offset, current_wrap_offset;	
-			get_offset_coordinates(&current_row_offset, &current_wrap_offset, editor.cursor_render.y, editor.buf_chain);
+			get_offset_coordinates(editor.buf_chain, editor.cursor_render.y, &current_row_offset, &current_wrap_offset);
 
 			int next_row_offset, next_wrap_offset;
-			get_offset_coordinates(&next_row_offset, &next_wrap_offset, editor.cursor_render.y + 1, editor.buf_chain);
+			get_offset_coordinates(editor.buf_chain, editor.cursor_render.y + 1, &next_row_offset, &next_wrap_offset);
 
 			// Moving down, but in the same logical line
 			if (current_row_offset == next_row_offset)

@@ -78,7 +78,7 @@ void render_coords(BUFFER_CHAIN *buf_chain, POSITION cursor, POSITION *cursor_re
 	cursor_render->x = rx_pos % buf_chain->editor_width_cache;
 }
 
-void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CHAIN *buf_chain)
+void get_offset_coordinates(BUFFER_CHAIN *buf_chain, int ry, int *row_offset, int *wrap_offset)
 {
 	int r_offset = 0;
 	int w_offset = 0;
@@ -105,6 +105,32 @@ void get_offset_coordinates(int *row_offset, int *wrap_offset, int ry, BUFFER_CH
 
 	*row_offset = r_offset;
 	*wrap_offset = w_offset;
+}
+
+Bool is_row_in_selection(Bool text_selected, POSITION render_select_start, POSITION render_select_end, int display_row)
+{
+	if (!text_selected) return FALSE;
+
+	// This is for totally selected rows (those IN THE MIDDLE)
+	// AND the row in which the selected text ends.
+	// (tl;dr: this excludes the first selected row)
+	return display_row > render_select_start.y
+        && display_row <= render_select_end.y;
+}
+
+SELECTION_STATE get_selection_state(Bool text_selected, POSITION render_select_start, POSITION render_select_end, int display_row, int ry, Bool in_selection, int width)
+{
+	if (!text_selected) return SEL_NONE;
+
+	Bool on_start_row = (display_row == render_select_start.y);
+	Bool on_end_row = (display_row == render_select_end.y);
+	int start_col = render_select_start.x % width;
+	int end_col = render_select_end.x % width;
+
+	if (on_start_row && ry == start_col) return SEL_START;
+	if (on_end_row && ry == end_col) return SEL_END;
+
+	return in_selection ? SEL_INSIDE : SEL_NONE;
 }
 
 int token_to_color(unsigned char token)
