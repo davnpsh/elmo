@@ -134,49 +134,53 @@ void editor_scroll()
 	}
 }
 
-void editor_draw_line_number(APPEND_BUFFER *ab, int *number, int offset)
+void editor_draw_line_number(APPEND_BUFFER *ab, int line_num, int wrap_offset)
 {
 	if (!editor.show_line_num_gutter) return;
 	
 	char gutter_buf[32];
-	int line_number;	// for display
 
-	if (offset == 0)
+	if (wrap_offset == 0)
 	{
-		if (editor.line_num_mode == ABSOLUTE || (*number == editor.cursor.y + 1))
-			line_number = *number;
-		else
-			line_number = abs(*number - editor.cursor.y - 1);
+		Bool is_cursor_line = (line_num == editor.cursor.y + 1) && !editor.in_prompt;
+		int display_num = (editor.line_num_mode == ABSOLUTE || is_cursor_line)
+			            ? line_num
+			            : abs(line_num - editor.cursor.y - 1);
 
-		if ((*number == editor.cursor.y + 1) && !editor.in_prompt)
+		if (is_cursor_line)
 		{
 			ab_append_esc_seq(ab, ESC_FG_BLUE);
-			snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", editor.line_num_gutter_width - 1, line_number);
+			snprintf(gutter_buf, sizeof(gutter_buf), "%*d ", 
+				editor.line_num_gutter_width - 1, display_num);
 		}
 		else 
 		{
 			ab_append_esc_seq(ab, ESC_FG_GRAY);
-			snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", editor.line_num_gutter_width - 1, line_number);
+			snprintf(gutter_buf, sizeof(gutter_buf), "%-*d ", 
+				editor.line_num_gutter_width - 1, display_num);
 		}
-
-		(*number)++;
 	}
-	else if (offset == 1)
+	else if (wrap_offset == 1)
 	{
-		if ((*number - 1 == editor.cursor.y + 1) && !editor.in_prompt)
+		Bool is_cursor_wrap = (line_num - 1 == editor.cursor.y + 1) && !editor.in_prompt;
+		
+		if (is_cursor_wrap)
 		{
 			ab_append_esc_seq(ab, ESC_FG_BLUE);
-			snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, ">");
+			snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", 
+				editor.line_num_gutter_width - 1, ">");
 		}
 		else
 		{
 			ab_append_esc_seq(ab, ESC_FG_GRAY);
-			snprintf(gutter_buf, sizeof(gutter_buf), "%-*s ", editor.line_num_gutter_width - 1, ">");
+			snprintf(gutter_buf, sizeof(gutter_buf), "%-*s ", 
+				editor.line_num_gutter_width - 1, ">");
 		}
 	}
 	else
 	{
-		snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", editor.line_num_gutter_width - 1, "");
+		snprintf(gutter_buf, sizeof(gutter_buf), "%*s ", 
+			editor.line_num_gutter_width - 1, "");
 	}
 
 	ab_append_string(ab, gutter_buf);
@@ -239,7 +243,8 @@ void editor_draw_buffer(APPEND_BUFFER *ab)
 		}
 		
 		// -- LINE NUMBER --
-		editor_draw_line_number(ab, &line_num, wrap_offset);
+		editor_draw_line_number(ab, line_num, wrap_offset);
+		if (wrap_offset == 0) line_num++;
 
 		// -- PRE-COMPUTATION OF VISIBLE SEGMENT OF LINE --
 		int render_start = current_width * wrap_offset;

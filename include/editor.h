@@ -111,7 +111,7 @@ void editor_open(char *filepath);
 void editor_save();
 int editor_get_editable_area_width();
 void editor_scroll();
-void editor_draw_line_number(APPEND_BUFFER *ab, int *number, int offset);
+void editor_draw_line_number(APPEND_BUFFER *ab, int line_num, int wrap_offset);
 void editor_draw_buffer(APPEND_BUFFER *ab);
 void editor_draw_status_bar(APPEND_BUFFER *ab);
 void editor_draw_message_bar(APPEND_BUFFER *ab);
