@@ -10,7 +10,7 @@
 - [x] ~~Syntax highlight~~
 - [x] ~~Wrap lines~~
 - [x] ~~Toggle comments~~
-- [ ] Select text
+- [x] ~~Select text~~
 - [ ] Copy/paste
 - [ ] Auto indent
 - [ ] Auto pairs ((); {})
