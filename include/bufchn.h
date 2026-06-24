@@ -118,6 +118,8 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache);
  */
 void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c);
 
+void buf_insert_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end, char c);
+
 /**
  * Deletes a single character from the buffer.
  * Automatically re-renders the affected line(s) and updates syntax highlighting.

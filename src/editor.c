@@ -795,17 +795,33 @@ void editor_select(int c)
 
 void editor_insert(int c)
 {
-	buf_insert(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x, c);
-	
-	if (c == '\r')
+	if (editor.text_selected)
 	{
-		editor.cursor.x = 0;
-		editor.cursor.y++;
+		buf_insert_block(editor.buf_chain, editor.select_start, editor.select_end, c);
+
+		editor.cursor = editor.select_start;
+		editor.text_selected = FALSE;
+
+		if (c == '\r')
+		{
+			editor.cursor.x = 0;
+			editor.cursor.y++;
+		}
+		else editor.cursor.x++;
 	}
-	else editor.cursor.x++;
-	
+	else
+	{
+		buf_insert(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x, c);
+		
+		if (c == '\r')
+		{
+			editor.cursor.x = 0;
+			editor.cursor.y++;
+		}
+		else editor.cursor.x++;
+	}
+
 	editor.dirty = TRUE;
-	editor.buf_chain->update_layout = TRUE;
 }
 
 void editor_delete()

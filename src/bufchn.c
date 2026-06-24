@@ -251,7 +251,11 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache)
 
 void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 {
+	if (buf_chain == NULL) return;
+	
 	BUFFER_NODE *buf_node = buf_get_line_at(buf_chain, line_num, FALSE);
+
+	if (buf_node == NULL) return;
 	
 	if (c == '\r')
 	{
@@ -307,6 +311,14 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 	}
 }
 
+void buf_insert_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end, char c)
+{
+	if (buf_chain == NULL) return;
+	
+	buf_delete_block(buf_chain, select_start, select_end);
+	buf_insert(buf_chain, select_start.y + 1, select_start.x, c);
+}
+
 void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 {
 	if (offset == 0 && line_num == 1) return;
@@ -357,6 +369,8 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 
 void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end)
 {
+	if (buf_chain == NULL) return;
+	
 	int diff = select_end.y - select_start.y;
 
 	BUFFER_NODE *first = buf_get_line_at(buf_chain, select_start.y + 1, FALSE);
