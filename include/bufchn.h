@@ -118,6 +118,14 @@ BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache);
  */
 void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c);
 
+/**
+ * Replaces a block of selected text with a single character.
+ *
+ * @param buf_chain     Chain to modify.
+ * @param select_start  Logical start of selection (x = char offset, y = 0-based line).
+ * @param select_end    Logical end of selection (x = char offset, y = 0-based line).
+ * @param c             Character to insert after the deletion.
+ */
 void buf_insert_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end, char c);
 
 /**
