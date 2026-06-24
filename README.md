@@ -10,6 +10,7 @@ See [documentation](./DOCS.md) about the data structure used in the back-end.
 
 ### Requirements
 - `gcc`
+- `git`
 - `make`
 
 Run:
