@@ -23,6 +23,8 @@ void buf_invalidate_cache(BUFFER_CHAIN* buf_chain)
 
 void buf_free_node(BUFFER_NODE *buf_node)
 {
+	if (buf_node == NULL) return;
+	
 	free(buf_node->s);
 	free(buf_node->r);
 	free(buf_node->h);
@@ -199,13 +201,13 @@ BUFFER_CHAIN *buf_new_chain()
 
 BUFFER_NODE *buf_get_line_at(BUFFER_CHAIN *buf_chain, int line_num, Bool cache)
 {
+	if (buf_chain == NULL 
+		|| buf_chain->head == NULL
+		|| line_num <= 0
+		|| line_num > buf_chain->lines_num) return NULL;
+
 	BUFFER_NODE *ptr;
 	int current_line_num;
-	
-	if ((buf_chain == NULL) 
-		|| (buf_chain->head == NULL)) return NULL;
-	
-	if (line_num > buf_chain->lines_num) return NULL;
 	
 	// Try to fetch from cache
 	if ((buf_chain->cache_node != NULL)
@@ -415,6 +417,8 @@ void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION s
 
 char *buf_read(BUFFER_CHAIN *buf_chain, int *len)
 {
+	if (buf_chain == NULL) return NULL;
+	
 	BUFFER_NODE *ptr;
 	
 	*len = 0;
@@ -442,8 +446,12 @@ char *buf_read(BUFFER_CHAIN *buf_chain, int *len)
 
 int buf_save(BUFFER_CHAIN *buf_chain, char *filepath)
 {
+	if (buf_chain == NULL || filepath == NULL) return -1;
+	
 	int len;
 	char *buf = buf_read(buf_chain, &len);
+
+	if (buf == NULL) return -1;
 	
 	int fd = open(filepath, O_RDWR | O_CREAT, 0644);
 	

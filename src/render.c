@@ -73,6 +73,8 @@ void render_coords(BUFFER_CHAIN *buf_chain, POSITION cursor, POSITION *cursor_re
 {
 	BUFFER_NODE *line = buf_get_line_at(buf_chain, cursor.y + 1, FALSE);
 
+	if (line == NULL) return;
+
 	int rx_pos = cx_to_rx(line->s, cursor.x);
 	cursor_render->y = line->display_row_offset + rx_pos / buf_chain->editor_width_cache;
 	cursor_render->x = rx_pos % buf_chain->editor_width_cache;
@@ -85,7 +87,7 @@ void get_offset_coordinates(BUFFER_CHAIN *buf_chain, int ry, int *row_offset, in
 
 	BUFFER_NODE *current_line = buf_chain->head;
 
-	while (ry > 0)
+	while (current_line && ry > 0)
 	{
 		int lines = current_line->display_wrap_rows;
 
