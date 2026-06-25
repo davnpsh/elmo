@@ -156,7 +156,11 @@ void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION s
  * @param len        Output: receives the total byte count.
  * @return           Heap-allocated string containing the full document.
  */
-char *buf_read(BUFFER_CHAIN *buf_chain, int *len);
+char *buf_read_document(BUFFER_CHAIN *buf_chain, int *len);
+
+char *buf_read_line(BUFFER_CHAIN *buf_chain, int line_num);
+
+char *buf_read_selection(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end);
 
 /**
  * Writes the buffer contents to a file, overwriting it if it exists.

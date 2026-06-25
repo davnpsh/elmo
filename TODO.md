@@ -11,7 +11,7 @@
 - [x] ~~Wrap lines~~
 - [x] ~~Toggle comments~~
 - [x] ~~Select text~~
-- [ ] Copy/paste
+- [x] ~~Copy/paste~~
 - [ ] Auto indent
 - [ ] Auto pairs ((); {})
 - [ ] Git integration

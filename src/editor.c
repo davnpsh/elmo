@@ -28,6 +28,7 @@ void editor_cleanup()
 {
 	buf_free_chain(editor.buf_chain);
     free(editor.filepath);
+    free(editor.clipboard);
 }
 
 void editor_set_status_msg(char *fmt, ...) 
@@ -941,6 +942,52 @@ void editor_toggle_comment()
    	editor.dirty = TRUE;
 }
 
+void editor_copy()
+{
+	// Copy block
+	if (editor.text_selected)
+	{
+		free(editor.clipboard);
+		editor.clipboard = buf_read_selection(editor.buf_chain, editor.select_start, editor.select_end);
+		editor.line_copy = FALSE;
+		editor_set_status_msg("text copied!");
+	}
+	// Copy entire line
+	else
+	{
+		free(editor.clipboard);
+		editor.clipboard = buf_read_line(editor.buf_chain, editor.cursor.y + 1);
+		editor.line_copy = TRUE;
+		editor_set_status_msg("text copied!");
+	}
+}
+
+void editor_paste()
+{
+	if (editor.clipboard == NULL) return;
+
+	int cursor_x = editor.cursor.x;
+
+	if (editor.line_copy)
+	{
+		editor.cursor.x = 0;
+		editor_insert('\r');
+		editor.cursor.y--;
+	}
+		
+	for (size_t i = 0; i < strlen(editor.clipboard); i++)
+		editor_insert(editor.clipboard[i]);
+
+	if (editor.line_copy)
+	{
+		editor.cursor.y++;
+		editor.cursor.x = cursor_x;
+	}
+
+	editor.sticky_col_update = TRUE;
+	editor.dirty = TRUE;
+}
+
 void editor_prompt(char *command)
 {
 	size_t buf_size = 128;
@@ -1091,6 +1138,14 @@ void editor_process_keypress()
         case /* CTRL+/ */ 31:
 			editor_toggle_comment();
 			break;
+
+		case CTRL_KEY('c'):
+			editor_copy();
+			break;
+
+		case CTRL_KEY('v'):
+			editor_paste();
+			break;
          
 		case UP:
 		case DOWN:
@@ -1204,6 +1259,7 @@ void init_editor()
 	editor.sticky_col_update = FALSE;
 	editor.text_selected = FALSE;
 	editor.dirty = FALSE;
+	editor.line_copy = FALSE;
 	editor.welcome = TRUE;
 	editor.highlight_current_line = TRUE;
 	editor.show_line_num_gutter = TRUE;

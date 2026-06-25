@@ -82,6 +82,7 @@ typedef struct EDITOR
 
 	// Clipboard buffer
 	char *clipboard;
+	Bool line_copy;	// If copied a line or a block
 
 	Bool welcome;
 	int screen_rows;
@@ -128,6 +129,7 @@ void editor_insert(int c);
 void editor_delete();
 void editor_jump(int shift);
 void editor_toggle_comment();
+void editor_copy();
 void editor_prompt(char *command);
 void editor_process_keypress();
 void init_editor();

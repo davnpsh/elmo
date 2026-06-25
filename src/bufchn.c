@@ -431,7 +431,7 @@ void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION s
 	syntax_hl_update_region(buf_chain, select_start.y + 1);
 }
 
-char *buf_read(BUFFER_CHAIN *buf_chain, int *len)
+char *buf_read_document(BUFFER_CHAIN *buf_chain, int *len)
 {
 	if (buf_chain == NULL) return NULL;
 	
@@ -460,12 +460,68 @@ char *buf_read(BUFFER_CHAIN *buf_chain, int *len)
 	return buf;
 }
 
+char *buf_read_line(BUFFER_CHAIN *buf_chain, int line_num)
+{
+	if (buf_chain == NULL) return NULL;
+	
+	char *copy;
+
+	BUFFER_NODE *line = buf_get_line_at(buf_chain, line_num, FALSE);
+
+	if (line == NULL) return NULL;
+
+	copy = malloc(line->len + 1);
+	memcpy(copy, line->s, line->len);
+	copy[line->len] = '\0';
+
+	return copy;
+}
+
+char *buf_read_selection(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end)
+{
+	if (buf_chain == NULL) return NULL;
+	
+	char *copy = NULL;
+	int len = 0;
+	int diff = select_end.y - select_start.y;
+
+	for (int i = 0; i <= diff; i++)
+	{
+		BUFFER_NODE *line = buf_get_line_at(buf_chain, select_start.y + i + 1, FALSE);
+
+		if (line == NULL) return NULL;
+
+		int seg_start = (i == 0) ? select_start.x : 0;
+		int seg_end = (i == diff) ? select_end.x : line->len;
+		int qty = seg_end - seg_start;
+		int needs_newline = (i < diff) ? 1 : 0;
+
+		char *tmp = realloc(copy, len + qty + needs_newline + 1);
+		if (tmp == NULL) 
+		{
+			free(copy);
+			return NULL;
+		}
+		copy = tmp;
+
+		memcpy(&copy[len], &line->s[seg_start], qty);
+		len += qty;
+
+		if (needs_newline)
+			copy[len++] = '\r';
+
+		copy[len] = '\0';
+	}
+
+	return copy;
+}
+
 int buf_save(BUFFER_CHAIN *buf_chain, char *filepath)
 {
 	if (buf_chain == NULL || filepath == NULL) return -1;
 	
 	int len;
-	char *buf = buf_read(buf_chain, &len);
+	char *buf = buf_read_document(buf_chain, &len);
 
 	if (buf == NULL) return -1;
 	
