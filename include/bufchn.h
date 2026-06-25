@@ -158,8 +158,23 @@ void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION s
  */
 char *buf_read_document(BUFFER_CHAIN *buf_chain, int *len);
 
+/**
+ * Serializes a single line into a single heap-allocated string.
+ *
+ * @param buf_chain  Chain to serialize.
+ * @param line_num   1-based line number.
+ * @return           Heap-allocated string containing the line.
+ */
 char *buf_read_line(BUFFER_CHAIN *buf_chain, int line_num);
 
+/**
+ * Serializes a text selection into a single heap-allocated string.
+ *
+ * @param buf_chain  	Chain to serialize.
+ * @param select_start  Logical start of selection (x = char offset, y = 0-based line).
+ * @param select_end    Logical end of selection (x = char offset, y = 0-based line).
+ * @return           	Heap-allocated string containing the selection.
+ */
 char *buf_read_selection(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION select_end);
 
 /**
