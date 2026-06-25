@@ -80,6 +80,9 @@ typedef struct EDITOR
 	POSITION r_select_start;	// render
 	POSITION r_select_end;		// render
 
+	// Clipboard buffer
+	char *clipboard;
+
 	Bool welcome;
 	int screen_rows;
 	int screen_cols;

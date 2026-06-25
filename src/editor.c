@@ -1070,6 +1070,13 @@ void editor_process_keypress()
 	// On any keypress, disable welcome message
 	if (editor.welcome) 
 		editor.welcome = FALSE;
+
+	// Enforce safe mode
+	if ((!iscntrl(c) && c < 128 && c != '/')
+		|| c == 31 // CTRL+/
+		|| c == DEL_KEY
+		|| c == BACKSPACE)
+		if (editor.mode == SAFE) return;
 	
 	switch (c)
 	{	
@@ -1082,10 +1089,7 @@ void editor_process_keypress()
            	break;
 
         case /* CTRL+/ */ 31:
-        	if (editor.mode == SAFE)
-				editor_set_status_msg("you are on safe mode!");
-			else
-				editor_toggle_comment();
+			editor_toggle_comment();
 			break;
          
 		case UP:
@@ -1140,8 +1144,6 @@ void editor_process_keypress()
 			
 		case DEL_KEY:
 		case BACKSPACE:
-			if (editor.mode == SAFE) break;
-			
 			if (c == DEL_KEY)
 			{
 				BUFFER_NODE *buf_node = CURRENT_LINE;
@@ -1185,9 +1187,7 @@ void editor_process_keypress()
 			/* fall-through */
 		case '\r':
 		default:
-			if (editor.mode == SAFE)
-				editor_set_status_msg("you are on safe mode!");
-			else
+			if (!iscntrl(c) && c < 128)
 				editor_insert(c);
 			break;
 	}
