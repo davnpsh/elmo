@@ -1122,7 +1122,8 @@ void editor_process_keypress()
 	if ((!iscntrl(c) && c < 128 && c != '/')
 		|| c == 31 // CTRL+/
 		|| c == DEL_KEY
-		|| c == BACKSPACE)
+		|| c == BACKSPACE
+		|| c == CTRL_KEY('v'))
 		if (editor.mode == SAFE) return;
 	
 	switch (c)
