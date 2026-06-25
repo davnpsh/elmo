@@ -15,10 +15,14 @@
 #include "syntax.h"
 #include "util.h"
 
-void buf_invalidate_cache(BUFFER_CHAIN* buf_chain)
+void buf_reset_cache(BUFFER_CHAIN* buf_chain)
 {
+	// Cache node invalidation
 	buf_chain->cache_node = NULL;
     buf_chain->cache_line_num = 0;
+
+    // Update layout
+    buf_chain->update_layout = TRUE;
 }
 
 void buf_free_node(BUFFER_NODE *buf_node)
@@ -284,8 +288,10 @@ void buf_insert(BUFFER_CHAIN *buf_chain, int line_num, int offset, char c)
 		
 		buf_render_line(buf_node);
 		buf_chain->lines_num++;
-		buf_invalidate_cache(buf_chain);
-		buf_chain->update_layout = TRUE;
+
+		// Reset state before updating syntax highlight!
+		buf_reset_cache(buf_chain);
+		
 		syntax_hl_update_region(buf_chain, line_num);
 		syntax_hl_update_region(buf_chain, line_num + 1);
 	}
@@ -353,8 +359,10 @@ void buf_delete(BUFFER_CHAIN *buf_chain, int line_num, int offset)
 
 		buf_render_line(prev_node);
 		buf_chain->lines_num--;
-		buf_invalidate_cache(buf_chain);
-		buf_chain->update_layout = TRUE;
+		
+		// Reset state before updating syntax highlight!
+		buf_reset_cache(buf_chain);
+		
 		syntax_hl_update_region(buf_chain, line_num - 1);
 	}
 }
@@ -416,8 +424,10 @@ void buf_delete_block(BUFFER_CHAIN *buf_chain, POSITION select_start, POSITION s
 	
 	buf_render_line(first);
 	buf_chain->lines_num -= diff; // Remove: middle lines + last one = diff - 1 + 1 = diff
-	buf_invalidate_cache(buf_chain);
-	buf_chain->update_layout = TRUE;
+
+	// Reset state before updating syntax highlight!
+	buf_reset_cache(buf_chain);
+	
 	syntax_hl_update_region(buf_chain, select_start.y + 1);
 }
 

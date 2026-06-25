@@ -1187,7 +1187,7 @@ void editor_process_keypress()
 			/* fall-through */
 		case '\r':
 		default:
-			if (!iscntrl(c) && c < 128)
+			if ((!iscntrl(c) && c < 128) || c == '\r')
 				editor_insert(c);
 			break;
 	}
