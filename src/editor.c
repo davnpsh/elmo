@@ -816,8 +816,27 @@ void editor_insert(int c)
 		
 		if (c == '\r')
 		{
-			editor.cursor.x = 0;
+			BUFFER_NODE *line;
+
+			line = CURRENT_LINE;
+			
+			int offset = 0;
+			while (offset < line->rlen && line->r[offset] == ' ')
+				offset++;
+			
 			editor.cursor.y++;
+			
+			line = CURRENT_LINE;
+			
+			int index = 0;
+			
+			for (int i = 0; i < offset / TAB_STOP; i++)
+				buf_insert(editor.buf_chain, editor.cursor.y + 1, index++, '\t');
+
+			for (int i = 0; i < offset % TAB_STOP; i++)
+				buf_insert(editor.buf_chain, editor.cursor.y + 1, index++, ' ');
+			
+			editor.cursor.x = rx_to_cx(line->s, line->len, offset);
 		}
 		else editor.cursor.x++;
 	}
@@ -858,7 +877,8 @@ void editor_delete()
 			editor.cursor.x = len;
 		}
 	}
-	
+
+	editor.sticky_col_update = TRUE;
 	editor.dirty = TRUE;
 }
 
@@ -1243,7 +1263,7 @@ void editor_process_keypress()
 			/* fall-through */
 		case '\r':
 		default:
-			if ((!iscntrl(c) && c < 128) || c == '\r')
+			if ((!iscntrl(c) && c < 128) || c == '\r' || c == '\t')
 				editor_insert(c);
 			break;
 	}
