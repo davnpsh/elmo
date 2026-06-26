@@ -12,8 +12,8 @@
 - [x] ~~Toggle comments~~
 - [x] ~~Select text~~
 - [x] ~~Copy/paste~~
-- [ ] Auto indent
-- [ ] Auto pairs ((); {})
+- [x] ~~Auto indent~~
+- [x] ~~Auto pairs ((); {})~~
 - [ ] Git integration
 - [ ] Search words
 - [ ] File explorer

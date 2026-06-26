@@ -813,9 +813,20 @@ void editor_insert(int c)
 	else
 	{
 		buf_insert(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x, c);
-		
-		if (c == '\r')
+
+		// Auto-pairs
+		if (c == '{' || c == '(' || c == '[')
 		{
+			editor.cursor.x++;
+			
+			int p = (c == '{') ? '}' :
+					(c == '(') ? ')' : ']';
+			buf_insert(editor.buf_chain, editor.cursor.y + 1, editor.cursor.x, p);
+		}
+		// New-line
+		else if (c == '\r')
+		{
+			// Auto-identation
 			BUFFER_NODE *line;
 
 			line = CURRENT_LINE;
